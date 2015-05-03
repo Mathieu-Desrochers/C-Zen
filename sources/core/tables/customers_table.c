@@ -27,6 +27,8 @@ int customers_table_read(sqlite3_stmt *sql_statement, customer_row_t **customer_
 
 error:
 
+  customer_row_free(*customer_row);
+
   return -1;
 }
 
@@ -37,8 +39,15 @@ int customers_table_select_by_customer_id(sqlite3 *sql_connection, int customer_
   check(customer_row != NULL, "customers_table_select_by_customer_id | customer_row == NULL");
 
   sqlite3_stmt *sql_statement = sql_prepare_statement(sql_connection,
-    "SELECT * "
-    "FROM customers "
+    "SELECT "
+    "\"customer-id\", "
+    "\"first-name\", "
+    "\"last-name\", "
+    "\"address\", "
+    "\"city\", "
+    "\"state\", "
+    "\"zip\" "
+    "FROM \"customers\" "
     "WHERE \"customer-id\" = ?1;");
 
   check(sql_statement != NULL, "customers_table_select_by_customer_id | sql_statement == NULL");
