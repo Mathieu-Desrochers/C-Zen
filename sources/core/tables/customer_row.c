@@ -1,8 +1,8 @@
-#include <assert.h>
 #include <stddef.h>
 #include <stdlib.h>
 
 #include "../../infrastructure/dbg/dbg.h"
+#include "../../infrastructure/string/string.h"
 #include "../../core/tables/customer_row.h"
 
 // allocates a customer row
@@ -26,47 +26,12 @@ customer_row_t *customer_row_malloc(
   customer_row->state = NULL;
   customer_row->zip = NULL;
 
-  if (first_name != NULL)
-  {
-    customer_row->first_name = malloc(strlen(first_name) + 1);
-    check_mem(customer_row->first_name);
-    strcpy(customer_row->first_name, first_name);
-  }
-
-  if (last_name != NULL)
-  {
-    customer_row->last_name = malloc(strlen(last_name) + 1);
-    check_mem(customer_row->last_name);
-    strcpy(customer_row->last_name, last_name);
-  }
-
-  if (address != NULL)
-  {
-    customer_row->address = malloc(strlen(address) + 1);
-    check_mem(customer_row->address);
-    strcpy(customer_row->address, address);
-  }
-
-  if (city != NULL)
-  {
-    customer_row->city = malloc(strlen(city) + 1);
-    check_mem(customer_row->city);
-    strcpy(customer_row->city, city);
-  }
-
-  if (state != NULL)
-  {
-    customer_row->state = malloc(strlen(state) + 1);
-    check_mem(customer_row->state);
-    strcpy(customer_row->state, state);
-  }
-
-  if (zip != NULL)
-  {
-    customer_row->zip = malloc(strlen(zip) + 1);
-    check_mem(customer_row->zip);
-    strcpy(customer_row->zip, zip);
-  }
+  string_assign(customer_row->first_name, first_name);
+  string_assign(customer_row->last_name, last_name);
+  string_assign(customer_row->address, address);
+  string_assign(customer_row->city, city);
+  string_assign(customer_row->state, state);
+  string_assign(customer_row->zip, zip);
 
   return customer_row;
 

@@ -1,16 +1,18 @@
 CC = gcc
 CFLAGS  = -g -Wall
 
+INFRASTRUCTURE = sources/infrastructure/sql/sql.c
+
 TABLES = sources/core/tables/customer_row.o \
          sources/core/tables/customers_table.o
 
-all : $(TABLES)
+all : $(INFRASTRUCTURE) $(TABLES)
 
 %.o : %.c %.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-main : sources/core/main/main.c $(TABLES)
-	$(CC) $(CFLAGS) $(TABLES) -l sqlite3 $< -o $@
+main : sources/core/main/main.c $(INFRASTRUCTURE) $(TABLES)
+	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(TABLES) -l sqlite3 $< -o $@
 
 database :
 	mkdir -p /var/c-zen
@@ -20,5 +22,5 @@ database :
 	chown mathieu /var/c-zen/c-zen.db
 
 clean :
-	rm -f $(TABLES)
+	find . -name *.o | xargs -i /bin/rm {}
 	rm -f main
