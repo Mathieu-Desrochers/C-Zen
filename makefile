@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS  = -g -Wall
 
-INFRASTRUCTURE = sources/infrastructure/sql/sql.c
+INFRASTRUCTURE = sources/infrastructure/sql/sql.o
 
 TABLES = sources/core/tables/customer_row.o \
          sources/core/tables/customers_table.o

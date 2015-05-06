@@ -9,8 +9,8 @@
 // reads a customer_row
 int customers_table_read(sqlite3_stmt *sql_statement, customer_row_t **customer_row)
 {
-  check(sql_statement != NULL, "customers_table_read | sql_statement == NULL");
-  check(customer_row != NULL, "customers_table_read | customer_row == NULL");
+  check(sql_statement != NULL, "sql_statement: NULL");
+  check(customer_row != NULL, "customer_row: NULL");
 
   *customer_row = customer_row_malloc(
     sqlite3_column_int(sql_statement, 0),
@@ -21,7 +21,7 @@ int customers_table_read(sqlite3_stmt *sql_statement, customer_row_t **customer_
     (char*)sqlite3_column_text(sql_statement, 5),
     (char*)sqlite3_column_text(sql_statement, 6));
 
-  check(*customer_row != NULL, "customers_table_read | *customer_row == NULL");
+  check(*customer_row != NULL, "*customer_row: NULL");
 
   return 0;
 
@@ -35,8 +35,8 @@ error:
 // selects a customer_row by customer id
 int customers_table_select_by_customer_id(sqlite3 *sql_connection, int customer_id, customer_row_t **customer_row)
 {
-  check(sql_connection != NULL, "customers_table_select_by_customer_id | sql_connection == NULL");
-  check(customer_row != NULL, "customers_table_select_by_customer_id | customer_row == NULL");
+  check(sql_connection != NULL, "sql_connection: NULL");
+  check(customer_row != NULL, "customer_row: NULL");
 
   sqlite3_stmt *sql_statement = sql_prepare_statement(sql_connection,
     "SELECT "
@@ -50,25 +50,26 @@ int customers_table_select_by_customer_id(sqlite3 *sql_connection, int customer_
     "FROM \"customers\" "
     "WHERE \"customer-id\" = ?1;");
 
-  check(sql_statement != NULL, "customers_table_select_by_customer_id | sql_statement == NULL");
+  check(sql_statement != NULL, "sql_statement: NULL");
 
-  int sql_bind_result = sql_bind_int(sql_statement, 1, customer_id);
-  check(sql_bind_result == 0, "customers_table_select_by_customer_id | sql_bind_result: %d", sql_bind_result);
+  int sql_bind_result_1 = sql_bind_int(sql_statement, 1, customer_id);
+  check(sql_bind_result_1 == 0, "sql_bind_result_1: %d",
+    sql_bind_result_1);
 
-  int sql_step_result = sql_step(sql_statement);
+  int sql_select_step_status = 0;
+  int sql_select_step_result = sql_select_step(sql_statement, &sql_select_step_status);
+  check(sql_select_step_result == 0, "sql_select_step_result: %d",
+    sql_select_step_result);
 
-  if (sql_step_result == SQLITE_DONE)
+  if (sql_select_step_status == SQLITE_ROW)
+  {
+    int customers_table_rea_result = customers_table_read(sql_statement, customer_row);
+    check(customers_table_rea_result == 0, "customers_table_rea_result: %d",
+      customers_table_rea_result);
+  }
+  else if (sql_select_step_status == SQLITE_DONE)
   {
     *customer_row = NULL;
-  }
-  else if (sql_step_result == SQLITE_ROW)
-  {
-    int read_result = customers_table_read(sql_statement, customer_row);
-    check(read_result == 0, "customers_table_select_by_customer_id | read_result: %d", read_result);
-  }
-  else
-  {
-    sentinel("customers_table_select_by_customer_id | sql_step_result: %d", sql_step_result);
   }
 
   sql_finalize_statement(sql_statement);
