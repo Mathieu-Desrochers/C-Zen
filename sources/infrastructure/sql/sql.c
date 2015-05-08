@@ -56,11 +56,11 @@ int sql_bind_int(sqlite3_stmt *sql_statement, int position, int value)
 
 error:
 
-  return -1;
+  return 1;
 }
 
-// steps a select sql statement
-int sql_select_step(sqlite3_stmt *sql_statement, int *sql_select_step_status)
+// steps a sql statement that returns rows
+int sql_step_read(sqlite3_stmt *sql_statement, int *sql_step_read_status)
 {
   check(sql_statement != NULL, "sql_statement: NULL");
 
@@ -68,12 +68,12 @@ int sql_select_step(sqlite3_stmt *sql_statement, int *sql_select_step_status)
   check(sqlite3_step_result == SQLITE_ROW || sqlite3_step_result == SQLITE_DONE, "sqlite3_step_result: %d",
     sqlite3_step_result);
 
-  *sql_select_step_status = sqlite3_step_result;
+  *sql_step_read_status = sqlite3_step_result;
   return 0;
 
 error:
 
-  return -1;
+  return 1;
 }
 
 // finalizes a sql statement

@@ -1,4 +1,4 @@
-CC = gcc
+CC = c99
 CFLAGS  = -g -Wall
 
 INFRASTRUCTURE = sources/infrastructure/sql/sql.o

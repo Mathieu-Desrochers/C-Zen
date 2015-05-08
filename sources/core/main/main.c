@@ -11,17 +11,15 @@ int main()
   sqlite3 *sql_connection = sql_open_connection("/var/c-zen/c-zen.db");
   check(sql_connection != NULL, "sql_connection: NULL");
 
-  customer_row_t *customer_row = NULL;
+  customer_row_t **customer_rows = NULL;
+  int customer_rows_count = 0;
 
-  int select_result = customers_table_select_by_customer_id(sql_connection, 1, &customer_row);
+  int select_result = customers_table_select_all(sql_connection, &customer_rows, &customer_rows_count);
   check(select_result == 0, "select_result: %d",
     select_result);
 
-  if (customer_row != NULL)
-  {
-    printf("%s\n", customer_row->first_name);
-    customer_row_free(customer_row);
-  }
+  printf("%d\n", customer_rows_count);
+  customer_rows_free(customer_rows, customer_rows_count);
 
   sql_close_connection(sql_connection);
 
