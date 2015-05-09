@@ -9,10 +9,12 @@
 // reads a customer_row
 int customers_table_read(sqlite3_stmt *sql_statement, void **customer_row)
 {
+  customer_row_t *allocated_customer_row = NULL;
+
   check(sql_statement != NULL, "sql_statement: NULL");
   check(customer_row != NULL, "customer_row: NULL");
 
-  *customer_row = customer_row_malloc(
+  allocated_customer_row = customer_row_malloc(
     sqlite3_column_int(sql_statement, 0),
     (char*)sqlite3_column_text(sql_statement, 1),
     (char*)sqlite3_column_text(sql_statement, 2),
@@ -21,14 +23,16 @@ int customers_table_read(sqlite3_stmt *sql_statement, void **customer_row)
     (char*)sqlite3_column_text(sql_statement, 5),
     (char*)sqlite3_column_text(sql_statement, 6));
 
-  check(*customer_row != NULL, "*customer_row: NULL");
+  check(allocated_customer_row != NULL, "allocated_customer_row: NULL");
+
+  *customer_row = allocated_customer_row;
 
   return 0;
 
 error:
 
-  if (*customer_row != NULL) { customer_row_free(*customer_row); }
-  if (*customer_row != NULL) { *customer_row = NULL; }
+  if (allocated_customer_row != NULL) { customer_row_free(allocated_customer_row); }
+  if (allocated_customer_row != NULL) { allocated_customer_row = NULL; }
 
   return -1;
 }
