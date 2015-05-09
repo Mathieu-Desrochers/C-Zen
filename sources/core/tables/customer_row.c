@@ -31,7 +31,7 @@ customer_row_t *customer_row_malloc(
 
 error:
 
-  customer_row_free(customer_row);
+  if (customer_row != NULL) { customer_row_free(customer_row); }
 
   return NULL;
 }
@@ -52,19 +52,6 @@ void customer_row_free(customer_row_t *customer_row)
   if (customer_row->zip != NULL) { free(customer_row->zip); }
 
   free(customer_row);
-}
-
-// reallocates an array of customer rows
-customer_row_t **customer_rows_realloc(customer_row_t **customer_rows, int count)
-{
-  customer_row_t **reallocated_customer_rows = realloc(customer_rows, sizeof(customer_row_t*) * count);
-  check_mem(reallocated_customer_rows);
-
-  return reallocated_customer_rows;
-
-error:
-
-  return NULL;
 }
 
 // frees an array of customer rows

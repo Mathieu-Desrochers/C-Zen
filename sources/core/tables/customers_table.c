@@ -7,7 +7,7 @@
 #include "../../core/tables/customers_table.h"
 
 // reads a customer_row
-int customers_table_read(sqlite3_stmt *sql_statement, customer_row_t **customer_row)
+int customers_table_read(sqlite3_stmt *sql_statement, void **customer_row)
 {
   check(sql_statement != NULL, "sql_statement: NULL");
   check(customer_row != NULL, "customer_row: NULL");
@@ -27,81 +27,37 @@ int customers_table_read(sqlite3_stmt *sql_statement, customer_row_t **customer_
 
 error:
 
-  customer_row_free(*customer_row);
+  if (*customer_row != NULL) { customer_row_free(*customer_row); }
+  if (*customer_row != NULL) { *customer_row = NULL; }
 
   return -1;
 }
 
-// selects all the customer rows
-int customers_table_select_all(sqlite3 *sql_connection, customer_row_t ***customer_rows, int *count)
+// frees a customer row
+void customers_table_free_row(void *customer_rows)
 {
-  check(sql_connection != NULL, "sql_connection: NULL");
-  check(customer_rows != NULL, "customer_rows: NULL");
-  check(count != NULL, "count: NULL");
+  customer_row_free((customer_row_t *)customer_rows);
+}
 
-  sqlite3_stmt *sql_statement = sql_prepare_statement(sql_connection,
-    "SELECT "
-    "\"customer-id\", "
-    "\"first-name\", "
-    "\"last-name\", "
-    "\"address\", "
-    "\"city\", "
-    "\"state\", "
-    "\"zip\" "
-    "FROM \"customers\";");
+// frees an array of customer rows
+void customers_table_free_rows(void **customer_rows, int count)
+{
+  customer_rows_free((customer_row_t **)customer_rows, count);
+}
 
-  check(sql_statement != NULL, "sql_statement: NULL");
+// binds the parameters when
+// selecting a customer row by customer id
+int customers_table_select_by_customer_id_bind(sqlite3_stmt *sql_statement, void **parameters)
+{
+  int customer_id = *((int *)parameters[0]);
 
-  int sql_select_step_status = 0;
-  int sql_select_step_result = sql_select_step(sql_statement, &sql_select_step_status);
-  check(sql_select_step_result == 0, "sql_select_step_result: %d",
-    sql_select_step_result);
-
-  int allocated_customer_rows_count = 10;
-  customer_row_t **allocated_customer_rows = customer_rows_realloc(NULL, allocated_customer_rows_count);
-  check_mem(allocated_customer_rows);
-
-  int read_customer_rows_count = 0;
-
-  while (sql_select_step_status == SQLITE_ROW)
-  {
-    customer_row_t **read_customer_row = &(allocated_customer_rows[read_customer_rows_count]);
-
-    int customers_table_read_result = customers_table_read(sql_statement, read_customer_row);
-    check(customers_table_read_result == 0, "customers_table_read_result: %d",
-      customers_table_read_result);
-
-    read_customer_rows_count++;
-
-    if (read_customer_rows_count == allocated_customer_rows_count)
-    {
-      allocated_customer_rows_count *= 2;
-      allocated_customer_rows = customer_rows_realloc(allocated_customer_rows, allocated_customer_rows_count);
-      check_mem(allocated_customer_rows);
-    }
-
-    sql_select_step_result = sql_select_step(sql_statement, &sql_select_step_status);
-    check(sql_select_step_result == 0, "sql_select_step_result: %d",
-      sql_select_step_result);
-  }
-
-  allocated_customer_rows = customer_rows_realloc(allocated_customer_rows, read_customer_rows_count);
-  check(read_customer_rows_count == 0 || allocated_customer_rows != NULL,
-    "allocated_customer_rows: NULL");
-
-  *customer_rows = allocated_customer_rows;
-  *count = read_customer_rows_count;
-
-  sql_finalize_statement(sql_statement);
+  int sql_bind_result = sql_bind_int(sql_statement, 1, customer_id);
+  check(sql_bind_result == 0, "sql_bind_result: %d",
+    sql_bind_result);
 
   return 0;
 
 error:
-
-  allocated_customer_rows = customer_rows_realloc(allocated_customer_rows, read_customer_rows_count);
-  customer_rows_free(allocated_customer_rows, read_customer_rows_count);
-
-  sql_finalize_statement(sql_statement);
 
   return -1;
 }
@@ -109,50 +65,96 @@ error:
 // selects a customer row by customer id
 int customers_table_select_by_customer_id(sqlite3 *sql_connection, int customer_id, customer_row_t **customer_row)
 {
+  customer_row_t *selected_row = NULL;
+
   check(sql_connection != NULL, "sql_connection: NULL");
   check(customer_row != NULL, "customer_row: NULL");
 
-  sqlite3_stmt *sql_statement = sql_prepare_statement(sql_connection,
-    "SELECT "
-    "\"customer-id\", "
-    "\"first-name\", "
-    "\"last-name\", "
-    "\"address\", "
-    "\"city\", "
-    "\"state\", "
-    "\"zip\" "
-    "FROM \"customers\" "
-    "WHERE \"customer-id\" = ?1;");
-
-  check(sql_statement != NULL, "sql_statement: NULL");
-
-  int sql_bind_result = sql_bind_int(sql_statement, 1, customer_id);
-  check(sql_bind_result == 0, "sql_bind_result: %d",
-    sql_bind_result);
-
-  int sql_select_step_status = 0;
-  int sql_select_step_result = sql_select_step(sql_statement, &sql_select_step_status);
-  check(sql_select_step_result == 0, "sql_select_step_result: %d",
-    sql_select_step_result);
-
-  customer_row_t *read_customer_row = NULL;
-
-  if (sql_select_step_status == SQLITE_ROW)
+  void *parameters[1] =
   {
-    int customers_table_read_result = customers_table_read(sql_statement, &read_customer_row);
-    check(customers_table_read_result == 0, "customers_table_read_result: %d",
-      customers_table_read_result);
-  }
+    &customer_id
+  };
 
-  *customer_row = read_customer_row;
+  int sql_select_one_result = sql_select_one(
+    sql_connection,
+    "SELECT "
+      "\"customer-id\", "
+      "\"first-name\", "
+      "\"last-name\", "
+      "\"address\", "
+      "\"city\", "
+      "\"state\", "
+      "\"zip\" "
+    "FROM \"customers\" "
+    "WHERE \"customer-id\" = ?1;",
+    parameters,
+    &customers_table_select_by_customer_id_bind,
+    &customers_table_read,
+    &customers_table_free_row,
+    (void **)&selected_row);
 
-  sql_finalize_statement(sql_statement);
+  check(sql_select_one_result == 0, "sql_select_one_result: %d",
+    sql_select_one_result);
+
+  *customer_row = selected_row;
 
   return 0;
 
 error:
 
-  sql_finalize_statement(sql_statement);
+  if (selected_row != NULL) { customer_row_free(selected_row); }
+
+  return -1;
+}
+
+// binds the parameters when
+// selecting all the customer rows
+int customers_table_select_all_bind(sqlite3_stmt *sql_statement, void **parameters)
+{
+  return 0;
+}
+
+// selects all the customer rows
+int customers_table_select_all(sqlite3 *sql_connection, customer_row_t ***customer_rows, int *count)
+{
+  customer_row_t **selected_rows = NULL;
+  int selected_rows_count = 0;
+
+  check(sql_connection != NULL, "sql_connection: NULL");
+  check(customer_rows != NULL, "customer_rows: NULL");
+  check(count != NULL, "count: NULL");
+
+  void *parameters[0] = {};
+
+  int sql_select_many_result = sql_select_many(
+    sql_connection,
+    "SELECT "
+      "\"customer-id\", "
+      "\"first-name\", "
+      "\"last-name\", "
+      "\"address\", "
+      "\"city\", "
+      "\"state\", "
+      "\"zip\" "
+    "FROM \"customers\";",
+    parameters,
+    &customers_table_select_all_bind,
+    &customers_table_read,
+    &customers_table_free_rows,
+    (void ***)&selected_rows,
+    &selected_rows_count);
+
+  check(sql_select_many_result == 0, "sql_select_many_result: %d",
+    sql_select_many_result);
+
+  *customer_rows = selected_rows;
+  *count = selected_rows_count;
+
+  return 0;
+
+error:
+
+  if (selected_rows != NULL) { customer_rows_free(selected_rows, selected_rows_count); }
 
   return -1;
 }
