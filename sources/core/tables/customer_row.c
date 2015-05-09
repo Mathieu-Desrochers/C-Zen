@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "../../infrastructure/dbg/dbg.h"
+#include "../../infrastructure/string/string.h"
 #include "../../core/tables/customer_row.h"
 
 // allocates a customer row
@@ -19,30 +20,12 @@ customer_row_t *customer_row_malloc(
   check_mem(customer_row);
 
   customer_row->customer_id = customer_id;
-
-  customer_row->first_name = malloc(strlen(first_name) + 1);
-  check_mem(customer_row->first_name);
-  strcpy(customer_row->first_name, first_name);
-
-  customer_row->last_name = malloc(strlen(last_name) + 1);
-  check_mem(customer_row->last_name);
-  strcpy(customer_row->last_name, last_name);
-
-  customer_row->address = malloc(strlen(address) + 1);
-  check_mem(customer_row->address);
-  strcpy(customer_row->address, address);
-
-  customer_row->city = malloc(strlen(city) + 1);
-  check_mem(customer_row->city);
-  strcpy(customer_row->city, city);
-
-  customer_row->state = malloc(strlen(state) + 1);
-  check_mem(customer_row->state);
-  strcpy(customer_row->state, state);
-
-  customer_row->zip = malloc(strlen(zip) + 1);
-  check_mem(customer_row->zip);
-  strcpy(customer_row->zip, zip);
+  string_duplicate(customer_row->first_name, first_name);
+  string_duplicate(customer_row->last_name, last_name);
+  string_duplicate(customer_row->address, address);
+  string_duplicate(customer_row->city, city);
+  string_duplicate(customer_row->state, state);
+  string_duplicate(customer_row->zip, zip);
 
   return customer_row;
 
