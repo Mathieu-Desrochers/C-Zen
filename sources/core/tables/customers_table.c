@@ -40,61 +40,81 @@ error:
 // inserts a customer row
 int customers_table_insert(sqlite3 *sql_connection, customer_row_t *customer_row)
 {
-  sqlite3_stmt *sql_statement = NULL;
+  sqlite3_stmt *sql_insert_statement = NULL;
+  sqlite3_stmt *sql_select_statement = NULL;
 
   check(sql_connection != NULL, "sql_connection: NULL");
   check(customer_row != NULL, "customer_row: NULL");
 
-  int sql_prepare_statement_result = sql_prepare_statement(
+  int sql_prepare_insert_statement_result = sql_prepare_statement(
     sql_connection,
     "INSERT INTO \"customers\" ("
-    "\"first-name\", "
-    "\"last-name\", "
-    "\"address\", "
-    "\"city\", "
-    "\"state\", "
-    "\"zip\") "
+      "\"first-name\", "
+      "\"last-name\", "
+      "\"address\", "
+      "\"city\", "
+      "\"state\", "
+      "\"zip\") "
     "VALUES (?1, ?2, ?3, ?4, ?5, ?6);",
-    &sql_statement);
+    &sql_insert_statement);
 
-  check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
-    sql_prepare_statement_result);
+  check(sql_prepare_insert_statement_result == 0, "sql_prepare_insert_statement_result: %d",
+    sql_prepare_insert_statement_result);
 
-  int sql_bind_first_name_result = sql_bind_string(sql_statement, 1, customer_row->first_name);
+  int sql_bind_first_name_result = sql_bind_string(sql_insert_statement, 1, customer_row->first_name);
   check(sql_bind_first_name_result == 0, "sql_bind_first_name_result: %d",
     sql_bind_first_name_result);
 
-  int sql_bind_last_name_result = sql_bind_string(sql_statement, 2, customer_row->last_name);
+  int sql_bind_last_name_result = sql_bind_string(sql_insert_statement, 2, customer_row->last_name);
   check(sql_bind_last_name_result == 0, "sql_bind_last_name_result: %d",
     sql_bind_last_name_result);
 
-  int sql_bind_address_result = sql_bind_string(sql_statement, 3, customer_row->address);
+  int sql_bind_address_result = sql_bind_string(sql_insert_statement, 3, customer_row->address);
   check(sql_bind_address_result == 0, "sql_bind_address_result: %d",
     sql_bind_address_result);
 
-  int sql_bind_city_result = sql_bind_string(sql_statement, 4, customer_row->city);
+  int sql_bind_city_result = sql_bind_string(sql_insert_statement, 4, customer_row->city);
   check(sql_bind_city_result == 0, "sql_bind_city_result: %d",
     sql_bind_city_result);
 
-  int sql_bind_state_result = sql_bind_string(sql_statement, 5, customer_row->state);
+  int sql_bind_state_result = sql_bind_string(sql_insert_statement, 5, customer_row->state);
   check(sql_bind_state_result == 0, "sql_bind_state_result: %d",
     sql_bind_state_result);
 
-  int sql_bind_zip_result = sql_bind_string(sql_statement, 6, customer_row->zip);
+  int sql_bind_zip_result = sql_bind_string(sql_insert_statement, 6, customer_row->zip);
   check(sql_bind_zip_result == 0, "sql_bind_zip_result: %d",
     sql_bind_zip_result);
 
-  int sql_step_execute_result = sql_step_execute(sql_statement);
+  int sql_step_execute_result = sql_step_execute(sql_insert_statement);
   check(sql_step_execute_result == 0, "sql_step_execute_result: %d",
     sql_step_execute_result);
 
-  sql_finalize_statement(sql_statement);
+  int sql_prepare_select_statement_result = sql_prepare_statement(
+    sql_connection,
+    "SELECT last_insert_rowid();",
+    &sql_select_statement);
+
+  check(sql_prepare_select_statement_result == 0, "sql_prepare_select_statement_result: %d",
+    sql_prepare_select_statement_result);
+
+  int row_available = 0;
+  int sql_step_select_result = sql_step_select(sql_select_statement, &row_available);
+  check(sql_step_select_result == 0, "sql_step_select_result: %d",
+    sql_step_select_result);
+
+  check(row_available == 1, "row_available: %d", row_available);
+
+  customer_row->customer_id = sqlite3_column_int(sql_select_statement, 0);
+
+  sql_finalize_statement(sql_insert_statement);
+  sql_finalize_statement(sql_select_statement);
 
   return 0;
 
 error:
 
-  if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
+  if (sql_insert_statement != NULL) { sql_finalize_statement(sql_insert_statement); }
+  if (sql_select_statement != NULL) { sql_finalize_statement(sql_select_statement); }
 
   return -1;
 }
@@ -227,6 +247,108 @@ int customers_table_select_all(sqlite3 *sql_connection, customer_row_t ***custom
 error:
 
   if (allocated_customer_rows != NULL) { customer_rows_free(allocated_customer_rows, used_customer_rows_count); }
+  if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
+
+  return -1;
+}
+
+// updates a customer row
+int customers_table_update(sqlite3 *sql_connection, customer_row_t *customer_row)
+{
+  sqlite3_stmt *sql_statement = NULL;
+
+  check(sql_connection != NULL, "sql_connection: NULL");
+  check(customer_row != NULL, "customer_row: NULL");
+
+  int sql_prepare_statement_result = sql_prepare_statement(
+    sql_connection,
+    "UPDATE \"customers\" SET "
+      "\"first-name\" = ?1, "
+      "\"last-name\" = ?2, "
+      "\"address\" = ?3, "
+      "\"city\" = ?4, "
+      "\"state\" = ?5, "
+      "\"zip\" = ?6 "
+    "WHERE \"customer-id\" = ?7;",
+    &sql_statement);
+
+  check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
+    sql_prepare_statement_result);
+
+  int sql_bind_first_name_result = sql_bind_string(sql_statement, 1, customer_row->first_name);
+  check(sql_bind_first_name_result == 0, "sql_bind_first_name_result: %d",
+    sql_bind_first_name_result);
+
+  int sql_bind_last_name_result = sql_bind_string(sql_statement, 2, customer_row->last_name);
+  check(sql_bind_last_name_result == 0, "sql_bind_last_name_result: %d",
+    sql_bind_last_name_result);
+
+  int sql_bind_address_result = sql_bind_string(sql_statement, 3, customer_row->address);
+  check(sql_bind_address_result == 0, "sql_bind_address_result: %d",
+    sql_bind_address_result);
+
+  int sql_bind_city_result = sql_bind_string(sql_statement, 4, customer_row->city);
+  check(sql_bind_city_result == 0, "sql_bind_city_result: %d",
+    sql_bind_city_result);
+
+  int sql_bind_state_result = sql_bind_string(sql_statement, 5, customer_row->state);
+  check(sql_bind_state_result == 0, "sql_bind_state_result: %d",
+    sql_bind_state_result);
+
+  int sql_bind_zip_result = sql_bind_string(sql_statement, 6, customer_row->zip);
+  check(sql_bind_zip_result == 0, "sql_bind_zip_result: %d",
+    sql_bind_zip_result);
+
+  int sql_bind_customer_id_result = sql_bind_int(sql_statement, 7, customer_row->customer_id);
+  check(sql_bind_customer_id_result == 0, "sql_bind_customer_id_result: %d",
+    sql_bind_customer_id_result);
+
+  int sql_step_execute_result = sql_step_execute(sql_statement);
+  check(sql_step_execute_result == 0, "sql_step_execute_result: %d",
+    sql_step_execute_result);
+
+  sql_finalize_statement(sql_statement);
+
+  return 0;
+
+error:
+
+  if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
+
+  return -1;
+}
+
+// deletes a customer row
+int customers_table_delete(sqlite3 *sql_connection, customer_row_t *customer_row)
+{
+  sqlite3_stmt *sql_statement = NULL;
+
+  check(sql_connection != NULL, "sql_connection: NULL");
+  check(customer_row != NULL, "customer_row: NULL");
+
+  int sql_prepare_statement_result = sql_prepare_statement(
+    sql_connection,
+    "DELETE FROM \"customers\" "
+    "WHERE \"customer-id\" = ?1;",
+    &sql_statement);
+
+  check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
+    sql_prepare_statement_result);
+
+  int sql_bind_customer_id_result = sql_bind_int(sql_statement, 1, customer_row->customer_id);
+  check(sql_bind_customer_id_result == 0, "sql_bind_customer_id_result: %d",
+    sql_bind_customer_id_result);
+
+  int sql_step_execute_result = sql_step_execute(sql_statement);
+  check(sql_step_execute_result == 0, "sql_step_execute_result: %d",
+    sql_step_execute_result);
+
+  sql_finalize_statement(sql_statement);
+
+  return 0;
+
+error:
+
   if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
 
   return -1;
