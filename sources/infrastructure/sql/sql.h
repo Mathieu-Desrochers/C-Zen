@@ -11,9 +11,13 @@ int sql_prepare_statement(sqlite3 *sql_connection, char *sql, sqlite3_stmt **sql
 
 // binds a sql statement parameter
 int sql_bind_int(sqlite3_stmt *sql_statement, int position, int value);
+int sql_bind_string(sqlite3_stmt *sql_statement, int position, char *value);
 
 // steps a sql statement that selects rows
-int sql_step_select(sqlite3_stmt *sql_statement, int *sql_select_step_status);
+int sql_step_select(sqlite3_stmt *sql_statement, int *row_available);
+
+// steps a sql statement that executes a command
+int sql_step_execute(sqlite3_stmt *sql_statement);
 
 // finalizes a sql statement
 void sql_finalize_statement(sqlite3_stmt *sql_statement);

@@ -37,6 +37,68 @@ error:
   return -1;
 }
 
+// inserts a customer row
+int customers_table_insert(sqlite3 *sql_connection, customer_row_t *customer_row)
+{
+  sqlite3_stmt *sql_statement = NULL;
+
+  check(sql_connection != NULL, "sql_connection: NULL");
+  check(customer_row != NULL, "customer_row: NULL");
+
+  int sql_prepare_statement_result = sql_prepare_statement(
+    sql_connection,
+    "INSERT INTO \"customers\" ("
+    "\"first-name\", "
+    "\"last-name\", "
+    "\"address\", "
+    "\"city\", "
+    "\"state\", "
+    "\"zip\") "
+    "VALUES (?1, ?2, ?3, ?4, ?5, ?6);",
+    &sql_statement);
+
+  check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
+    sql_prepare_statement_result);
+
+  int sql_bind_first_name_result = sql_bind_string(sql_statement, 1, customer_row->first_name);
+  check(sql_bind_first_name_result == 0, "sql_bind_first_name_result: %d",
+    sql_bind_first_name_result);
+
+  int sql_bind_last_name_result = sql_bind_string(sql_statement, 2, customer_row->last_name);
+  check(sql_bind_last_name_result == 0, "sql_bind_last_name_result: %d",
+    sql_bind_last_name_result);
+
+  int sql_bind_address_result = sql_bind_string(sql_statement, 3, customer_row->address);
+  check(sql_bind_address_result == 0, "sql_bind_address_result: %d",
+    sql_bind_address_result);
+
+  int sql_bind_city_result = sql_bind_string(sql_statement, 4, customer_row->city);
+  check(sql_bind_city_result == 0, "sql_bind_city_result: %d",
+    sql_bind_city_result);
+
+  int sql_bind_state_result = sql_bind_string(sql_statement, 5, customer_row->state);
+  check(sql_bind_state_result == 0, "sql_bind_state_result: %d",
+    sql_bind_state_result);
+
+  int sql_bind_zip_result = sql_bind_string(sql_statement, 6, customer_row->zip);
+  check(sql_bind_zip_result == 0, "sql_bind_zip_result: %d",
+    sql_bind_zip_result);
+
+  int sql_step_execute_result = sql_step_execute(sql_statement);
+  check(sql_step_execute_result == 0, "sql_step_execute_result: %d",
+    sql_step_execute_result);
+
+  sql_finalize_statement(sql_statement);
+
+  return 0;
+
+error:
+
+  if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
+
+  return -1;
+}
+
 // selects a customer row by customer id
 int customers_table_select_by_customer_id(sqlite3 *sql_connection, int customer_id, customer_row_t **customer_row)
 {

@@ -65,6 +65,22 @@ error:
   return -1;
 }
 
+// binds a sql statement parameter
+int sql_bind_string(sqlite3_stmt *sql_statement, int position, char *value)
+{
+  check(sql_statement != NULL, "sql_statement: NULL)");
+
+  int sqlite3_bind_text_result = sqlite3_bind_text(sql_statement, position, value, -1, SQLITE_STATIC);
+  check(sqlite3_bind_text_result == SQLITE_OK, "sqlite3_bind_text_result: %d | position: %d | value: %s",
+    sqlite3_bind_text_result, position, value);
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
 // steps a sql statement that selects rows
 int sql_step_select(sqlite3_stmt *sql_statement, int *row_available)
 {
@@ -75,6 +91,22 @@ int sql_step_select(sqlite3_stmt *sql_statement, int *row_available)
     sqlite3_step_result);
 
   *row_available = sqlite3_step_result == SQLITE_ROW ? 1 : 0;
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
+// steps a sql statement that executes a command
+int sql_step_execute(sqlite3_stmt *sql_statement)
+{
+  check(sql_statement != NULL, "sql_statement: NULL");
+
+  int sqlite3_step_result = sqlite3_step(sql_statement);
+  check(sqlite3_step_result == SQLITE_DONE, "sqlite3_step_result: %d",
+    sqlite3_step_result);
 
   return 0;
 
