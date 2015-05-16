@@ -4,11 +4,11 @@ CFLAGS  = -g -Wall
 INFRASTRUCTURE = sources/infrastructure/sql/sql.o
 
 TABLES = sources/core/tables/customer_row.o \
-         sources/core/tables/customers_table.o
+         sources/core/tables/customers_table.o \
+         sources/core/tables/order_row.o \
+         sources/core/tables/orders_table.o
 
-TESTS = tests/core/tables/customers_table_tests.o
-
-all : $(INFRASTRUCTURE) $(TABLES) $(TESTS)
+all : $(INFRASTRUCTURE) $(TABLES)
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -16,10 +16,6 @@ all : $(INFRASTRUCTURE) $(TABLES) $(TESTS)
 main : sources/core/main/main.c $(INFRASTRUCTURE) $(TABLES)
 	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(TABLES) \
 	-l sqlite3 sources/core/main/main.c -o $@
-
-test-runner : tests/test-runner.c $(INFRASTRUCTURE) $(TABLES) $(TESTS)
-	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(TABLES) $(TESTS) \
-	-l sqlite3 `pkg-config --cflags --libs check` tests/test-runner.c -o $@
 
 database :
 	mkdir -p /var/c-zen
