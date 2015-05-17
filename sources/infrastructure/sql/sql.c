@@ -1,8 +1,14 @@
+#define _BSD_SOURCE
+#define _XOPEN_SOURCE
+
 #include <sqlite3.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/sql/sql.h"
+#include "../../infrastructure/string/string.h"
+#include "../../infrastructure/time/time.h"
 
 // opens a database connection
 int sql_open_connection(char *filename, sqlite3 **sql_connection)
@@ -49,10 +55,156 @@ error:
   return -1;
 }
 
+// reads a sql column
+int sql_read_int(sqlite3_stmt *sql_statement, int position, int *value)
+{
+  check(sql_statement != NULL, "sql_statement: NULL");
+  check(value != NULL, "value: NULL");
+
+  int columns_count = sqlite3_column_count(sql_statement);
+  check(position >= 0 && position < columns_count, "position: %d",
+    position);
+
+  int column_type = sqlite3_column_type(sql_statement, position);
+  check(column_type == SQLITE_INTEGER, "column_type: %d",
+    column_type);
+
+  *value = sqlite3_column_int(sql_statement, position);
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
+// reads a sql column
+int sql_read_string(sqlite3_stmt *sql_statement, int position, char **value)
+{
+  char *value_return = NULL;
+
+  check(sql_statement != NULL, "sql_statement: NULL");
+  check(value != NULL, "value: NULL");
+
+  int columns_count = sqlite3_column_count(sql_statement);
+  check(position >= 0 && position < columns_count, "position: %d",
+    position);
+
+  int column_type = sqlite3_column_type(sql_statement, position);
+  check(column_type == SQLITE_TEXT, "column_type: %d",
+    column_type);
+
+  char *column_text = (char *)sqlite3_column_text(sql_statement, position);
+  string_duplicate(value_return, column_text);
+
+  *value = value_return;
+
+  return 0;
+
+error:
+
+  if (value_return != NULL) { free(value_return); }
+
+  return -1;
+}
+
+// reads a sql column
+int sql_read_date(sqlite3_stmt *sql_statement, int position, time_t *value)
+{
+  check(sql_statement != NULL, "sql_statement: NULL");
+  check(value != NULL, "value: NULL");
+
+  int columns_count = sqlite3_column_count(sql_statement);
+  check(position >= 0 && position < columns_count, "position: %d",
+    position);
+
+  int column_type = sqlite3_column_type(sql_statement, position);
+  check(column_type == SQLITE_TEXT, "column_type: %d",
+    column_type);
+
+  char *column_text = (char *)sqlite3_column_text(sql_statement, position);
+
+  time_t time_result;
+
+  int parse_utc_date_result = parse_utc_date(column_text, &time_result);
+  check(parse_utc_date_result == 0, "parse_utc_date_result: %d",
+    parse_utc_date_result);
+
+  *value = time_result;
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
+// reads a sql column
+int sql_read_date_time(sqlite3_stmt *sql_statement, int position, time_t *value)
+{
+  check(sql_statement != NULL, "sql_statement: NULL");
+  check(value != NULL, "value: NULL");
+
+  int columns_count = sqlite3_column_count(sql_statement);
+  check(position >= 0 && position < columns_count, "position: %d",
+    position);
+
+  int column_type = sqlite3_column_type(sql_statement, position);
+  check(column_type == SQLITE_TEXT, "column_type: %d",
+    column_type);
+
+  char *column_text = (char *)sqlite3_column_text(sql_statement, position);
+
+  time_t time_result;
+
+  int parse_utc_date_time_result = parse_utc_date_time(column_text, &time_result);
+  check(parse_utc_date_time_result == 0, "parse_utc_date_time_result: %d",
+    parse_utc_date_time_result);
+
+  *value = time_result;
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
+// reads a sql column
+int sql_read_time(sqlite3_stmt *sql_statement, int position, time_t *value)
+{
+  check(sql_statement != NULL, "sql_statement: NULL");
+  check(value != NULL, "value: NULL");
+
+  int columns_count = sqlite3_column_count(sql_statement);
+  check(position >= 0 && position < columns_count, "position: %d",
+    position);
+
+  int column_type = sqlite3_column_type(sql_statement, position);
+  check(column_type == SQLITE_TEXT, "column_type: %d",
+    column_type);
+
+  char *column_text = (char *)sqlite3_column_text(sql_statement, position);
+
+  time_t time_result;
+
+  int parse_utc_time_result = parse_utc_time(column_text, &time_result);
+  check(parse_utc_time_result == 0, "parse_utc_time_result: %d",
+    parse_utc_time_result);
+
+  *value = time_result;
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
 // binds a sql statement parameter
 int sql_bind_int(sqlite3_stmt *sql_statement, int position, int value)
 {
-  check(sql_statement != NULL, "sql_statement: NULL)");
+  check(sql_statement != NULL, "sql_statement: NULL");
 
   int sqlite3_bind_int_result = sqlite3_bind_int(sql_statement, position, value);
   check(sqlite3_bind_int_result == SQLITE_OK, "sqlite3_bind_int_result: %d | position: %d | value: %d",
@@ -68,7 +220,7 @@ error:
 // binds a sql statement parameter
 int sql_bind_string(sqlite3_stmt *sql_statement, int position, char *value)
 {
-  check(sql_statement != NULL, "sql_statement: NULL)");
+  check(sql_statement != NULL, "sql_statement: NULL");
 
   int sqlite3_bind_text_result = sqlite3_bind_text(sql_statement, position, value, -1, SQLITE_STATIC);
   check(sqlite3_bind_text_result == SQLITE_OK, "sqlite3_bind_text_result: %d | position: %d | value: %s",
@@ -78,6 +230,18 @@ int sql_bind_string(sqlite3_stmt *sql_statement, int position, char *value)
 
 error:
 
+  return -1;
+}
+
+// binds a sql statement parameter
+int sql_bind_date_time(sqlite3_stmt *sql_statement, int position, int value)
+{
+  return -1;
+}
+
+// binds a sql statement parameter
+int sql_bind_date(sqlite3_stmt *sql_statement, int position, int value)
+{
   return -1;
 }
 

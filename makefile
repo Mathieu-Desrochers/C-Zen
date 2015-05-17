@@ -5,7 +5,9 @@ INFRASTRUCTURE = sources/infrastructure/sql/sql.o \
                  sources/infrastructure/time/time.o
 
 TABLES = sources/core/tables/customer_row.o \
-         sources/core/tables/customers_table.o
+         sources/core/tables/customers_table.o \
+         sources/core/tables/order_row.o \
+         sources/core/tables/orders_table.o
 
 all : $(INFRASTRUCTURE) $(TABLES)
 

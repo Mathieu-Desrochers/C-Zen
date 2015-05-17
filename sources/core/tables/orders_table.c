@@ -15,12 +15,37 @@ int orders_table_read(sqlite3_stmt *sql_statement, order_row_t **order_row)
   check(sql_statement != NULL, "sql_statement: NULL");
   check(order_row != NULL, "order_row: NULL");
 
+  int order_id;
+  int sql_read_order_id_result = sql_read_int(sql_statement, 0, &order_id);
+  check(sql_read_order_id_result == 0, "sql_read_order_id_result: %d",
+    sql_read_order_id_result);
+
+  int customer_id;
+  int sql_read_customer_id_result = sql_read_int(sql_statement, 1, &customer_id);
+  check(sql_read_customer_id_result == 0, "sql_read_customer_id_result: %d",
+    sql_read_customer_id_result);
+
+  int total;
+  int sql_read_total_result = sql_read_int(sql_statement, 2, &total);
+  check(sql_read_total_result == 0, "sql_read_total_result: %d",
+    sql_read_total_result);
+
+  time_t placed_on_date_time;
+  int sql_read_placed_on_date_time_result = sql_read_date_time(sql_statement, 3, &placed_on_date_time);
+  check(sql_read_placed_on_date_time_result == 0, "sql_read_placed_on_date_time_result: %d",
+    sql_read_placed_on_date_time_result);
+
+  time_t shipped_on_date;
+  int sql_read_shipped_on_date_result = sql_read_date(sql_statement, 4, &shipped_on_date);
+  check(sql_read_shipped_on_date_result == 0, "sql_read_shipped_on_date_result: %d",
+    sql_read_shipped_on_date_result);
+
   order_row_return = order_row_malloc(
-    sqlite3_column_int(sql_statement, 0),
-    sqlite3_column_int(sql_statement, 1),
-    sqlite3_column_int(sql_statement, 2),
-    sql_read_date_time(sql_statement, 3),
-    sql_read_date(sql_statement, 4));
+    order_id,
+    customer_id,
+    total,
+    placed_on_date_time,
+    shipped_on_date);
 
   check(order_row_return != NULL, "order_row_return: NULL");
 

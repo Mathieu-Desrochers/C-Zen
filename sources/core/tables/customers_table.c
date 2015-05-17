@@ -10,27 +10,77 @@
 // reads a customer row
 int customers_table_read(sqlite3_stmt *sql_statement, customer_row_t **customer_row)
 {
+  char *first_name = NULL;
+  char *last_name = NULL;
+  char *address = NULL;
+  char *city = NULL;
+  char *state = NULL;
+  char *zip = NULL;
+
   customer_row_t *customer_row_return = NULL;
 
   check(sql_statement != NULL, "sql_statement: NULL");
   check(customer_row != NULL, "customer_row: NULL");
 
+  int customer_id;
+  int sql_read_customer_id_result = sql_read_int(sql_statement, 0, &customer_id);
+  check(sql_read_customer_id_result == 0, "sql_read_customer_id_result: %d",
+    sql_read_customer_id_result);
+
+  int sql_read_first_name_result = sql_read_string(sql_statement, 1, &first_name);
+  check(sql_read_first_name_result == 0, "sql_read_first_name_result: %d",
+    sql_read_first_name_result);
+
+  int sql_read_last_name_result = sql_read_string(sql_statement, 2, &last_name);
+  check(sql_read_last_name_result == 0, "sql_read_last_name_result: %d",
+    sql_read_last_name_result);
+
+  int sql_read_address_result = sql_read_string(sql_statement, 3, &address);
+  check(sql_read_address_result == 0, "sql_read_address_result: %d",
+    sql_read_address_result);
+
+  int sql_read_city_result = sql_read_string(sql_statement, 4, &city);
+  check(sql_read_city_result == 0, "sql_read_city_result: %d",
+    sql_read_city_result);
+
+  int sql_read_state_result = sql_read_string(sql_statement, 5, &state);
+  check(sql_read_state_result == 0, "sql_read_state_result: %d",
+    sql_read_state_result);
+
+  int sql_read_zip_result = sql_read_string(sql_statement, 6, &zip);
+  check(sql_read_zip_result == 0, "sql_read_zip_result: %d",
+    sql_read_zip_result);
+
   customer_row_return = customer_row_malloc(
-    sqlite3_column_int(sql_statement, 0),
-    (char*)sqlite3_column_text(sql_statement, 1),
-    (char*)sqlite3_column_text(sql_statement, 2),
-    (char*)sqlite3_column_text(sql_statement, 3),
-    (char*)sqlite3_column_text(sql_statement, 4),
-    (char*)sqlite3_column_text(sql_statement, 5),
-    (char*)sqlite3_column_text(sql_statement, 6));
+    customer_id,
+    first_name,
+    last_name,
+    address,
+    city,
+    state,
+    zip);
 
   check(customer_row_return != NULL, "customer_row_return: NULL");
+
+  free(first_name);
+  free(last_name);
+  free(address);
+  free(city);
+  free(state);
+  free(zip);
 
   *customer_row = customer_row_return;
 
   return 0;
 
 error:
+
+  if (first_name != NULL) { free(first_name); }
+  if (last_name != NULL) { free(last_name); }
+  if (address != NULL) { free(address); }
+  if (city != NULL) { free(city); }
+  if (state != NULL) { free(state); }
+  if (zip != NULL) { free(zip); }
 
   if (customer_row_return != NULL) { customer_row_free(customer_row_return); }
 
