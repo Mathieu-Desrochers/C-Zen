@@ -12,6 +12,7 @@ int sql_prepare_statement(sqlite3 *sql_connection, char *sql, sqlite3_stmt **sql
 
 // reads a sql column
 int sql_read_int(sqlite3_stmt *sql_statement, int position, int *value);
+int sql_read_double(sqlite3_stmt *sql_statement, int position, double *value);
 int sql_read_string(sqlite3_stmt *sql_statement, int position, char **value);
 int sql_read_date(sqlite3_stmt *sql_statement, int position, time_t *value);
 int sql_read_date_time(sqlite3_stmt *sql_statement, int position, time_t *value);
@@ -19,6 +20,7 @@ int sql_read_time(sqlite3_stmt *sql_statement, int position, time_t *value);
 
 // binds a sql statement parameter
 int sql_bind_int(sqlite3_stmt *sql_statement, int position, int value);
+int sql_bind_double(sqlite3_stmt *sql_statement, int position, double value);
 int sql_bind_string(sqlite3_stmt *sql_statement, int position, char *value);
 int sql_bind_date(sqlite3_stmt *sql_statement, int position, time_t value);
 int sql_bind_date_time(sqlite3_stmt *sql_statement, int position, time_t value);

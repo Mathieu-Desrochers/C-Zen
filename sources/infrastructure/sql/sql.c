@@ -79,6 +79,29 @@ error:
 }
 
 // reads a sql column
+int sql_read_double(sqlite3_stmt *sql_statement, int position, double *value)
+{
+  check(sql_statement != NULL, "sql_statement: NULL");
+  check(value != NULL, "value: NULL");
+
+  int columns_count = sqlite3_column_count(sql_statement);
+  check(position >= 0 && position < columns_count, "position: %d",
+    position);
+
+  int column_type = sqlite3_column_type(sql_statement, position);
+  check(column_type == SQLITE_FLOAT, "column_type: %d",
+    column_type);
+
+  *value = sqlite3_column_double(sql_statement, position);
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
+// reads a sql column
 int sql_read_string(sqlite3_stmt *sql_statement, int position, char **value)
 {
   char *value_return = NULL;
@@ -209,6 +232,22 @@ int sql_bind_int(sqlite3_stmt *sql_statement, int position, int value)
   int sqlite3_bind_int_result = sqlite3_bind_int(sql_statement, position, value);
   check(sqlite3_bind_int_result == SQLITE_OK, "sqlite3_bind_int_result: %d | position: %d | value: %d",
     sqlite3_bind_int_result, position, value);
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
+// binds a sql statement parameter
+int sql_bind_double(sqlite3_stmt *sql_statement, int position, double value)
+{
+  check(sql_statement != NULL, "sql_statement: NULL");
+
+  int sqlite3_bind_double_result = sqlite3_bind_double(sql_statement, position, value);
+  check(sqlite3_bind_double_result == SQLITE_OK, "sqlite3_bind_double_result: %d | position: %d | value: %f",
+    sqlite3_bind_double_result, position, value);
 
   return 0;
 
