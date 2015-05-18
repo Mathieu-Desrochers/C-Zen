@@ -10,22 +10,37 @@
 // reads a NAME_SINGLE_LOWER() row
 int NAME_PLURAL_LOWER()_table_read(sqlite3_stmt *sql_statement, NAME_SINGLE_LOWER()_row_t **NAME_SINGLE_LOWER()_row)
 {
+  char *name = NULL;
+
   NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row_return = NULL;
 
   check(sql_statement != NULL, "sql_statement: NULL");
   check(NAME_SINGLE_LOWER()_row != NULL, "NAME_SINGLE_LOWER()_row: NULL");
 
+  int NAME_SINGLE_LOWER()_id;
+  int sql_read_`'NAME_SINGLE_LOWER()_id_result = sql_read_int(sql_statement, 0, &NAME_SINGLE_LOWER()_id);
+  check(sql_read_`'NAME_SINGLE_LOWER()_id_result == 0, "sql_read_`'NAME_SINGLE_LOWER()_id_result: %d",
+    sql_read_`'NAME_SINGLE_LOWER()_id_result);
+
+  int sql_read_name_result = sql_read_string(sql_statement, 1, &name);
+  check(sql_read_name_result == 0, "sql_read_name_result: %d",
+    sql_read_name_result);
+
   NAME_SINGLE_LOWER()_row_return = NAME_SINGLE_LOWER()_row_malloc(
-    sqlite3_column_int(sql_statement, 0),
-    (char*)sqlite3_column_text(sql_statement, 1));
+    NAME_SINGLE_LOWER()_id,
+    name);
 
   check(NAME_SINGLE_LOWER()_row_return != NULL, "NAME_SINGLE_LOWER()_row_return: NULL");
+
+  free(name);
 
   *NAME_SINGLE_LOWER()_row = NAME_SINGLE_LOWER()_row_return;
 
   return 0;
 
 error:
+
+  if (name != NULL) { free(name); }
 
   if (NAME_SINGLE_LOWER()_row_return != NULL) { NAME_SINGLE_LOWER()_row_free(NAME_SINGLE_LOWER()_row_return); }
 

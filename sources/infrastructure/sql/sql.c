@@ -218,11 +218,83 @@ error:
 }
 
 // binds a sql statement parameter
+int sql_bind_date(sqlite3_stmt *sql_statement, int position, time_t value)
+{
+  char *formatted_time = NULL;
+
+  check(sql_statement != NULL, "sql_statement: NULL");
+
+  formatted_time = format_utc_date(value);
+
+  int sqlite3_bind_text_result = sqlite3_bind_text(sql_statement, position, formatted_time, -1, SQLITE_TRANSIENT);
+  check(sqlite3_bind_text_result == SQLITE_OK, "sqlite3_bind_text_result: %d | position: %d | value: %s",
+    sqlite3_bind_text_result, position, formatted_time);
+
+  free(formatted_time);
+
+  return 0;
+
+error:
+
+  if (formatted_time != NULL) { free(formatted_time); }
+
+  return -1;
+}
+
+// binds a sql statement parameter
+int sql_bind_date_time(sqlite3_stmt *sql_statement, int position, time_t value)
+{
+  char *formatted_time = NULL;
+
+  check(sql_statement != NULL, "sql_statement: NULL");
+
+  formatted_time = format_utc_date_time(value);
+
+  int sqlite3_bind_text_result = sqlite3_bind_text(sql_statement, position, formatted_time, -1, SQLITE_TRANSIENT);
+  check(sqlite3_bind_text_result == SQLITE_OK, "sqlite3_bind_text_result: %d | position: %d | value: %s",
+    sqlite3_bind_text_result, position, formatted_time);
+
+  free(formatted_time);
+
+  return 0;
+
+error:
+
+  if (formatted_time != NULL) { free(formatted_time); }
+
+  return -1;
+}
+
+// binds a sql statement parameter
+int sql_bind_time(sqlite3_stmt *sql_statement, int position, time_t value)
+{
+  char *formatted_time = NULL;
+
+  check(sql_statement != NULL, "sql_statement: NULL");
+
+  formatted_time = format_utc_time(value);
+
+  int sqlite3_bind_text_result = sqlite3_bind_text(sql_statement, position, formatted_time, -1, SQLITE_TRANSIENT);
+  check(sqlite3_bind_text_result == SQLITE_OK, "sqlite3_bind_text_result: %d | position: %d | value: %s",
+    sqlite3_bind_text_result, position, formatted_time);
+
+  free(formatted_time);
+
+  return 0;
+
+error:
+
+  if (formatted_time != NULL) { free(formatted_time); }
+
+  return -1;
+}
+
+// binds a sql statement parameter
 int sql_bind_string(sqlite3_stmt *sql_statement, int position, char *value)
 {
   check(sql_statement != NULL, "sql_statement: NULL");
 
-  int sqlite3_bind_text_result = sqlite3_bind_text(sql_statement, position, value, -1, SQLITE_STATIC);
+  int sqlite3_bind_text_result = sqlite3_bind_text(sql_statement, position, value, -1, SQLITE_TRANSIENT);
   check(sqlite3_bind_text_result == SQLITE_OK, "sqlite3_bind_text_result: %d | position: %d | value: %s",
     sqlite3_bind_text_result, position, value);
 
@@ -230,18 +302,6 @@ int sql_bind_string(sqlite3_stmt *sql_statement, int position, char *value)
 
 error:
 
-  return -1;
-}
-
-// binds a sql statement parameter
-int sql_bind_date_time(sqlite3_stmt *sql_statement, int position, int value)
-{
-  return -1;
-}
-
-// binds a sql statement parameter
-int sql_bind_date(sqlite3_stmt *sql_statement, int position, int value)
-{
   return -1;
 }
 

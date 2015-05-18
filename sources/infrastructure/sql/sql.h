@@ -20,8 +20,9 @@ int sql_read_time(sqlite3_stmt *sql_statement, int position, time_t *value);
 // binds a sql statement parameter
 int sql_bind_int(sqlite3_stmt *sql_statement, int position, int value);
 int sql_bind_string(sqlite3_stmt *sql_statement, int position, char *value);
-int sql_bind_date_time(sqlite3_stmt *sql_statement, int position, int value);
-int sql_bind_date(sqlite3_stmt *sql_statement, int position, int value);
+int sql_bind_date(sqlite3_stmt *sql_statement, int position, time_t value);
+int sql_bind_date_time(sqlite3_stmt *sql_statement, int position, time_t value);
+int sql_bind_time(sqlite3_stmt *sql_statement, int position, time_t value);
 
 // steps a sql statement that selects rows
 int sql_step_select(sqlite3_stmt *sql_statement, int *row_available);
