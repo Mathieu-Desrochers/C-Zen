@@ -20,6 +20,16 @@ CREATE TABLE "orders"
 
 CREATE INDEX "orders-customer-id" ON "orders" ("customer-id");
 
+CREATE TABLE "order-items"
+(
+  "order-item-id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "order-id" INTEGER INTEGER REFERENCES "orders" ("order-id"),
+  "name" TEXT,
+  "quantity" INTEGER
+);
+
+CREATE INDEX "order-items-order-id" ON "order-items" ("order-id");
+
 CREATE TABLE "shipping-schedules"
 (
   "shipping-schedule-id" INTEGER PRIMARY KEY AUTOINCREMENT,
