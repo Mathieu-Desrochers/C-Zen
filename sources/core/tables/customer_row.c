@@ -54,6 +54,24 @@ void customer_row_free(customer_row_t *customer_row)
   free(customer_row);
 }
 
+// allocates an array of customer rows
+customer_row_t **customer_rows_realloc(customer_row_t **customer_rows, int count)
+{
+  customer_row_t **customer_rows_return = NULL;
+
+  customer_rows_return = realloc(customer_rows, sizeof(customer_row_t *) * count);
+  check(customer_rows_return != NULL || count == 0, "customer_rows_return: %p | count: %d",
+    customer_rows_return, count);
+
+  return customer_rows_return;
+
+error:
+
+  if (customer_rows_return != NULL) { free(customer_rows_return); }
+
+  return NULL;
+}
+
 // frees an array of customer rows
 void customer_rows_free(customer_row_t **customer_rows, int count)
 {

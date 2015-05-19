@@ -16,6 +16,9 @@ NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row_malloc(
 // frees a NAME_SINGLE_LOWER() row
 void NAME_SINGLE_LOWER()_row_free(NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row);
 
+// allocates an array of NAME_SINGLE_LOWER() rows
+NAME_SINGLE_LOWER()_row_t **NAME_SINGLE_LOWER()_rows_realloc(NAME_SINGLE_LOWER()_row_t **NAME_SINGLE_LOWER()_rows, int count);
+
 // frees an array of NAME_SINGLE_LOWER() rows
 void NAME_SINGLE_LOWER()_rows_free(NAME_SINGLE_LOWER()_row_t **NAME_SINGLE_LOWER()_rows, int count);
 

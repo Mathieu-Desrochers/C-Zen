@@ -345,7 +345,7 @@ error:
 }
 
 // steps a sql statement that selects rows
-int sql_step_select(sqlite3_stmt *sql_statement, int *row_available)
+int sql_step_select(sqlite3_stmt *sql_statement, int *is_row_available)
 {
   check(sql_statement != NULL, "sql_statement: NULL");
 
@@ -353,7 +353,7 @@ int sql_step_select(sqlite3_stmt *sql_statement, int *row_available)
   check(sqlite3_step_result == SQLITE_ROW || sqlite3_step_result == SQLITE_DONE, "sqlite3_step_result: %d",
     sqlite3_step_result);
 
-  *row_available = sqlite3_step_result == SQLITE_ROW ? 1 : 0;
+  *is_row_available = sqlite3_step_result == SQLITE_ROW ? 1 : 0;
 
   return 0;
 

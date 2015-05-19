@@ -27,7 +27,7 @@ int sql_bind_date_time(sqlite3_stmt *sql_statement, int position, time_t value);
 int sql_bind_time(sqlite3_stmt *sql_statement, int position, time_t value);
 
 // steps a sql statement that selects rows
-int sql_step_select(sqlite3_stmt *sql_statement, int *row_available);
+int sql_step_select(sqlite3_stmt *sql_statement, int *is_row_available);
 
 // steps a sql statement that executes a command
 int sql_step_execute(sqlite3_stmt *sql_statement);

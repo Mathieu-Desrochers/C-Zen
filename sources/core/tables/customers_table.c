@@ -147,12 +147,12 @@ int customers_table_insert(sqlite3 *sql_connection, customer_row_t *customer_row
   check(sql_prepare_select_statement_result == 0, "sql_prepare_select_statement_result: %d",
     sql_prepare_select_statement_result);
 
-  int row_available = 0;
-  int sql_step_select_result = sql_step_select(sql_select_statement, &row_available);
+  int is_row_available = 0;
+  int sql_step_select_result = sql_step_select(sql_select_statement, &is_row_available);
   check(sql_step_select_result == 0, "sql_step_select_result: %d",
     sql_step_select_result);
 
-  check(row_available == 1, "row_available: %d", row_available);
+  check(is_row_available == 1, "is_row_available: %d", is_row_available);
 
   customer_row->customer_id = sqlite3_column_int(sql_select_statement, 0);
 
@@ -199,12 +199,12 @@ int customers_table_select_by_customer_id(sqlite3 *sql_connection, int customer_
   check(sql_bind_customer_id_result == 0, "sql_bind_customer_id_result: %d",
     sql_bind_customer_id_result);
 
-  int row_available = 0;
-  int sql_step_select_result = sql_step_select(sql_statement, &row_available);
+  int is_row_available = 0;
+  int sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
   check(sql_step_select_result == 0, "sql_step_select_result: %d",
     sql_step_select_result);
 
-  if (row_available == 1)
+  if (is_row_available == 1)
   {
     int customers_table_read_result = customers_table_read(sql_statement, &customer_row_return);
     check(customers_table_read_result == 0, "customers_table_read_result: %d",
@@ -229,8 +229,8 @@ error:
 int customers_table_select_all(sqlite3 *sql_connection, customer_row_t ***customer_rows, int *count)
 {
   sqlite3_stmt *sql_statement = NULL;
-  customer_row_t **allocated_customer_rows = NULL;
-  int used_customer_rows_count = 0;
+  customer_row_t **customer_rows_return = NULL;
+  int count_return = 0;
 
   check(sql_connection != NULL, "sql_connection: NULL");
   check(customer_rows != NULL, "customer_rows: NULL");
@@ -252,51 +252,50 @@ int customers_table_select_all(sqlite3 *sql_connection, customer_row_t ***custom
   check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
     sql_prepare_statement_result);
 
-  int allocated_customer_rows_count = 10;
-  allocated_customer_rows = realloc(allocated_customer_rows, sizeof(customer_row_t *) * allocated_customer_rows_count);
-  check_mem(allocated_customer_rows);
+  int allocated_customer_rows_count = 4;
+  customer_rows_return = customer_rows_realloc(customer_rows_return, allocated_customer_rows_count);
+  check(customer_rows_return != NULL, "customer_rows_return: NULL");
 
-  int row_available = 0;
-  int sql_step_select_result = sql_step_select(sql_statement, &row_available);
+  int is_row_available = 0;
+  int sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
   check(sql_step_select_result == 0, "sql_step_select_result: %d",
     sql_step_select_result);
 
-  while (row_available == 1)
+  while (is_row_available == 1)
   {
-    customer_row_t **customer_row = &(allocated_customer_rows[used_customer_rows_count]);
+    customer_row_t **customer_row = &(customer_rows_return[count_return]);
 
     int customers_table_read_result = customers_table_read(sql_statement, customer_row);
     check(customers_table_read_result == 0, "customers_table_read_result: %d",
       customers_table_read_result);
 
-    used_customer_rows_count++;
+    count_return++;
 
-    if (used_customer_rows_count == allocated_customer_rows_count)
+    if (count_return == allocated_customer_rows_count)
     {
       allocated_customer_rows_count *= 2;
-      allocated_customer_rows = realloc(allocated_customer_rows, sizeof(customer_row_t *) * allocated_customer_rows_count);
-      check_mem(allocated_customer_rows);
+      customer_rows_return = customer_rows_realloc(customer_rows_return, allocated_customer_rows_count);
+      check(customer_rows_return != NULL, "customer_rows_return: NULL");
     }
 
-    sql_step_select_result = sql_step_select(sql_statement, &row_available);
+    sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
     check(sql_step_select_result == 0, "sql_step_select_result: %d",
       sql_step_select_result);
   }
 
-  allocated_customer_rows = realloc(allocated_customer_rows, sizeof(customer_row_t *) * used_customer_rows_count);
-  check(allocated_customer_rows != NULL || used_customer_rows_count == 0,
-    "allocated_customer_rows: NULL");
+  customer_rows_return = customer_rows_realloc(customer_rows_return, count_return);
+  check(customer_rows_return != NULL || count_return == 0, "customer_rows_return: NULL");
 
   sql_finalize_statement(sql_statement);
 
-  *customer_rows = allocated_customer_rows;
-  *count = used_customer_rows_count;
+  *customer_rows = customer_rows_return;
+  *count = count_return;
 
   return 0;
 
 error:
 
-  if (allocated_customer_rows != NULL) { customer_rows_free(allocated_customer_rows, used_customer_rows_count); }
+  if (customer_rows_return != NULL) { customer_rows_free(customer_rows_return, count_return); }
   if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
 
   return -1;
