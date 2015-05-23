@@ -1,40 +1,29 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
 
-#include "../../core/tables/customer_row.h"
-#include "../../core/tables/customers_table.h"
-#include "../../infrastructure/dbg/dbg.h"
-#include "../../infrastructure/sql/sql.h"
+#include "../../infrastructure/array/array.h"
+#include "../../core/services/new_order_request.h"
+#include "../../core/services/new_order_request_order_item.h"
 
 int main()
 {
-  sqlite3 *sql_connection;
-  int sql_open_connection_result = sql_open_connection("/var/c-zen/c-zen.db", &sql_connection);
-  check(sql_open_connection_result == 0, "sql_open_connection_result: %d",
-    sql_open_connection_result);
+  new_order_request_t *new_order_request = new_order_request_malloc("Alice", 100);
+  check(new_order_request != NULL, "new_order_request: NULL");
 
-  customer_row_t **customer_rows = NULL;
-  int customer_rows_count = 0;
+  array_realloc(new_order_request->order_items, 2);
 
-  customers_table_select_all(sql_connection, &customer_rows, &customer_rows_count);
-  check(customer_rows != NULL || customer_rows_count == 0, "customer_rows: NULL");
+  new_order_request->order_items[0] = new_order_request_order_item_malloc("Skateboard", 2);
+  check(new_order_request->order_items[0] != NULL, "new_order_request->order_items[0]: NULL");
 
-  for (int i = 0; i < customer_rows_count; i++)
-  {
-    printf("%d\n", customer_rows[i]->customer_id);
-  }
+  new_order_request->order_items[1] = new_order_request_order_item_malloc("Pirate sword", 5);
+  check(new_order_request->order_items[1] != NULL, "new_order_request->order_items[1]: NULL");
 
-  customer_rows_free(customer_rows, customer_rows_count);
-
-  sql_close_connection(sql_connection);
+  new_order_request_free(new_order_request);
 
   return 0;
 
 error:
 
-  if (customer_rows != NULL) { customer_rows_free(customer_rows, customer_rows_count); }
-  if (sql_connection != NULL) { sql_close_connection(sql_connection); }
+  if (new_order_request != NULL) { new_order_request_free(new_order_request); }
 
   return -1;
 }

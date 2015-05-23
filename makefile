@@ -13,13 +13,16 @@ TABLES = sources/core/tables/customer_row.o \
          sources/core/tables/shipping_schedule_row.o \
          sources/core/tables/shipping_schedules_table.o
 
-all : $(INFRASTRUCTURE) $(TABLES)
+SERVICES = sources/core/services/new_order_request.o \
+           sources/core/services/new_order_request_order_item.o
+
+all : $(INFRASTRUCTURE) $(TABLES) $(SERVICES)
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-main : sources/core/main/main.c $(INFRASTRUCTURE) $(TABLES)
-	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(TABLES) \
+main : sources/core/main/main.c $(INFRASTRUCTURE) $(TABLES) $(SERVICES)
+	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(TABLES) $(SERVICES) \
 	-l sqlite3 sources/core/main/main.c -o $@
 
 database :
