@@ -4,16 +4,14 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#include "../../infrastructure/dbg/dbg.h"
-
 // allocates an array of pointers
-#define array_malloc(A, C) { A = malloc(sizeof(void *) * (C + 1)); check_mem(A); A[C] = NULL; }
+#define array_malloc(S) ({ void **__a = malloc(sizeof(void *) * (S + 1)); if (__a != NULL) { for (int __i = 0; __i < (S + 1); __i++) { __a[__i] = NULL; } } __a; })
 
-// returns the size of an array of pointers
-#define array_size(A) ({ int __i = 0; while (A[__i] != NULL) { __i++; } __i; })
+// returns the number of pointers in an array
+#define array_count(A) ({ int __i = 0; while (A[__i] != NULL) { __i++; } __i; })
 
-// increases the size of an array of pointers
-#define array_realloc(A, C) { A = realloc(A, sizeof(void *) * (C + 1)); check_mem(A); A[C] = NULL; }
+// reallocates an array of pointers
+#define array_realloc(A, S) ({ int __c = array_count(A); void **__a = realloc(A, sizeof(void *) * (S + 1)); if (__a != NULL) { for (int __i = __c; __i < (S + 1); __i++) { __a[__i] = NULL; } } __a; })
 
 // frees an array of pointers
 #define array_free(A, F) { int __i = 0; while (A[__i] != NULL) { F(A[__i]); __i++; } free(A); }

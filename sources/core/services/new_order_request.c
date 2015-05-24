@@ -15,7 +15,10 @@ new_order_request_t *new_order_request_malloc(
   check_mem(new_order_request);
 
   string_duplicate(new_order_request->customer, customer);
-  array_malloc(new_order_request->order_items, 0);
+
+  new_order_request->order_items = (new_order_request_order_item_t **)array_malloc(0);
+  check_mem(new_order_request->order_items);
+
   new_order_request->total = total;
 
   return new_order_request;

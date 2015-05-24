@@ -12,7 +12,7 @@ int customers_table_insert(sqlite3 *sql_connection, customer_row_t *customer_row
 int customers_table_select_by_customer_id(sqlite3 *sql_connection, int customer_id, customer_row_t **customer_row);
 
 // selects all the customer rows
-int customers_table_select_all(sqlite3 *sql_connection, customer_row_t ***customer_row, int *count);
+int customers_table_select_all(sqlite3 *sql_connection, customer_row_t ***customer_row);
 
 // updates a customer row
 int customers_table_update(sqlite3 *sql_connection, customer_row_t *customer_row);
