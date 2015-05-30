@@ -20,9 +20,6 @@ order_item_row_t *order_item_row_malloc(
 // frees an order item row
 void order_item_row_free(order_item_row_t *order_item_row);
 
-// allocates an array of order_item rows
-order_item_row_t **order_item_rows_realloc(order_item_row_t **order_item_rows, int count);
-
 // frees an array of order item rows
 void order_item_rows_free(order_item_row_t **order_item_rows, int count);
 

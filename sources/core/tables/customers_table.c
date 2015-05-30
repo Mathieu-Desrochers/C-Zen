@@ -2,11 +2,10 @@
 #include <stdlib.h>
 #include <sqlite3.h>
 
-#include "../../infrastructure/array/array.h"
-#include "../../infrastructure/dbg/dbg.h"
-#include "../../infrastructure/sql/sql.h"
 #include "../../core/tables/customer_row.h"
 #include "../../core/tables/customers_table.h"
+#include "../../infrastructure/dbg/dbg.h"
+#include "../../infrastructure/sql/sql.h"
 
 // reads a customer row
 int customers_table_read(sqlite3_stmt *sql_statement, customer_row_t **customer_row)
@@ -227,7 +226,7 @@ error:
 }
 
 // selects all the customer rows
-int customers_table_select_all(sqlite3 *sql_connection, customer_row_t ***customer_rows)
+int customers_table_select_all(sqlite3 *sql_connection, customer_row_t ***customer_rows, int *count)
 {
   sqlite3_stmt *sql_statement = NULL;
   customer_row_t **allocated_customer_rows = NULL;
@@ -255,7 +254,7 @@ int customers_table_select_all(sqlite3 *sql_connection, customer_row_t ***custom
   int read_customer_rows_count = 0;
 
   int allocated_customer_rows_count = 4;
-  allocated_customer_rows = (customer_row_t **)array_malloc(allocated_customer_rows_count);
+  allocated_customer_rows = malloc(sizeof(customer_row_t *) * allocated_customer_rows_count);
   check_mem(allocated_customer_rows);
 
   int is_row_available = 0;
@@ -276,7 +275,7 @@ int customers_table_select_all(sqlite3 *sql_connection, customer_row_t ***custom
     if (read_customer_rows_count == allocated_customer_rows_count)
     {
       allocated_customer_rows_count *= 2;
-      reallocated_customer_rows = (customer_row_t **)array_realloc(allocated_customer_rows, allocated_customer_rows_count);
+      reallocated_customer_rows = realloc(allocated_customer_rows, sizeof(customer_row_t *) * allocated_customer_rows_count);
       check_mem(reallocated_customer_rows);
       allocated_customer_rows = reallocated_customer_rows;
     }
@@ -286,19 +285,20 @@ int customers_table_select_all(sqlite3 *sql_connection, customer_row_t ***custom
       sql_step_select_result);
   }
 
-  reallocated_customer_rows = (customer_row_t **)array_realloc(allocated_customer_rows, read_customer_rows_count);
+  reallocated_customer_rows = realloc(allocated_customer_rows, sizeof(customer_row_t *) * read_customer_rows_count);
   check_mem(reallocated_customer_rows);
   allocated_customer_rows = reallocated_customer_rows;
 
   sql_finalize_statement(sql_statement);
 
   *customer_rows = allocated_customer_rows;
+  *count = read_customer_rows_count;
 
   return 0;
 
 error:
 
-  if (allocated_customer_rows != NULL) { array_free(allocated_customer_rows, customer_row_free); }
+  if (allocated_customer_rows != NULL) { customer_rows_free(allocated_customer_rows, read_customer_rows_count); }
   if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
 
   return -1;

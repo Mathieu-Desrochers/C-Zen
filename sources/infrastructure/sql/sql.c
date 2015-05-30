@@ -118,7 +118,8 @@ int sql_read_string(sqlite3_stmt *sql_statement, int position, char **value)
     column_type);
 
   char *column_text = (char *)sqlite3_column_text(sql_statement, position);
-  string_duplicate(value_return, column_text);
+  value_return = strdup(column_text);
+  check_mem(value_return);
 
   *value = value_return;
 

@@ -26,4 +26,7 @@ customer_row_t *customer_row_malloc(
 // frees a customer row
 void customer_row_free(customer_row_t *customer_row);
 
+// frees an array of customer rows
+void customer_rows_free(customer_row_t **customer_rows, int count);
+
 #endif

@@ -20,12 +20,24 @@ customer_row_t *customer_row_malloc(
   check_mem(customer_row);
 
   customer_row->customer_id = customer_id;
-  string_duplicate(customer_row->first_name, first_name);
-  string_duplicate(customer_row->last_name, last_name);
-  string_duplicate(customer_row->address, address);
-  string_duplicate(customer_row->city, city);
-  string_duplicate(customer_row->state, state);
-  string_duplicate(customer_row->zip, zip);
+
+  customer_row->first_name = strdup(first_name);
+  check_mem(customer_row->first_name);
+
+  customer_row->last_name = strdup(last_name);
+  check_mem(customer_row->last_name);
+
+  customer_row->address = strdup(address);
+  check_mem(customer_row->address);
+
+  customer_row->city = strdup(city);
+  check_mem(customer_row->city);
+
+  customer_row->state = strdup(state);
+  check_mem(customer_row->state);
+
+  customer_row->zip = strdup(zip);
+  check_mem(customer_row->zip);
 
   return customer_row;
 
@@ -52,24 +64,6 @@ void customer_row_free(customer_row_t *customer_row)
   if (customer_row->zip != NULL) { free(customer_row->zip); }
 
   free(customer_row);
-}
-
-// allocates an array of customer rows
-customer_row_t **customer_rows_realloc(customer_row_t **customer_rows, int count)
-{
-  customer_row_t **customer_rows_return = NULL;
-
-  customer_rows_return = realloc(customer_rows, sizeof(customer_row_t *) * count);
-  check(customer_rows_return != NULL || count == 0, "customer_rows_return: %p | count: %d",
-    customer_rows_return, count);
-
-  return customer_rows_return;
-
-error:
-
-  if (customer_rows_return != NULL) { free(customer_rows_return); }
-
-  return NULL;
 }
 
 // frees an array of customer rows

@@ -24,9 +24,6 @@ order_row_t *order_row_malloc(
 // frees an order row
 void order_row_free(order_row_t *order_row);
 
-// allocates an array of order rows
-order_row_t **order_rows_realloc(order_row_t **order_rows, int count);
-
 // frees an array of order rows
 void order_rows_free(order_row_t **order_rows, int count);
 

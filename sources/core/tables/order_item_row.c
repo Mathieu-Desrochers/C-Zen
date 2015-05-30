@@ -18,7 +18,10 @@ order_item_row_t *order_item_row_malloc(
 
   order_item_row->order_item_id = order_item_id;
   order_item_row->order_id = order_id;
-  string_duplicate(order_item_row->name, name);
+
+  order_item_row->name = strdup(name);
+  check_mem(order_item_row->name);
+
   order_item_row->quantity = quantity;
 
   return order_item_row;
@@ -43,25 +46,7 @@ void order_item_row_free(order_item_row_t *order_item_row)
   free(order_item_row);
 }
 
-// allocates an array of order_item rows
-order_item_row_t **order_item_rows_realloc(order_item_row_t **order_item_rows, int count)
-{
-  order_item_row_t **order_item_rows_return = NULL;
-
-  order_item_rows_return = realloc(order_item_rows, sizeof(order_item_row_t *) * count);
-  check(order_item_rows_return != NULL || count == 0, "order_item_rows_return: %p | count: %d",
-    order_item_rows_return, count);
-
-  return order_item_rows_return;
-
-error:
-
-  if (order_item_rows_return != NULL) { free(order_item_rows_return); }
-
-  return NULL;
-}
-
-// frees an array of order_item rows
+// frees an array of order item rows
 void order_item_rows_free(order_item_row_t **order_item_rows, int count)
 {
   if (order_item_rows == NULL)

@@ -43,24 +43,6 @@ void shipping_schedule_row_free(shipping_schedule_row_t *shipping_schedule_row)
   free(shipping_schedule_row);
 }
 
-// allocates an array of shipping_schedule rows
-shipping_schedule_row_t **shipping_schedule_rows_realloc(shipping_schedule_row_t **shipping_schedule_rows, int count)
-{
-  shipping_schedule_row_t **shipping_schedule_rows_return = NULL;
-
-  shipping_schedule_rows_return = realloc(shipping_schedule_rows, sizeof(shipping_schedule_row_t *) * count);
-  check(shipping_schedule_rows_return != NULL || count == 0, "shipping_schedule_rows_return: %p | count: %d",
-    shipping_schedule_rows_return, count);
-
-  return shipping_schedule_rows_return;
-
-error:
-
-  if (shipping_schedule_rows_return != NULL) { free(shipping_schedule_rows_return); }
-
-  return NULL;
-}
-
 // frees an array of shipping schedule rows
 void shipping_schedule_rows_free(shipping_schedule_row_t **shipping_schedule_rows, int count)
 {

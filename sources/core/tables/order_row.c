@@ -43,24 +43,6 @@ void order_row_free(order_row_t *order_row)
   free(order_row);
 }
 
-// allocates an array of order rows
-order_row_t **order_rows_realloc(order_row_t **order_rows, int count)
-{
-  order_row_t **order_rows_return = NULL;
-
-  order_rows_return = realloc(order_rows, sizeof(order_row_t *) * count);
-  check(order_rows_return != NULL || count == 0, "order_rows_return: %p | count: %d",
-    order_rows_return, count);
-
-  return order_rows_return;
-
-error:
-
-  if (order_rows_return != NULL) { free(order_rows_return); }
-
-  return NULL;
-}
-
 // frees an array of order rows
 void order_rows_free(order_row_t **order_rows, int count)
 {

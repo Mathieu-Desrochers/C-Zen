@@ -15,7 +15,9 @@ NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row_malloc(
   check_mem(NAME_SINGLE_LOWER()_row);
 
   NAME_SINGLE_LOWER()_row->NAME_SINGLE_LOWER()_id = NAME_SINGLE_LOWER()_id;
-  string_duplicate(NAME_SINGLE_LOWER()_row->name, name);
+
+  NAME_SINGLE_LOWER()_row->name = strdup(name);
+  check_mem(NAME_SINGLE_LOWER()_row->name);
 
   return NAME_SINGLE_LOWER()_row;
 
@@ -37,24 +39,6 @@ void NAME_SINGLE_LOWER()_row_free(NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()
   if (NAME_SINGLE_LOWER()_row->name != NULL) { free(NAME_SINGLE_LOWER()_row->name); }
 
   free(NAME_SINGLE_LOWER()_row);
-}
-
-// allocates an array of NAME_SINGLE_LOWER() rows
-NAME_SINGLE_LOWER()_row_t **NAME_SINGLE_LOWER()_rows_realloc(NAME_SINGLE_LOWER()_row_t **NAME_SINGLE_LOWER()_rows, int count)
-{
-  NAME_SINGLE_LOWER()_row_t **NAME_SINGLE_LOWER()_rows_return = NULL;
-
-  NAME_SINGLE_LOWER()_rows_return = realloc(NAME_SINGLE_LOWER()_rows, sizeof(NAME_SINGLE_LOWER()_row_t *) * count);
-  check(NAME_SINGLE_LOWER()_rows_return != NULL || count == 0, "NAME_SINGLE_LOWER()_rows_return: %p | count: %d",
-    NAME_SINGLE_LOWER()_rows_return, count);
-
-  return NAME_SINGLE_LOWER()_rows_return;
-
-error:
-
-  if (NAME_SINGLE_LOWER()_rows_return != NULL) { free(NAME_SINGLE_LOWER()_rows_return); }
-
-  return NULL;
 }
 
 // frees an array of NAME_SINGLE_LOWER() rows

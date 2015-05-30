@@ -8,12 +8,15 @@ typedef struct new_order_request_order_item_t
   int quantity;
 } new_order_request_order_item_t;
 
-// allocates an order item
+// allocates an new order request order item
 new_order_request_order_item_t *new_order_request_order_item_malloc(
   char *name,
   int quantity);
 
-// frees an order item
+// frees a new order request order item
 void new_order_request_order_item_free(new_order_request_order_item_t *new_order_request_order_item);
+
+// frees an array of new order request order items
+void new_order_request_order_items_free(new_order_request_order_item_t **new_order_request_order_item, int count);
 
 #endif

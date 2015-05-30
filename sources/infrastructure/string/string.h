@@ -1,8 +1,7 @@
-#ifndef STRING_H
-#define STRING_H
+#ifndef SQL_H
+#define SQL_H
 
-#include <string.h>
-
-#define string_duplicate(D, S) { D = malloc(strlen(S) + 1); check_mem(D); strcpy(D, S); }
+// duplicates a string
+char *strdup(const char *s);
 
 #endif

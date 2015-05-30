@@ -2,6 +2,7 @@ CC = c99
 CFLAGS  = -g -Wall
 
 INFRASTRUCTURE = sources/infrastructure/sql/sql.o \
+                 sources/infrastructure/string/string.o \
                  sources/infrastructure/time/time.o
 
 TABLES = sources/core/tables/customer_row.o \

@@ -2,7 +2,6 @@
 
 #include "../../core/services/new_order_request.h"
 #include "../../core/services/new_order_request_order_item.h"
-#include "../../infrastructure/array/array.h"
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/string/string.h"
 
@@ -14,11 +13,11 @@ new_order_request_t *new_order_request_malloc(
   new_order_request_t *new_order_request = malloc(sizeof(new_order_request_t));
   check_mem(new_order_request);
 
-  string_duplicate(new_order_request->customer, customer);
+  new_order_request->customer = strdup(customer);
+  check_mem(new_order_request->customer);
 
-  new_order_request->order_items = (new_order_request_order_item_t **)array_malloc(0);
-  check_mem(new_order_request->order_items);
-
+  new_order_request->order_items = NULL;
+  new_order_request->order_items_count = 0;
   new_order_request->total = total;
 
   return new_order_request;
@@ -39,7 +38,26 @@ void new_order_request_free(new_order_request_t *new_order_request)
   }
 
   if (new_order_request->customer != NULL) { free(new_order_request->customer); }
-  if (new_order_request->order_items != NULL) { array_free(new_order_request->order_items, new_order_request_order_item_free); }
+  if (new_order_request->order_items != NULL)
+  {
+    new_order_request_order_items_free(new_order_request->order_items, new_order_request->order_items_count);
+  }
 
   free(new_order_request);
+}
+
+// frees an array of new order requests
+void new_order_requests_free(new_order_request_t **new_order_requests, int count)
+{
+  if (new_order_requests == NULL)
+  {
+    return;
+  }
+
+  for (int i = 0; i < count; i++)
+  {
+    new_order_request_free(new_order_requests[i]);
+  }
+
+  free(new_order_requests);
 }

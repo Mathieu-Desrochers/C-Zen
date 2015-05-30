@@ -2,11 +2,10 @@
 
 #include "../../core/services/new_order_request.h"
 #include "../../core/services/new_order_request_order_item.h"
-#include "../../infrastructure/array/array.h"
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/string/string.h"
 
-// allocates an order item
+// allocates an new order request order item
 new_order_request_order_item_t *new_order_request_order_item_malloc(
   char *name,
   int quantity)
@@ -14,7 +13,9 @@ new_order_request_order_item_t *new_order_request_order_item_malloc(
   new_order_request_order_item_t *new_order_request_order_item = malloc(sizeof(new_order_request_order_item_t));
   check_mem(new_order_request_order_item);
 
-  string_duplicate(new_order_request_order_item->name, name);
+  new_order_request_order_item->name = strdup(name);
+  check_mem(new_order_request_order_item->name);
+
   new_order_request_order_item->quantity = quantity;
 
   return new_order_request_order_item;
@@ -26,7 +27,7 @@ error:
   return NULL;
 }
 
-// frees an order item
+// frees a new order request order item
 void new_order_request_order_item_free(new_order_request_order_item_t *new_order_request_order_item)
 {
   if (new_order_request_order_item == NULL)
@@ -37,4 +38,20 @@ void new_order_request_order_item_free(new_order_request_order_item_t *new_order
   if (new_order_request_order_item->name != NULL) { free(new_order_request_order_item->name); }
 
   free(new_order_request_order_item);
+}
+
+// frees an array of new order request order items
+void new_order_request_order_items_free(new_order_request_order_item_t **new_order_request_order_items, int count)
+{
+  if (new_order_request_order_items == NULL)
+  {
+    return;
+  }
+
+  for (int i = 0; i < count; i++)
+  {
+    new_order_request_order_item_free(new_order_request_order_items[i]);
+  }
+
+  free(new_order_request_order_items);
 }

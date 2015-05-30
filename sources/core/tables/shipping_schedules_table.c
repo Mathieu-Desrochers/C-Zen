@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <sqlite3.h>
 
-#include "../../infrastructure/dbg/dbg.h"
-#include "../../infrastructure/sql/sql.h"
 #include "../../core/tables/shipping_schedule_row.h"
 #include "../../core/tables/shipping_schedules_table.h"
+#include "../../infrastructure/dbg/dbg.h"
+#include "../../infrastructure/sql/sql.h"
 
 // reads a shipping schedule row
 int shipping_schedules_table_read(sqlite3_stmt *sql_statement, shipping_schedule_row_t **shipping_schedule_row)
@@ -190,12 +190,11 @@ error:
 int shipping_schedules_table_select_all(sqlite3 *sql_connection, shipping_schedule_row_t ***shipping_schedule_rows, int *count)
 {
   sqlite3_stmt *sql_statement = NULL;
-  shipping_schedule_row_t **shipping_schedule_rows_return = NULL;
-  int count_return = 0;
+  shipping_schedule_row_t **allocated_shipping_schedule_rows = NULL;
+  shipping_schedule_row_t **reallocated_shipping_schedule_rows = NULL;
 
   check(sql_connection != NULL, "sql_connection: NULL");
   check(shipping_schedule_rows != NULL, "shipping_schedule_rows: NULL");
-  check(count != NULL, "count: NULL");
 
   int sql_prepare_statement_result = sql_prepare_statement(
     sql_connection,
@@ -211,9 +210,11 @@ int shipping_schedules_table_select_all(sqlite3 *sql_connection, shipping_schedu
   check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
     sql_prepare_statement_result);
 
+  int read_shipping_schedule_rows_count = 0;
+
   int allocated_shipping_schedule_rows_count = 4;
-  shipping_schedule_rows_return = shipping_schedule_rows_realloc(shipping_schedule_rows_return, allocated_shipping_schedule_rows_count);
-  check(shipping_schedule_rows_return != NULL, "shipping_schedule_rows_return: NULL");
+  allocated_shipping_schedule_rows = malloc(sizeof(shipping_schedule_row_t *) * allocated_shipping_schedule_rows_count);
+  check_mem(allocated_shipping_schedule_rows);
 
   int is_row_available = 0;
   int sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
@@ -222,19 +223,20 @@ int shipping_schedules_table_select_all(sqlite3 *sql_connection, shipping_schedu
 
   while (is_row_available == 1)
   {
-    shipping_schedule_row_t **shipping_schedule_row = &(shipping_schedule_rows_return[count_return]);
+    shipping_schedule_row_t **shipping_schedule_row = &(allocated_shipping_schedule_rows[read_shipping_schedule_rows_count]);
 
     int shipping_schedules_table_read_result = shipping_schedules_table_read(sql_statement, shipping_schedule_row);
     check(shipping_schedules_table_read_result == 0, "shipping_schedules_table_read_result: %d",
       shipping_schedules_table_read_result);
 
-    count_return++;
+    read_shipping_schedule_rows_count++;
 
-    if (count_return == allocated_shipping_schedule_rows_count)
+    if (read_shipping_schedule_rows_count == allocated_shipping_schedule_rows_count)
     {
       allocated_shipping_schedule_rows_count *= 2;
-      shipping_schedule_rows_return = shipping_schedule_rows_realloc(shipping_schedule_rows_return, allocated_shipping_schedule_rows_count);
-      check(shipping_schedule_rows_return != NULL, "shipping_schedule_rows_return: NULL");
+      reallocated_shipping_schedule_rows = realloc(allocated_shipping_schedule_rows, sizeof(shipping_schedule_row_t *) * allocated_shipping_schedule_rows_count);
+      check_mem(reallocated_shipping_schedule_rows);
+      allocated_shipping_schedule_rows = reallocated_shipping_schedule_rows;
     }
 
     sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
@@ -242,19 +244,20 @@ int shipping_schedules_table_select_all(sqlite3 *sql_connection, shipping_schedu
       sql_step_select_result);
   }
 
-  shipping_schedule_rows_return = shipping_schedule_rows_realloc(shipping_schedule_rows_return, count_return);
-  check(shipping_schedule_rows_return != NULL || count_return == 0, "shipping_schedule_rows_return: NULL");
+  reallocated_shipping_schedule_rows = realloc(allocated_shipping_schedule_rows, sizeof(shipping_schedule_row_t *) * read_shipping_schedule_rows_count);
+  check_mem(reallocated_shipping_schedule_rows);
+  allocated_shipping_schedule_rows = reallocated_shipping_schedule_rows;
 
   sql_finalize_statement(sql_statement);
 
-  *shipping_schedule_rows = shipping_schedule_rows_return;
-  *count = count_return;
+  *shipping_schedule_rows = allocated_shipping_schedule_rows;
+  *count = read_shipping_schedule_rows_count;
 
   return 0;
 
 error:
 
-  if (shipping_schedule_rows_return != NULL) { shipping_schedule_rows_free(shipping_schedule_rows_return, count_return); }
+  if (allocated_shipping_schedule_rows != NULL) { shipping_schedule_rows_free(allocated_shipping_schedule_rows, read_shipping_schedule_rows_count); }
   if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
 
   return -1;
