@@ -15,7 +15,9 @@ TABLES = sources/core/tables/customer_row.o \
          sources/core/tables/shipping_schedules_table.o
 
 SERVICES = sources/core/services/new_order_request.o \
-           sources/core/services/new_order_request_order_item.o
+           sources/core/services/new_order_request_order_item.o \
+           sources/core/services/new_order_response.o \
+           sources/core/services/new_order_service.o
 
 all : $(INFRASTRUCTURE) $(TABLES) $(SERVICES)
 
