@@ -3,7 +3,8 @@ CFLAGS  = -g -Wall
 
 INFRASTRUCTURE = sources/infrastructure/sql/sql.o \
                  sources/infrastructure/string/string.o \
-                 sources/infrastructure/time/time.o
+                 sources/infrastructure/time/time.o \
+                 sources/infrastructure/validation/validation.o
 
 TABLES = sources/core/tables/customer_row.o \
          sources/core/tables/customers_table.o \
