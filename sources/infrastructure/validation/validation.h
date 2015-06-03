@@ -26,6 +26,9 @@ validation_path_t *validation_path_malloc(int property, int index, validation_pa
 // allocates a validation error
 validation_error_t *validation_error_malloc(int property, int index, int error_code);
 
+// adds a validation error to an array
+int validation_errors_add(validation_error_t ***validation_errors, int *count, int *used, int property, int index, int error_code);
+
 // validates a string
 int validate_string(char *value, int required, int min_length, int max_length);
 
@@ -34,5 +37,8 @@ void validation_path_free(validation_path_t *validation_path);
 
 // frees a validation error
 void validation_error_free(validation_error_t *validation_error);
+
+// frees an array of validation errors
+void validation_errors_free(validation_error_t **validation_errors, int count);
 
 #endif

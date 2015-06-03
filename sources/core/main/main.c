@@ -8,31 +8,32 @@
 
 int main()
 {
-  sqlite3 *sql_connection = NULL;
   new_order_request_t *new_order_request = NULL;
-  new_order_response_t *new_order_response = NULL;
 
-  int sql_open_connection_result = sql_open_connection("/var/c-zen/c-zen.db", &sql_connection);
-  check(sql_open_connection_result == 0, "sql_open_connection_result: %d",
-    sql_open_connection_result);
+  validation_error_t **validation_errors = NULL;
+  int count = 0;
 
   new_order_request = new_order_request_malloc(
     "Alice",
     100);
 
-  int new_order_service_result = new_order_service(sql_connection, new_order_request, &new_order_response);
-  check(new_order_service_result == 0, "new_order_service_result: %d",
-    new_order_service_result);
+  check(new_order_request != NULL, "new_order_request: NULL");
 
-  new_order_response_free(new_order_response);
+  int new_order_request_validate_result = new_order_request_validate(new_order_request, &validation_errors, &count);
+  check(new_order_request_validate_result == 0, "new_order_request_validate_result: %d",
+    new_order_request_validate_result);
+
+  printf("%d\n", count);
+
+  validation_errors_free(validation_errors, count);
   new_order_request_free(new_order_request);
-  sql_close_connection(sql_connection);
 
   return 0;
 
 error:
 
-  if (new_order_response != NULL) { new_order_response_free(new_order_response); }
+  if (validation_errors != NULL) { validation_errors_free(validation_errors, count); }
   if (new_order_request != NULL) { new_order_request_free(new_order_request); }
-  if (sql_connection != NULL) { sql_close_connection(sql_connection); }
+
+  return -1;
 }
