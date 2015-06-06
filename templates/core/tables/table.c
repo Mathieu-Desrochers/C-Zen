@@ -159,8 +159,8 @@ error:
 int NAME_PLURAL_LOWER()_table_select_all(sqlite3 *sql_connection, NAME_SINGLE_LOWER()_row_t ***NAME_SINGLE_LOWER()_rows, int *count)
 {
   sqlite3_stmt *sql_statement = NULL;
-  NAME_SINGLE_LOWER()_row_t **allocated_`'NAME_SINGLE_LOWER()_rows = NULL;
-  NAME_SINGLE_LOWER()_row_t **reallocated_`'NAME_SINGLE_LOWER()_rows = NULL;
+  NAME_SINGLE_LOWER()_row_t **NAME_SINGLE_LOWER()_rows_return = NULL;
+  NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row = NULL;
 
   check(sql_connection != NULL, "sql_connection: NULL");
   check(NAME_SINGLE_LOWER()_rows != NULL, "NAME_SINGLE_LOWER()_rows: NULL");
@@ -176,11 +176,8 @@ int NAME_PLURAL_LOWER()_table_select_all(sqlite3 *sql_connection, NAME_SINGLE_LO
   check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
     sql_prepare_statement_result);
 
+  int allocated_`'NAME_SINGLE_LOWER()_rows_count = 0;
   int read_`'NAME_SINGLE_LOWER()_rows_count = 0;
-
-  int allocated_`'NAME_SINGLE_LOWER()_rows_count = 4;
-  allocated_`'NAME_SINGLE_LOWER()_rows = malloc(sizeof(NAME_SINGLE_LOWER()_row_t *) * allocated_`'NAME_SINGLE_LOWER()_rows_count);
-  check_mem(allocated_`'NAME_SINGLE_LOWER()_rows);
 
   int is_row_available = 0;
   int sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
@@ -189,41 +186,32 @@ int NAME_PLURAL_LOWER()_table_select_all(sqlite3 *sql_connection, NAME_SINGLE_LO
 
   while (is_row_available == 1)
   {
-    NAME_SINGLE_LOWER()_row_t **NAME_SINGLE_LOWER()_row = &(allocated_`'NAME_SINGLE_LOWER()_rows[read_`'NAME_SINGLE_LOWER()_rows_count]);
-
-    int NAME_SINGLE_LOWER()s_table_read_result = NAME_SINGLE_LOWER()s_table_read(sql_statement, NAME_SINGLE_LOWER()_row);
+    int NAME_SINGLE_LOWER()s_table_read_result = NAME_SINGLE_LOWER()s_table_read(sql_statement, &NAME_SINGLE_LOWER()_row);
     check(NAME_SINGLE_LOWER()s_table_read_result == 0, "NAME_SINGLE_LOWER()s_table_read_result: %d",
       NAME_SINGLE_LOWER()s_table_read_result);
 
-    read_`'NAME_SINGLE_LOWER()_rows_count++;
+    int NAME_SINGLE_LOWER()_rows_add_result = NAME_SINGLE_LOWER()_rows_add(
+      &NAME_SINGLE_LOWER()_rows_return, &allocated_`'NAME_SINGLE_LOWER()_rows_count, &read_`'NAME_SINGLE_LOWER()_rows_count,
+      NAME_SINGLE_LOWER()_row);
 
-    if (read_`'NAME_SINGLE_LOWER()_rows_count == allocated_`'NAME_SINGLE_LOWER()_rows_count)
-    {
-      allocated_`'NAME_SINGLE_LOWER()_rows_count *= 2;
-      reallocated_`'NAME_SINGLE_LOWER()_rows = realloc(allocated_`'NAME_SINGLE_LOWER()_rows, sizeof(NAME_SINGLE_LOWER()_row_t *) * allocated_`'NAME_SINGLE_LOWER()_rows_count);
-      check_mem(reallocated_`'NAME_SINGLE_LOWER()_rows);
-      allocated_`'NAME_SINGLE_LOWER()_rows = reallocated_`'NAME_SINGLE_LOWER()_rows;
-    }
+    check(NAME_SINGLE_LOWER()_rows_add_result == 0, "NAME_SINGLE_LOWER()_rows_add_result: %d",
+      NAME_SINGLE_LOWER()_rows_add_result);
 
     sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
     check(sql_step_select_result == 0, "sql_step_select_result: %d",
       sql_step_select_result);
   }
 
-  reallocated_`'NAME_SINGLE_LOWER()_rows = realloc(allocated_`'NAME_SINGLE_LOWER()_rows, sizeof(NAME_SINGLE_LOWER()_row_t *) * read_`'NAME_SINGLE_LOWER()_rows_count);
-  check_mem(reallocated_`'NAME_SINGLE_LOWER()_rows);
-  allocated_`'NAME_SINGLE_LOWER()_rows = reallocated_`'NAME_SINGLE_LOWER()_rows;
-
   sql_finalize_statement(sql_statement);
 
-  *NAME_SINGLE_LOWER()_rows = allocated_`'NAME_SINGLE_LOWER()_rows;
+  *NAME_SINGLE_LOWER()_rows = NAME_SINGLE_LOWER()_rows_return;
   *count = read_`'NAME_SINGLE_LOWER()_rows_count;
 
   return 0;
 
 error:
 
-  if (allocated_`'NAME_SINGLE_LOWER()_rows != NULL) { NAME_SINGLE_LOWER()_rows_free(allocated_`'NAME_SINGLE_LOWER()_rows, read_`'NAME_SINGLE_LOWER()_rows_count); }
+  if (NAME_SINGLE_LOWER()_rows_return != NULL) { NAME_SINGLE_LOWER()_rows_free(NAME_SINGLE_LOWER()_rows_return, read_`'NAME_SINGLE_LOWER()_rows_count); }
   if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
 
   return -1;

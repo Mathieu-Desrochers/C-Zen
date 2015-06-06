@@ -34,6 +34,30 @@ error:
   return NULL;
 }
 
+// adds an order row to an array
+int order_rows_add(order_row_t ***order_rows, int *count, int *used, order_row_t *order_row)
+{
+  order_row_t **reallocated_order_rows = NULL;
+
+  if (*count == *used)
+  {
+    int new_count = (*count) == 0 ? 4 : ((*count) * 2);
+    reallocated_order_rows = realloc(*order_rows, sizeof(order_row_t *) * new_count);
+    check_mem(reallocated_order_rows);
+    *order_rows = reallocated_order_rows;
+    *count = new_count;
+  }
+
+  (*order_rows)[*used] = order_row;
+  (*used)++;
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
 // frees an order row
 void order_row_free(order_row_t *order_row)
 {

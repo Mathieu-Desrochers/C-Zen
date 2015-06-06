@@ -13,6 +13,9 @@ NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row_malloc(
   int NAME_SINGLE_LOWER()_id,
   char *name);
 
+// adds a NAME_SINGLE_LOWER() row to an array
+int NAME_SINGLE_LOWER()_rows_add(NAME_SINGLE_LOWER()_row_t ***NAME_SINGLE_LOWER()_rows, int *count, int *used, NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row);
+
 // frees a NAME_SINGLE_LOWER() row
 void NAME_SINGLE_LOWER()_row_free(NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row);
 

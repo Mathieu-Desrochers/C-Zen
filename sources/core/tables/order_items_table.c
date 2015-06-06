@@ -220,8 +220,8 @@ error:
 int order_items_table_select_all(sqlite3 *sql_connection, order_item_row_t ***order_item_rows, int *count)
 {
   sqlite3_stmt *sql_statement = NULL;
-  order_item_row_t **allocated_order_item_rows = NULL;
-  order_item_row_t **reallocated_order_item_rows = NULL;
+  order_item_row_t **order_item_rows_return = NULL;
+  order_item_row_t *order_item_row = NULL;
 
   check(sql_connection != NULL, "sql_connection: NULL");
   check(order_item_rows != NULL, "order_item_rows: NULL");
@@ -242,11 +242,8 @@ int order_items_table_select_all(sqlite3 *sql_connection, order_item_row_t ***or
   check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
     sql_prepare_statement_result);
 
+  int allocated_order_item_rows_count = 0;
   int read_order_item_rows_count = 0;
-
-  int allocated_order_item_rows_count = 4;
-  allocated_order_item_rows = malloc(sizeof(order_item_row_t *) * allocated_order_item_rows_count);
-  check_mem(allocated_order_item_rows);
 
   int is_row_available = 0;
   int sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
@@ -255,41 +252,32 @@ int order_items_table_select_all(sqlite3 *sql_connection, order_item_row_t ***or
 
   while (is_row_available == 1)
   {
-    order_item_row_t **order_item_row = &(allocated_order_item_rows[read_order_item_rows_count]);
-
-    int order_items_table_read_result = order_items_table_read(sql_statement, order_item_row);
+    int order_items_table_read_result = order_items_table_read(sql_statement, &order_item_row);
     check(order_items_table_read_result == 0, "order_items_table_read_result: %d",
       order_items_table_read_result);
 
-    read_order_item_rows_count++;
+    int order_item_rows_add_result = order_item_rows_add(
+      &order_item_rows_return, &allocated_order_item_rows_count, &read_order_item_rows_count,
+      order_item_row);
 
-    if (read_order_item_rows_count == allocated_order_item_rows_count)
-    {
-      allocated_order_item_rows_count *= 2;
-      reallocated_order_item_rows = realloc(allocated_order_item_rows, sizeof(order_item_row_t *) * allocated_order_item_rows_count);
-      check_mem(reallocated_order_item_rows);
-      allocated_order_item_rows = reallocated_order_item_rows;
-    }
+    check(order_item_rows_add_result == 0, "order_item_rows_add_result: %d",
+      order_item_rows_add_result);
 
     sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
     check(sql_step_select_result == 0, "sql_step_select_result: %d",
       sql_step_select_result);
   }
 
-  reallocated_order_item_rows = realloc(allocated_order_item_rows, sizeof(order_item_row_t *) * read_order_item_rows_count);
-  check_mem(reallocated_order_item_rows);
-  allocated_order_item_rows = reallocated_order_item_rows;
-
   sql_finalize_statement(sql_statement);
 
-  *order_item_rows = allocated_order_item_rows;
+  *order_item_rows = order_item_rows_return;
   *count = read_order_item_rows_count;
 
   return 0;
 
 error:
 
-  if (allocated_order_item_rows != NULL) { order_item_rows_free(allocated_order_item_rows, read_order_item_rows_count); }
+  if (order_item_rows_return != NULL) { order_item_rows_free(order_item_rows_return, read_order_item_rows_count); }
   if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
 
   return -1;
