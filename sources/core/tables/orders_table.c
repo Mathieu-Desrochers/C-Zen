@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <sqlite3.h>
+#include <time.h>
 
 #include "../../core/tables/order_row.h"
 #include "../../core/tables/orders_table.h"
@@ -20,40 +21,38 @@ int orders_table_read(sqlite3_stmt *sql_statement, order_row_t **order_row)
   check(sql_read_order_id_result == 0, "sql_read_order_id_result: %d",
     sql_read_order_id_result);
 
-  int customer_id;
-  int sql_read_customer_id_result = sql_read_int(sql_statement, 1, &customer_id);
-  check(sql_read_customer_id_result == 0, "sql_read_customer_id_result: %d",
-    sql_read_customer_id_result);
-
-  int total;
-  int sql_read_total_result = sql_read_int(sql_statement, 2, &total);
-  check(sql_read_total_result == 0, "sql_read_total_result: %d",
-    sql_read_total_result);
+  char *customer_name;
+  int sql_read_customer_name_result = sql_read_string(sql_statement, 1, &customer_name);
+  check(sql_read_customer_name_result == 0, "sql_read_customer_name_result: %d",
+    sql_read_customer_name_result);
 
   time_t placed_on_date_time;
-  int sql_read_placed_on_date_time_result = sql_read_date_time(sql_statement, 3, &placed_on_date_time);
+  int sql_read_placed_on_date_time_result = sql_read_date_time(sql_statement, 2, &placed_on_date_time);
   check(sql_read_placed_on_date_time_result == 0, "sql_read_placed_on_date_time_result: %d",
     sql_read_placed_on_date_time_result);
 
-  time_t shipped_on_date;
-  int sql_read_shipped_on_date_result = sql_read_date(sql_statement, 4, &shipped_on_date);
-  check(sql_read_shipped_on_date_result == 0, "sql_read_shipped_on_date_result: %d",
-    sql_read_shipped_on_date_result);
+  int total;
+  int sql_read_total_result = sql_read_int(sql_statement, 3, &total);
+  check(sql_read_total_result == 0, "sql_read_total_result: %d",
+    sql_read_total_result);
 
   order_row_return = order_row_malloc(
     order_id,
-    customer_id,
-    total,
+    customer_name,
     placed_on_date_time,
-    shipped_on_date);
+    total);
 
   check(order_row_return != NULL, "order_row_return: NULL");
+
+  free(customer_name);
 
   *order_row = order_row_return;
 
   return 0;
 
 error:
+
+  if (customer_name != NULL) { free(customer_name); }
 
   if (order_row_return != NULL) { order_row_free(order_row_return); }
 
@@ -72,31 +71,26 @@ int orders_table_insert(sqlite3 *sql_connection, order_row_t *order_row)
   int sql_prepare_insert_statement_result = sql_prepare_statement(
     sql_connection,
     "INSERT INTO \"orders\" ("
-      "\"customer-id\", "
-      "\"total\", "
+      "\"customer-name\", "
       "\"placed-on-date-time\", "
-      "\"shipped-on-date\") "
-    "VALUES (?1, ?2, ?3, ?4);",
+      "\"total\") "
+    "VALUES (?1, ?2, ?3);",
     &sql_insert_statement);
 
   check(sql_prepare_insert_statement_result == 0, "sql_prepare_insert_statement_result: %d",
     sql_prepare_insert_statement_result);
 
-  int sql_bind_customer_id_result = sql_bind_int(sql_insert_statement, 1, order_row->customer_id);
-  check(sql_bind_customer_id_result == 0, "sql_bind_customer_id_result: %d",
-    sql_bind_customer_id_result);
+  int sql_bind_customer_name_result = sql_bind_string(sql_insert_statement, 1, order_row->customer_name);
+  check(sql_bind_customer_name_result == 0, "sql_bind_customer_name_result: %d",
+    sql_bind_customer_name_result);
 
-  int sql_bind_total_result = sql_bind_int(sql_insert_statement, 2, order_row->total);
-  check(sql_bind_total_result == 0, "sql_bind_total_result: %d",
-    sql_bind_total_result);
-
-  int sql_bind_placed_on_date_time_result = sql_bind_date_time(sql_insert_statement, 3, order_row->placed_on_date_time);
+  int sql_bind_placed_on_date_time_result = sql_bind_date_time(sql_insert_statement, 2, order_row->placed_on_date_time);
   check(sql_bind_placed_on_date_time_result == 0, "sql_bind_placed_on_date_time_result: %d",
     sql_bind_placed_on_date_time_result);
 
-  int sql_bind_shipped_on_date_result = sql_bind_date(sql_insert_statement, 4, order_row->shipped_on_date);
-  check(sql_bind_shipped_on_date_result == 0, "sql_bind_shipped_on_date_result: %d",
-    sql_bind_shipped_on_date_result);
+  int sql_bind_total_result = sql_bind_int(sql_insert_statement, 3, order_row->total);
+  check(sql_bind_total_result == 0, "sql_bind_total_result: %d",
+    sql_bind_total_result);
 
   int sql_step_execute_result = sql_step_execute(sql_insert_statement);
   check(sql_step_execute_result == 0, "sql_step_execute_result: %d",
@@ -145,10 +139,9 @@ int orders_table_select_by_order_id(sqlite3 *sql_connection, int order_id, order
     sql_connection,
     "SELECT "
       "\"order-id\", "
-      "\"customer-id\", "
-      "\"total\", "
+      "\"customer-name\", "
       "\"placed-on-date-time\", "
-      "\"shipped-on-date\" "
+      "\"total\" "
     "FROM \"orders\" "
     "WHERE \"order-id\" = ?1;",
     &sql_statement);
@@ -200,10 +193,9 @@ int orders_table_select_all(sqlite3 *sql_connection, order_row_t ***order_rows, 
     sql_connection,
     "SELECT "
       "\"order-id\", "
-      "\"order-id\", "
-      "\"total\", "
+      "\"customer-name\", "
       "\"placed-on-date-time\", "
-      "\"shipped-on-date\" "
+      "\"total\" "
     "FROM \"orders\";",
     &sql_statement);
 
@@ -274,33 +266,28 @@ int orders_table_update(sqlite3 *sql_connection, order_row_t *order_row)
   int sql_prepare_statement_result = sql_prepare_statement(
     sql_connection,
     "UPDATE \"orders\" SET "
-      "\"customer-id\" = ?1, "
-      "\"total\" = ?2, "
-      "\"placed-on-date-time\" = ?3, "
-      "\"shipped-on-date\" = ?4 "
-    "WHERE \"order-id\" = ?5;",
+      "\"customer-name\" = ?1, "
+      "\"placed-on-date-time\" = ?2, "
+      "\"total\" = ?3 "
+    "WHERE \"order-id\" = ?4;",
     &sql_statement);
 
   check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
     sql_prepare_statement_result);
 
-  int sql_bind_customer_id_result = sql_bind_int(sql_statement, 1, order_row->customer_id);
-  check(sql_bind_customer_id_result == 0, "sql_bind_customer_id_result: %d",
-    sql_bind_customer_id_result);
+  int sql_bind_customer_name_result = sql_bind_string(sql_statement, 1, order_row->customer_name);
+  check(sql_bind_customer_name_result == 0, "sql_bind_customer_name_result: %d",
+    sql_bind_customer_name_result);
 
-  int sql_bind_total_result = sql_bind_int(sql_statement, 2, order_row->total);
-  check(sql_bind_total_result == 0, "sql_bind_total_result: %d",
-    sql_bind_total_result);
-
-  int sql_bind_placed_on_date_time_result = sql_bind_date_time(sql_statement, 3, order_row->placed_on_date_time);
+  int sql_bind_placed_on_date_time_result = sql_bind_date_time(sql_statement, 2, order_row->placed_on_date_time);
   check(sql_bind_placed_on_date_time_result == 0, "sql_bind_placed_on_date_time_result: %d",
     sql_bind_placed_on_date_time_result);
 
-  int sql_bind_shipped_on_date_result = sql_bind_date(sql_statement, 4, order_row->shipped_on_date);
-  check(sql_bind_shipped_on_date_result == 0, "sql_bind_shipped_on_date_result: %d",
-    sql_bind_shipped_on_date_result);
+  int sql_bind_total_result = sql_bind_int(sql_statement, 3, order_row->total);
+  check(sql_bind_total_result == 0, "sql_bind_total_result: %d",
+    sql_bind_total_result);
 
-  int sql_bind_order_id_result = sql_bind_int(sql_statement, 5, order_row->order_id);
+  int sql_bind_order_id_result = sql_bind_int(sql_statement, 4, order_row->order_id);
   check(sql_bind_order_id_result == 0, "sql_bind_order_id_result: %d",
     sql_bind_order_id_result);
 

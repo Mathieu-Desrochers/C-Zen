@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/string/string.h"
@@ -9,19 +10,20 @@
 // allocates an order row
 order_row_t *order_row_malloc(
   int order_id,
-  int customer_id,
-  int total,
+  char *customer_name,
   time_t placed_on_date_time,
-  time_t shipped_on_date)
+  int total)
 {
   order_row_t *order_row = malloc(sizeof(order_row_t));
   check_mem(order_row);
 
   order_row->order_id = order_id;
-  order_row->customer_id = customer_id;
-  order_row->total = total;
+
+  order_row->customer_name = strdup(customer_name);
+  check_mem(order_row->customer_name);
+
   order_row->placed_on_date_time = placed_on_date_time;
-  order_row->shipped_on_date = shipped_on_date;
+  order_row->total = total;
 
   return order_row;
 
@@ -39,6 +41,8 @@ void order_row_free(order_row_t *order_row)
   {
     return;
   }
+
+  if (order_row->customer_name != NULL) { free(order_row->customer_name); }
 
   free(order_row);
 }
