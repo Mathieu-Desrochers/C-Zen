@@ -50,8 +50,7 @@ error:
 // inserts a NAME_SINGLE_LOWER() row
 int NAME_PLURAL_LOWER()_table_insert(sqlite3 *sql_connection, NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row)
 {
-  sqlite3_stmt *sql_insert_statement = NULL;
-  sqlite3_stmt *sql_select_statement = NULL;
+  sqlite3_stmt *sql_statement = NULL;
 
   check(sql_connection != NULL, "sql_connection: NULL");
   check(NAME_SINGLE_LOWER()_row != NULL, "NAME_SINGLE_LOWER()_row: NULL");
@@ -61,45 +60,33 @@ int NAME_PLURAL_LOWER()_table_insert(sqlite3 *sql_connection, NAME_SINGLE_LOWER(
     "INSERT INTO \"NAME_PLURAL_LOWER()\" ("
       "\"name\") "
     "VALUES (?1);",
-    &sql_insert_statement);
+    &sql_statement);
 
   check(sql_prepare_insert_statement_result == 0, "sql_prepare_insert_statement_result: %d",
     sql_prepare_insert_statement_result);
 
-  int sql_bind_name_result = sql_bind_string(sql_insert_statement, 1, NAME_SINGLE_LOWER()_row->name);
+  int sql_bind_name_result = sql_bind_string(sql_statement, 1, NAME_SINGLE_LOWER()_row->name);
   check(sql_bind_name_result == 0, "sql_bind_name_result: %d",
     sql_bind_name_result);
 
-  int sql_step_execute_result = sql_step_execute(sql_insert_statement);
+  int sql_step_execute_result = sql_step_execute(sql_statement);
   check(sql_step_execute_result == 0, "sql_step_execute_result: %d",
     sql_step_execute_result);
 
-  int sql_prepare_select_statement_result = sql_prepare_statement(
-    sql_connection,
-    "SELECT last_insert_rowid();",
-    &sql_select_statement);
+  int NAME_SINGLE_LOWER()_id;
+  int sql_select_last_insert_row_id_result = sql_select_last_insert_row_id(sql_connection, &NAME_SINGLE_LOWER()_id);
+  check(sql_select_last_insert_row_id_result == 0, "sql_select_last_insert_row_id_result: %d",
+    sql_select_last_insert_row_id_result);
 
-  check(sql_prepare_select_statement_result == 0, "sql_prepare_select_statement_result: %d",
-    sql_prepare_select_statement_result);
+  NAME_SINGLE_LOWER()_row->NAME_SINGLE_LOWER()_id = NAME_SINGLE_LOWER()_id;
 
-  int is_row_available = 0;
-  int sql_step_select_result = sql_step_select(sql_select_statement, &is_row_available);
-  check(sql_step_select_result == 0, "sql_step_select_result: %d",
-    sql_step_select_result);
-
-  check(is_row_available == 1, "is_row_available: %d", is_row_available);
-
-  NAME_SINGLE_LOWER()_row->NAME_SINGLE_LOWER()_id = sqlite3_column_int(sql_select_statement, 0);
-
-  sql_finalize_statement(sql_insert_statement);
-  sql_finalize_statement(sql_select_statement);
+  sql_finalize_statement(sql_statement);
 
   return 0;
 
 error:
 
-  if (sql_insert_statement != NULL) { sql_finalize_statement(sql_insert_statement); }
-  if (sql_select_statement != NULL) { sql_finalize_statement(sql_select_statement); }
+  if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
 
   return -1;
 }

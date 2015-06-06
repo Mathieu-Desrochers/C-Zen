@@ -81,8 +81,7 @@ error:
 // inserts an order item row
 int order_items_table_insert(sqlite3 *sql_connection, order_item_row_t *order_item_row)
 {
-  sqlite3_stmt *sql_insert_statement = NULL;
-  sqlite3_stmt *sql_select_statement = NULL;
+  sqlite3_stmt *sql_statement = NULL;
 
   check(sql_connection != NULL, "sql_connection: NULL");
   check(order_item_row != NULL, "order_item_row: NULL");
@@ -97,65 +96,53 @@ int order_items_table_insert(sqlite3 *sql_connection, order_item_row_t *order_it
       "\"shipping-time-before\", "
       "\"shipping-time-after\") "
     "VALUES (?1, ?2, ?3, ?4, ?5, ?6);",
-    &sql_insert_statement);
+    &sql_statement);
 
   check(sql_prepare_insert_statement_result == 0, "sql_prepare_insert_statement_result: %d",
     sql_prepare_insert_statement_result);
 
-  int sql_bind_order_id_result = sql_bind_int(sql_insert_statement, 1, order_item_row->order_id);
+  int sql_bind_order_id_result = sql_bind_int(sql_statement, 1, order_item_row->order_id);
   check(sql_bind_order_id_result == 0, "sql_bind_order_id_result: %d",
     sql_bind_order_id_result);
 
-  int sql_bind_name_result = sql_bind_string(sql_insert_statement, 2, order_item_row->name);
+  int sql_bind_name_result = sql_bind_string(sql_statement, 2, order_item_row->name);
   check(sql_bind_name_result == 0, "sql_bind_name_result: %d",
     sql_bind_name_result);
 
-  int sql_bind_quantity_result = sql_bind_double(sql_insert_statement, 3, order_item_row->quantity);
+  int sql_bind_quantity_result = sql_bind_double(sql_statement, 3, order_item_row->quantity);
   check(sql_bind_quantity_result == 0, "sql_bind_quantity_result: %d",
     sql_bind_quantity_result);
 
-  int sql_bind_shipping_date_result = sql_bind_date(sql_insert_statement, 4, order_item_row->shipping_date);
+  int sql_bind_shipping_date_result = sql_bind_date(sql_statement, 4, order_item_row->shipping_date);
   check(sql_bind_shipping_date_result == 0, "sql_bind_shipping_date_result: %d",
     sql_bind_shipping_date_result);
 
-  int sql_bind_shipping_time_before_result = sql_bind_time(sql_insert_statement, 5, order_item_row->shipping_time_before);
+  int sql_bind_shipping_time_before_result = sql_bind_time(sql_statement, 5, order_item_row->shipping_time_before);
   check(sql_bind_shipping_time_before_result == 0, "sql_bind_shipping_time_before_result: %d",
     sql_bind_shipping_time_before_result);
 
-  int sql_bind_shipping_time_after_result = sql_bind_time(sql_insert_statement, 6, order_item_row->shipping_time_after);
+  int sql_bind_shipping_time_after_result = sql_bind_time(sql_statement, 6, order_item_row->shipping_time_after);
   check(sql_bind_shipping_time_after_result == 0, "sql_bind_shipping_time_after_result: %d",
     sql_bind_shipping_time_after_result);
 
-  int sql_step_execute_result = sql_step_execute(sql_insert_statement);
+  int sql_step_execute_result = sql_step_execute(sql_statement);
   check(sql_step_execute_result == 0, "sql_step_execute_result: %d",
     sql_step_execute_result);
 
-  int sql_prepare_select_statement_result = sql_prepare_statement(
-    sql_connection,
-    "SELECT last_insert_rowid();",
-    &sql_select_statement);
+  int order_item_id;
+  int sql_select_last_insert_row_id_result = sql_select_last_insert_row_id(sql_connection, &order_item_id);
+  check(sql_select_last_insert_row_id_result == 0, "sql_select_last_insert_row_id_result: %d",
+    sql_select_last_insert_row_id_result);
 
-  check(sql_prepare_select_statement_result == 0, "sql_prepare_select_statement_result: %d",
-    sql_prepare_select_statement_result);
+  order_item_row->order_item_id = order_item_id;
 
-  int is_row_available = 0;
-  int sql_step_select_result = sql_step_select(sql_select_statement, &is_row_available);
-  check(sql_step_select_result == 0, "sql_step_select_result: %d",
-    sql_step_select_result);
-
-  check(is_row_available == 1, "is_row_available: %d", is_row_available);
-
-  order_item_row->order_item_id = sqlite3_column_int(sql_select_statement, 0);
-
-  sql_finalize_statement(sql_insert_statement);
-  sql_finalize_statement(sql_select_statement);
+  sql_finalize_statement(sql_statement);
 
   return 0;
 
 error:
 
-  if (sql_insert_statement != NULL) { sql_finalize_statement(sql_insert_statement); }
-  if (sql_select_statement != NULL) { sql_finalize_statement(sql_select_statement); }
+  if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
 
   return -1;
 }

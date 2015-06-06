@@ -62,8 +62,7 @@ error:
 // inserts an order row
 int orders_table_insert(sqlite3 *sql_connection, order_row_t *order_row)
 {
-  sqlite3_stmt *sql_insert_statement = NULL;
-  sqlite3_stmt *sql_select_statement = NULL;
+  sqlite3_stmt *sql_statement = NULL;
 
   check(sql_connection != NULL, "sql_connection: NULL");
   check(order_row != NULL, "order_row: NULL");
@@ -75,53 +74,41 @@ int orders_table_insert(sqlite3 *sql_connection, order_row_t *order_row)
       "\"placed-on-date-time\", "
       "\"total\") "
     "VALUES (?1, ?2, ?3);",
-    &sql_insert_statement);
+    &sql_statement);
 
   check(sql_prepare_insert_statement_result == 0, "sql_prepare_insert_statement_result: %d",
     sql_prepare_insert_statement_result);
 
-  int sql_bind_customer_name_result = sql_bind_string(sql_insert_statement, 1, order_row->customer_name);
+  int sql_bind_customer_name_result = sql_bind_string(sql_statement, 1, order_row->customer_name);
   check(sql_bind_customer_name_result == 0, "sql_bind_customer_name_result: %d",
     sql_bind_customer_name_result);
 
-  int sql_bind_placed_on_date_time_result = sql_bind_date_time(sql_insert_statement, 2, order_row->placed_on_date_time);
+  int sql_bind_placed_on_date_time_result = sql_bind_date_time(sql_statement, 2, order_row->placed_on_date_time);
   check(sql_bind_placed_on_date_time_result == 0, "sql_bind_placed_on_date_time_result: %d",
     sql_bind_placed_on_date_time_result);
 
-  int sql_bind_total_result = sql_bind_int(sql_insert_statement, 3, order_row->total);
+  int sql_bind_total_result = sql_bind_int(sql_statement, 3, order_row->total);
   check(sql_bind_total_result == 0, "sql_bind_total_result: %d",
     sql_bind_total_result);
 
-  int sql_step_execute_result = sql_step_execute(sql_insert_statement);
+  int sql_step_execute_result = sql_step_execute(sql_statement);
   check(sql_step_execute_result == 0, "sql_step_execute_result: %d",
     sql_step_execute_result);
 
-  int sql_prepare_select_statement_result = sql_prepare_statement(
-    sql_connection,
-    "SELECT last_insert_rowid();",
-    &sql_select_statement);
+  int order_id;
+  int sql_select_last_insert_row_id_result = sql_select_last_insert_row_id(sql_connection, &order_id);
+  check(sql_select_last_insert_row_id_result == 0, "sql_select_last_insert_row_id_result: %d",
+    sql_select_last_insert_row_id_result);
 
-  check(sql_prepare_select_statement_result == 0, "sql_prepare_select_statement_result: %d",
-    sql_prepare_select_statement_result);
+  order_row->order_id = order_id;
 
-  int is_row_available = 0;
-  int sql_step_select_result = sql_step_select(sql_select_statement, &is_row_available);
-  check(sql_step_select_result == 0, "sql_step_select_result: %d",
-    sql_step_select_result);
-
-  check(is_row_available == 1, "is_row_available: %d", is_row_available);
-
-  order_row->order_id = sqlite3_column_int(sql_select_statement, 0);
-
-  sql_finalize_statement(sql_insert_statement);
-  sql_finalize_statement(sql_select_statement);
+  sql_finalize_statement(sql_statement);
 
   return 0;
 
 error:
 
-  if (sql_insert_statement != NULL) { sql_finalize_statement(sql_insert_statement); }
-  if (sql_select_statement != NULL) { sql_finalize_statement(sql_select_statement); }
+  if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
 
   return -1;
 }
