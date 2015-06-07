@@ -10,6 +10,7 @@
 // reads a NAME_SINGLE_LOWER() row
 int NAME_PLURAL_LOWER()_table_read(sqlite3_stmt *sql_statement, NAME_SINGLE_LOWER()_row_t **NAME_SINGLE_LOWER()_row)
 {
+  int *NAME_SINGLE_LOWER()_id = NULL;
   char *name = NULL;
 
   NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row_return = NULL;
@@ -17,7 +18,6 @@ int NAME_PLURAL_LOWER()_table_read(sqlite3_stmt *sql_statement, NAME_SINGLE_LOWE
   check(sql_statement != NULL, "sql_statement: NULL");
   check(NAME_SINGLE_LOWER()_row != NULL, "NAME_SINGLE_LOWER()_row: NULL");
 
-  int NAME_SINGLE_LOWER()_id;
   int sql_read_`'NAME_SINGLE_LOWER()_id_result = sql_read_int(sql_statement, 0, &NAME_SINGLE_LOWER()_id);
   check(sql_read_`'NAME_SINGLE_LOWER()_id_result == 0, "sql_read_`'NAME_SINGLE_LOWER()_id_result: %d",
     sql_read_`'NAME_SINGLE_LOWER()_id_result);
@@ -32,6 +32,7 @@ int NAME_PLURAL_LOWER()_table_read(sqlite3_stmt *sql_statement, NAME_SINGLE_LOWE
 
   check(NAME_SINGLE_LOWER()_row_return != NULL, "NAME_SINGLE_LOWER()_row_return: NULL");
 
+  free(NAME_SINGLE_LOWER()_id);
   free(name);
 
   *NAME_SINGLE_LOWER()_row = NAME_SINGLE_LOWER()_row_return;
@@ -40,6 +41,7 @@ int NAME_PLURAL_LOWER()_table_read(sqlite3_stmt *sql_statement, NAME_SINGLE_LOWE
 
 error:
 
+  if (NAME_SINGLE_LOWER()_id != NULL) { free(NAME_SINGLE_LOWER()_id); }
   if (name != NULL) { free(name); }
 
   if (NAME_SINGLE_LOWER()_row_return != NULL) { NAME_SINGLE_LOWER()_row_free(NAME_SINGLE_LOWER()_row_return); }
@@ -51,6 +53,7 @@ error:
 int NAME_PLURAL_LOWER()_table_insert(sqlite3 *sql_connection, NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row)
 {
   sqlite3_stmt *sql_statement = NULL;
+  int *NAME_SINGLE_LOWER()_id_return = NULL;
 
   check(sql_connection != NULL, "sql_connection: NULL");
   check(NAME_SINGLE_LOWER()_row != NULL, "NAME_SINGLE_LOWER()_row: NULL");
@@ -73,12 +76,11 @@ int NAME_PLURAL_LOWER()_table_insert(sqlite3 *sql_connection, NAME_SINGLE_LOWER(
   check(sql_step_execute_result == 0, "sql_step_execute_result: %d",
     sql_step_execute_result);
 
-  int NAME_SINGLE_LOWER()_id;
-  int sql_select_last_insert_row_id_result = sql_select_last_insert_row_id(sql_connection, &NAME_SINGLE_LOWER()_id);
+  int sql_select_last_insert_row_id_result = sql_select_last_insert_row_id(sql_connection, &NAME_SINGLE_LOWER()_id_return);
   check(sql_select_last_insert_row_id_result == 0, "sql_select_last_insert_row_id_result: %d",
     sql_select_last_insert_row_id_result);
 
-  NAME_SINGLE_LOWER()_row->NAME_SINGLE_LOWER()_id = NAME_SINGLE_LOWER()_id;
+  NAME_SINGLE_LOWER()_row->NAME_SINGLE_LOWER()_id = NAME_SINGLE_LOWER()_id_return;
 
   sql_finalize_statement(sql_statement);
 
@@ -86,6 +88,7 @@ int NAME_PLURAL_LOWER()_table_insert(sqlite3 *sql_connection, NAME_SINGLE_LOWER(
 
 error:
 
+  if (NAME_SINGLE_LOWER()_id_return != NULL) { free(NAME_SINGLE_LOWER()_id_return); }
   if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
 
   return -1;
@@ -112,7 +115,7 @@ int NAME_PLURAL_LOWER()_table_select_by_`'NAME_SINGLE_LOWER()_id(sqlite3 *sql_co
   check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
     sql_prepare_statement_result);
 
-  int sql_bind_`'NAME_SINGLE_LOWER()_id_result = sql_bind_int(sql_statement, 1, NAME_SINGLE_LOWER()_id);
+  int sql_bind_`'NAME_SINGLE_LOWER()_id_result = sql_bind_int(sql_statement, 1, &NAME_SINGLE_LOWER()_id);
   check(sql_bind_`'NAME_SINGLE_LOWER()_id_result == 0, "sql_bind_`'NAME_SINGLE_LOWER()_id_result: %d",
     sql_bind_`'NAME_SINGLE_LOWER()_id_result);
 

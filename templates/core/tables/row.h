@@ -4,13 +4,13 @@
 // represents a NAME_SINGLE_LOWER() row
 typedef struct NAME_SINGLE_LOWER()_row_t
 {
-  int NAME_SINGLE_LOWER()_id;
+  int *NAME_SINGLE_LOWER()_id;
   char *name;
 } NAME_SINGLE_LOWER()_row_t;
 
 // allocates a NAME_SINGLE_LOWER() row
 NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row_malloc(
-  int NAME_SINGLE_LOWER()_id,
+  int *NAME_SINGLE_LOWER()_id,
   char *name);
 
 // adds a NAME_SINGLE_LOWER() row to an array

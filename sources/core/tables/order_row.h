@@ -6,18 +6,18 @@
 // represents an order row
 typedef struct order_row_t
 {
-  int order_id;
+  int *order_id;
   char *customer_name;
-  time_t placed_on_date_time;
-  int total;
+  time_t *placed_on_date_time;
+  int *total;
 } order_row_t;
 
 // allocates an order row
 order_row_t *order_row_malloc(
-  int order_id,
+  int *order_id,
   char *customer_name,
-  time_t placed_on_date_time,
-  int total);
+  time_t *placed_on_date_time,
+  int *total);
 
 // adds an order row to an array
 int order_rows_add(order_row_t ***order_rows, int *count, int *used, order_row_t *order_row);

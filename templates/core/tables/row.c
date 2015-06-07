@@ -1,23 +1,25 @@
 `#'include <stddef.h>
 `#'include <stdlib.h>
-`#'include <string.h>
 
 `#'include "../../infrastructure/dbg/dbg.h"
-`#'include "../../infrastructure/string/string.h"
+`#'include "../../infrastructure/mem/mem.h"
 `#'include "../../core/tables/NAME_SINGLE_LOWER()_row.h"
 
 // allocates a NAME_SINGLE_LOWER() row
 NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row_malloc(
-  int NAME_SINGLE_LOWER()_id,
+  int *NAME_SINGLE_LOWER()_id,
   char *name)
 {
   NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row = malloc(sizeof(NAME_SINGLE_LOWER()_row_t));
   check_mem(NAME_SINGLE_LOWER()_row);
 
-  NAME_SINGLE_LOWER()_row->NAME_SINGLE_LOWER()_id = NAME_SINGLE_LOWER()_id;
+  int malloc_memcpy_`'NAME_SINGLE_LOWER()_id_result = malloc_memcpy_int(&(NAME_SINGLE_LOWER()_row->NAME_SINGLE_LOWER()_id), NAME_SINGLE_LOWER()_id);
+  check(malloc_memcpy_`'NAME_SINGLE_LOWER()_id_result == 0, "malloc_memcpy_`'NAME_SINGLE_LOWER()_id_result: %d",
+    malloc_memcpy_`'NAME_SINGLE_LOWER()_id_result);
 
-  NAME_SINGLE_LOWER()_row->name = strdup(name);
-  check_mem(NAME_SINGLE_LOWER()_row->name);
+  int malloc_memcpy_name_result = malloc_memcpy_string(&(NAME_SINGLE_LOWER()_row->name), name);
+  check(malloc_memcpy_name_result == 0, "malloc_memcpy_name_result: %d",
+    malloc_memcpy_name_result);
 
   return NAME_SINGLE_LOWER()_row;
 
@@ -60,6 +62,7 @@ void NAME_SINGLE_LOWER()_row_free(NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()
     return;
   }
 
+  if (NAME_SINGLE_LOWER()_row->NAME_SINGLE_LOWER()_id != NULL) { free(NAME_SINGLE_LOWER()_row->NAME_SINGLE_LOWER()_id); }
   if (NAME_SINGLE_LOWER()_row->name != NULL) { free(NAME_SINGLE_LOWER()_row->name); }
 
   free(NAME_SINGLE_LOWER()_row);

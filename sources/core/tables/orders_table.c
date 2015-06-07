@@ -11,27 +11,28 @@
 // reads an order row
 int orders_table_read(sqlite3_stmt *sql_statement, order_row_t **order_row)
 {
+  int *order_id = NULL;
+  char *customer_name = NULL;
+  time_t *placed_on_date_time = NULL;
+  int *total = NULL;
+
   order_row_t *order_row_return = NULL;
 
   check(sql_statement != NULL, "sql_statement: NULL");
   check(order_row != NULL, "order_row: NULL");
 
-  int order_id;
   int sql_read_order_id_result = sql_read_int(sql_statement, 0, &order_id);
   check(sql_read_order_id_result == 0, "sql_read_order_id_result: %d",
     sql_read_order_id_result);
 
-  char *customer_name;
   int sql_read_customer_name_result = sql_read_string(sql_statement, 1, &customer_name);
   check(sql_read_customer_name_result == 0, "sql_read_customer_name_result: %d",
     sql_read_customer_name_result);
 
-  time_t placed_on_date_time;
   int sql_read_placed_on_date_time_result = sql_read_date_time(sql_statement, 2, &placed_on_date_time);
   check(sql_read_placed_on_date_time_result == 0, "sql_read_placed_on_date_time_result: %d",
     sql_read_placed_on_date_time_result);
 
-  int total;
   int sql_read_total_result = sql_read_int(sql_statement, 3, &total);
   check(sql_read_total_result == 0, "sql_read_total_result: %d",
     sql_read_total_result);
@@ -44,7 +45,10 @@ int orders_table_read(sqlite3_stmt *sql_statement, order_row_t **order_row)
 
   check(order_row_return != NULL, "order_row_return: NULL");
 
+  free(order_id);
   free(customer_name);
+  free(placed_on_date_time);
+  free(total);
 
   *order_row = order_row_return;
 
@@ -52,7 +56,10 @@ int orders_table_read(sqlite3_stmt *sql_statement, order_row_t **order_row)
 
 error:
 
+  if (order_id != NULL) { free(order_id); }
   if (customer_name != NULL) { free(customer_name); }
+  if (placed_on_date_time != NULL) { free(placed_on_date_time); }
+  if (total != NULL) { free(total); }
 
   if (order_row_return != NULL) { order_row_free(order_row_return); }
 
@@ -63,6 +70,7 @@ error:
 int orders_table_insert(sqlite3 *sql_connection, order_row_t *order_row)
 {
   sqlite3_stmt *sql_statement = NULL;
+  int *order_id_return = NULL;
 
   check(sql_connection != NULL, "sql_connection: NULL");
   check(order_row != NULL, "order_row: NULL");
@@ -95,12 +103,11 @@ int orders_table_insert(sqlite3 *sql_connection, order_row_t *order_row)
   check(sql_step_execute_result == 0, "sql_step_execute_result: %d",
     sql_step_execute_result);
 
-  int order_id;
-  int sql_select_last_insert_row_id_result = sql_select_last_insert_row_id(sql_connection, &order_id);
+  int sql_select_last_insert_row_id_result = sql_select_last_insert_row_id(sql_connection, &order_id_return);
   check(sql_select_last_insert_row_id_result == 0, "sql_select_last_insert_row_id_result: %d",
     sql_select_last_insert_row_id_result);
 
-  order_row->order_id = order_id;
+  order_row->order_id = order_id_return;
 
   sql_finalize_statement(sql_statement);
 
@@ -108,6 +115,7 @@ int orders_table_insert(sqlite3 *sql_connection, order_row_t *order_row)
 
 error:
 
+  if (order_id_return != NULL) { free(order_id_return); }
   if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
 
   return -1;
@@ -136,7 +144,7 @@ int orders_table_select_by_order_id(sqlite3 *sql_connection, int order_id, order
   check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
     sql_prepare_statement_result);
 
-  int sql_bind_order_id_result = sql_bind_int(sql_statement, 1, order_id);
+  int sql_bind_order_id_result = sql_bind_int(sql_statement, 1, &order_id);
   check(sql_bind_order_id_result == 0, "sql_bind_order_id_result: %d",
     sql_bind_order_id_result);
 

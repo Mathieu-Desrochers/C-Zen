@@ -11,19 +11,23 @@
 // reads an order item row
 int order_items_table_read(sqlite3_stmt *sql_statement, order_item_row_t **order_item_row)
 {
+  int *order_item_id = NULL;
+  int *order_id = NULL;
   char *name = NULL;
+  double *quantity = NULL;
+  time_t *shipping_date = NULL;
+  time_t *shipping_time_before = NULL;
+  time_t *shipping_time_after = NULL;
 
   order_item_row_t *order_item_row_return = NULL;
 
   check(sql_statement != NULL, "sql_statement: NULL");
   check(order_item_row != NULL, "order_item_row: NULL");
 
-  int order_item_id;
   int sql_read_order_item_id_result = sql_read_int(sql_statement, 0, &order_item_id);
   check(sql_read_order_item_id_result == 0, "sql_read_order_item_id_result: %d",
     sql_read_order_item_id_result);
 
-  int order_id;
   int sql_read_order_id_result = sql_read_int(sql_statement, 1, &order_id);
   check(sql_read_order_id_result == 0, "sql_read_order_id_result: %d",
     sql_read_order_id_result);
@@ -32,22 +36,18 @@ int order_items_table_read(sqlite3_stmt *sql_statement, order_item_row_t **order
   check(sql_read_name_result == 0, "sql_read_name_result: %d",
     sql_read_name_result);
 
-  double quantity;
   int sql_read_quantity_result = sql_read_double(sql_statement, 3, &quantity);
   check(sql_read_quantity_result == 0, "sql_read_quantity_result: %d",
     sql_read_quantity_result);
 
-  time_t shipping_date;
   int sql_read_shipping_date_result = sql_read_date(sql_statement, 4, &shipping_date);
   check(sql_read_shipping_date_result == 0, "sql_read_shipping_date_result: %d",
     sql_read_shipping_date_result);
 
-  time_t shipping_time_before;
   int sql_read_shipping_time_before_result = sql_read_time(sql_statement, 5, &shipping_time_before);
   check(sql_read_shipping_time_before_result == 0, "sql_read_shipping_time_before_result: %d",
     sql_read_shipping_time_before_result);
 
-  time_t shipping_time_after;
   int sql_read_shipping_time_after_result = sql_read_time(sql_statement, 6, &shipping_time_after);
   check(sql_read_shipping_time_after_result == 0, "sql_read_shipping_time_after_result: %d",
     sql_read_shipping_time_after_result);
@@ -63,7 +63,13 @@ int order_items_table_read(sqlite3_stmt *sql_statement, order_item_row_t **order
 
   check(order_item_row_return != NULL, "order_item_row_return: NULL");
 
+  free(order_item_id);
+  free(order_id);
   free(name);
+  free(quantity);
+  free(shipping_date);
+  free(shipping_time_before);
+  free(shipping_time_after);
 
   *order_item_row = order_item_row_return;
 
@@ -71,7 +77,13 @@ int order_items_table_read(sqlite3_stmt *sql_statement, order_item_row_t **order
 
 error:
 
+  if (order_item_id != NULL) { free(order_item_id); }
+  if (order_id != NULL) { free(order_id); }
   if (name != NULL) { free(name); }
+  if (quantity != NULL) { free(quantity); }
+  if (shipping_date != NULL) { free(shipping_date); }
+  if (shipping_time_before != NULL) { free(shipping_time_before); }
+  if (shipping_time_after != NULL) { free(shipping_time_after); }
 
   if (order_item_row_return != NULL) { order_item_row_free(order_item_row_return); }
 
@@ -82,6 +94,7 @@ error:
 int order_items_table_insert(sqlite3 *sql_connection, order_item_row_t *order_item_row)
 {
   sqlite3_stmt *sql_statement = NULL;
+  int *order_item_id_return = NULL;
 
   check(sql_connection != NULL, "sql_connection: NULL");
   check(order_item_row != NULL, "order_item_row: NULL");
@@ -129,12 +142,11 @@ int order_items_table_insert(sqlite3 *sql_connection, order_item_row_t *order_it
   check(sql_step_execute_result == 0, "sql_step_execute_result: %d",
     sql_step_execute_result);
 
-  int order_item_id;
-  int sql_select_last_insert_row_id_result = sql_select_last_insert_row_id(sql_connection, &order_item_id);
+  int sql_select_last_insert_row_id_result = sql_select_last_insert_row_id(sql_connection, &order_item_id_return);
   check(sql_select_last_insert_row_id_result == 0, "sql_select_last_insert_row_id_result: %d",
     sql_select_last_insert_row_id_result);
 
-  order_item_row->order_item_id = order_item_id;
+  order_item_row->order_item_id = order_item_id_return;
 
   sql_finalize_statement(sql_statement);
 
@@ -142,6 +154,7 @@ int order_items_table_insert(sqlite3 *sql_connection, order_item_row_t *order_it
 
 error:
 
+  if (order_item_id_return != NULL) { free(order_item_id_return); }
   if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
 
   return -1;
@@ -173,7 +186,7 @@ int order_items_table_select_by_order_item_id(sqlite3 *sql_connection, int order
   check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
     sql_prepare_statement_result);
 
-  int sql_bind_order_item_id_result = sql_bind_int(sql_statement, 1, order_item_id);
+  int sql_bind_order_item_id_result = sql_bind_int(sql_statement, 1, &order_item_id);
   check(sql_bind_order_item_id_result == 0, "sql_bind_order_item_id_result: %d",
     sql_bind_order_item_id_result);
 
