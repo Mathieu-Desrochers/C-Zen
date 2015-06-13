@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/validation/validation.h"
@@ -79,10 +81,110 @@ error:
   return -1;
 }
 
+// validates a double
+int validate_double(double *value, int required, double min_value, double max_value)
+{
+  if (value == NULL)
+  {
+    if (required)
+    {
+      return VALIDATION_RESULT_REQUIRED;
+    }
+
+    return 0;
+  }
+
+  if (*value < min_value)
+  {
+    return VALIDATION_RESULT_TOO_LOW;
+  }
+
+  if (*value > max_value)
+  {
+    return VALIDATION_RESULT_TOO_HIGH;
+  }
+
+  return 0;
+}
+
+// validates an integer
+int validate_int(int *value, int required, int min_value, int max_value)
+{
+  if (value == NULL)
+  {
+    if (required)
+    {
+      return VALIDATION_RESULT_REQUIRED;
+    }
+
+    return 0;
+  }
+
+  if (*value < min_value)
+  {
+    return VALIDATION_RESULT_TOO_LOW;
+  }
+
+  if (*value > max_value)
+  {
+    return VALIDATION_RESULT_TOO_HIGH;
+  }
+
+  return 0;
+}
+
 // validates a string
 int validate_string(char *value, int required, int min_length, int max_length)
 {
-  return 10;
+  if (value == NULL)
+  {
+    if (required)
+    {
+      return VALIDATION_RESULT_REQUIRED;
+    }
+
+    return 0;
+  }
+
+  int length = strlen(value);
+
+  if (length < min_length)
+  {
+    return VALIDATION_RESULT_TOO_SHORT;
+  }
+
+  if (length > max_length)
+  {
+    return VALIDATION_RESULT_TOO_LONG;
+  }
+
+  return 0;
+}
+
+// validates a time
+int validate_time(time_t *value, int required, time_t min_value, time_t max_value)
+{
+  if (value == NULL)
+  {
+    if (required)
+    {
+      return VALIDATION_RESULT_REQUIRED;
+    }
+
+    return 0;
+  }
+
+  if (*value < min_value)
+  {
+    return VALIDATION_RESULT_TOO_LOW;
+  }
+
+  if (*value > max_value)
+  {
+    return VALIDATION_RESULT_TOO_HIGH;
+  }
+
+  return 0;
 }
 
 // frees a validation path
