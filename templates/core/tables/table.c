@@ -80,6 +80,7 @@ int NAME_PLURAL_LOWER()_table_insert(sqlite3 *sql_connection, NAME_SINGLE_LOWER(
   check(sql_select_last_insert_row_id_result == 0, "sql_select_last_insert_row_id_result: %d",
     sql_select_last_insert_row_id_result);
 
+  free(NAME_SINGLE_LOWER()_row->NAME_SINGLE_LOWER()_id);
   NAME_SINGLE_LOWER()_row->NAME_SINGLE_LOWER()_id = NAME_SINGLE_LOWER()_id_return;
 
   sql_finalize_statement(sql_statement);

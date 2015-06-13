@@ -146,6 +146,7 @@ int order_items_table_insert(sqlite3 *sql_connection, order_item_row_t *order_it
   check(sql_select_last_insert_row_id_result == 0, "sql_select_last_insert_row_id_result: %d",
     sql_select_last_insert_row_id_result);
 
+  free(order_item_row->order_item_id);
   order_item_row->order_item_id = order_item_id_return;
 
   sql_finalize_statement(sql_statement);
