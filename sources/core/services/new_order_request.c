@@ -3,25 +3,31 @@
 #include "../../core/services/new_order_request.h"
 #include "../../core/services/new_order_request_order_item.h"
 #include "../../infrastructure/dbg/dbg.h"
+#include "../../infrastructure/mem/mem.h"
 #include "../../infrastructure/string/string.h"
 #include "../../infrastructure/validation/validation.h"
 
-#define NEW_ORDER_REQUEST_CUSTOMER 1
+#define NEW_ORDER_REQUEST_CUSTOMER_NAME 1
+#define NEW_ORDER_REQUEST_TOTAL 2
 
 // allocates a new order request
 new_order_request_t *new_order_request_malloc(
-  char *customer,
-  int total)
+  char *customer_name,
+  int *total)
 {
   new_order_request_t *new_order_request = malloc(sizeof(new_order_request_t));
   check_mem(new_order_request);
 
-  new_order_request->customer = strdup(customer);
-  check_mem(new_order_request->customer);
+  int malloc_memcpy_customer_name_result = malloc_memcpy_string(&(new_order_request->customer_name), customer_name);
+  check(malloc_memcpy_customer_name_result == 0, "malloc_memcpy_customer_name_result: %d",
+    malloc_memcpy_customer_name_result);
+
+  int malloc_memcpy_total_result = malloc_memcpy_int(&(new_order_request->total), total);
+  check(malloc_memcpy_total_result == 0, "malloc_memcpy_total_result: %d",
+    malloc_memcpy_total_result);
 
   new_order_request->order_items = NULL;
   new_order_request->order_items_count = 0;
-  new_order_request->total = total;
 
   return new_order_request;
 
@@ -44,12 +50,23 @@ int new_order_request_validate(new_order_request_t *new_order_request, validatio
   check(validation_errors != NULL, "validation_errors: NULL");
   check(count != NULL, "count: NULL");
 
-  int validate_customer_result = validate_string(new_order_request->customer, 1, 1, 100);
-  if (validate_customer_result != 0)
+  int validate_customer_name_result = validate_string(new_order_request->customer_name, 1, 1, 100);
+  if (validate_customer_name_result != 0)
   {
     int validation_errors_add_result = validation_errors_add(
       &validation_errors_return, &allocated_errors_count, &detected_errors_count,
-      NEW_ORDER_REQUEST_CUSTOMER, -1, validate_customer_result);
+      NEW_ORDER_REQUEST_CUSTOMER_NAME, -1, validate_customer_name_result);
+
+    check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
+      validation_errors_add_result);
+  }
+
+  int validate_total_result = validate_int(new_order_request->total, 1, 0, 999999);
+  if (validate_total_result != 0)
+  {
+    int validation_errors_add_result = validation_errors_add(
+      &validation_errors_return, &allocated_errors_count, &detected_errors_count,
+      NEW_ORDER_REQUEST_TOTAL, -1, validate_total_result);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
@@ -75,7 +92,9 @@ void new_order_request_free(new_order_request_t *new_order_request)
     return;
   }
 
-  if (new_order_request->customer != NULL) { free(new_order_request->customer); }
+  if (new_order_request->customer_name != NULL) { free(new_order_request->customer_name); }
+  if (new_order_request->total != NULL) { free(new_order_request->total); }
+
   if (new_order_request->order_items != NULL)
   {
     new_order_request_order_items_free(new_order_request->order_items, new_order_request->order_items_count);

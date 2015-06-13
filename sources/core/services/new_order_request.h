@@ -7,16 +7,16 @@
 // represents a new order request
 typedef struct new_order_request_t
 {
-  char *customer;
+  char *customer_name;
   new_order_request_order_item_t **order_items;
   int order_items_count;
-  int total;
+  int *total;
 } new_order_request_t;
 
 // allocates a new order request
 new_order_request_t *new_order_request_malloc(
-  char *customer,
-  int total);
+  char *customer_name,
+  int *total);
 
 // validates a new order request
 int new_order_request_validate(new_order_request_t *new_order_request, validation_error_t ***validation_errors, int *count);
