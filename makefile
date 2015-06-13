@@ -3,7 +3,6 @@ CFLAGS  = -g -Wall
 
 INFRASTRUCTURE = sources/infrastructure/mem/mem.o \
                  sources/infrastructure/sql/sql.o \
-                 sources/infrastructure/string/string.o \
                  sources/infrastructure/time/time.o \
                  sources/infrastructure/validation/validation.o
 

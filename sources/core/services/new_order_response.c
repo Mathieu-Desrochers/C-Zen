@@ -2,7 +2,6 @@
 
 #include "../../core/services/new_order_response.h"
 #include "../../infrastructure/dbg/dbg.h"
-#include "../../infrastructure/string/string.h"
 
 // allocates a new order response
 new_order_response_t *new_order_response_malloc(

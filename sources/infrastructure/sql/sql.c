@@ -5,7 +5,6 @@
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/mem/mem.h"
 #include "../../infrastructure/sql/sql.h"
-#include "../../infrastructure/string/string.h"
 #include "../../infrastructure/time/time.h"
 
 // opens a database connection

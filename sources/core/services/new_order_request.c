@@ -4,7 +4,6 @@
 #include "../../core/services/new_order_request_order_item.h"
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/mem/mem.h"
-#include "../../infrastructure/string/string.h"
 #include "../../infrastructure/validation/validation.h"
 
 #define NEW_ORDER_REQUEST_CUSTOMER_NAME 1
