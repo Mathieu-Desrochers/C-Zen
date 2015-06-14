@@ -6,9 +6,6 @@
 #include "../../infrastructure/mem/mem.h"
 #include "../../infrastructure/validation/validation.h"
 
-#define NEW_ORDER_REQUEST_CUSTOMER_NAME 1
-#define NEW_ORDER_REQUEST_TOTAL 2
-
 // allocates a new order request
 new_order_request_t *new_order_request_malloc(
   char *customer_name,
@@ -38,7 +35,10 @@ error:
 }
 
 // validates a new order request
-int new_order_request_validate(new_order_request_t *new_order_request, validation_error_t ***validation_errors, int *count)
+int new_order_request_validate(
+  new_order_request_t *new_order_request,
+  validation_error_t ***validation_errors,
+  int *count)
 {
   validation_error_t **validation_errors_return = NULL;
 
@@ -58,6 +58,34 @@ int new_order_request_validate(new_order_request_t *new_order_request, validatio
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
+  }
+
+  int validate_order_items_result = validate_array(
+    (void **)(new_order_request->order_items),
+    new_order_request->order_items_count,
+    1, 1, 100);
+
+  if (validate_order_items_result != 0)
+  {
+    int validation_errors_add_result = validation_errors_add(
+      &validation_errors_return, &allocated_errors_count, &detected_errors_count,
+      NEW_ORDER_REQUEST_ORDER_ITEMS, -1, validate_order_items_result);
+
+    check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
+      validation_errors_add_result);
+  }
+
+  for (int index = 0; index < new_order_request->order_items_count; index++)
+  {
+    int new_order_request_order_item_validate_result = new_order_request_order_item_validate(
+      new_order_request->order_items[index],
+      index,
+      &validation_errors_return,
+      &allocated_errors_count,
+      &detected_errors_count);
+
+    check(new_order_request_order_item_validate_result == 0, "new_order_request_order_item_validate_result: %d",
+      new_order_request_order_item_validate_result);
   }
 
   int validate_total_result = validate_int(new_order_request->total, 1, 0, 999999);

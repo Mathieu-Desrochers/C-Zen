@@ -13,23 +13,37 @@ int main()
     customer_name,
     &total);
 
+  char *name = "";
+  int quantity = 9999999;
+
+  new_order_request_order_item_t *new_order_request_order_item_1 = new_order_request_order_item_malloc(
+    name,
+    &quantity);
+
+  new_order_request_order_item_t *new_order_request_order_item_2 = new_order_request_order_item_malloc(
+    name,
+    &quantity);
+
+  new_order_request->order_items = malloc(sizeof(new_order_request_order_item_t *) * 2);
+  new_order_request->order_items[0] = new_order_request_order_item_1;
+  new_order_request->order_items[1] = new_order_request_order_item_2;
+  new_order_request->order_items_count = 2;
+
   validation_error_t **validation_errors = NULL;
   int count = 0;
 
   int result = new_order_request_validate(new_order_request, &validation_errors, &count);
   check(result == 0, "result: %d", result);
 
-  printf("%d\n", count);
+  printf("count: %d\n", count);
 
-  printf("%d\t%d\t%d\n",
-    validation_errors[0]->validation_path->property,
-    validation_errors[0]->validation_path->index,
-    validation_errors[0]->error_code);
-
-  printf("%d\t%d\t%d\n",
-    validation_errors[1]->validation_path->property,
-    validation_errors[1]->validation_path->index,
-    validation_errors[1]->error_code);
+  for (int i = 0; i < count; i++)
+  {
+    printf("property: %d\tindex: %d\t error_code: %d\n",
+      validation_errors[i]->validation_path->property,
+      validation_errors[i]->validation_path->index,
+      validation_errors[i]->error_code);
+  }
 
   validation_errors_free(validation_errors, count);
 
@@ -38,6 +52,9 @@ int main()
   return 0;
 
 error:
+
+  if (validation_errors != NULL) { validation_errors_free(validation_errors, count); }
+  if (new_order_request != NULL) {new_order_request_free(new_order_request); }
 
   return -1;
 }

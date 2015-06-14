@@ -8,6 +8,8 @@
 #define VALIDATION_RESULT_TOO_HIGH 3
 #define VALIDATION_RESULT_TOO_SHORT 4
 #define VALIDATION_RESULT_TOO_LONG 5
+#define VALIDATION_RESULT_TOO_FEW 6
+#define VALIDATION_RESULT_TOO_MANY 7
 
 // represents a validated property
 typedef struct validation_path_t
@@ -44,6 +46,9 @@ int validate_string(char *value, int required, int min_length, int max_length);
 
 // validates a time
 int validate_time(time_t *value, int required, time_t min_value, time_t max_value);
+
+// validates an array
+int validate_array(void **array, int count, int required, int min_count, int max_count);
 
 // frees a validation path
 void validation_path_free(validation_path_t *validation_path);

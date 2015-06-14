@@ -4,11 +4,12 @@
 #include "../../core/services/new_order_request_order_item.h"
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/mem/mem.h"
+#include "../../infrastructure/validation/validation.h"
 
 // allocates an new order request order item
 new_order_request_order_item_t *new_order_request_order_item_malloc(
   char *name,
-  int quantity)
+  int *quantity)
 {
   new_order_request_order_item_t *new_order_request_order_item = malloc(sizeof(new_order_request_order_item_t));
   check_mem(new_order_request_order_item);
@@ -17,7 +18,9 @@ new_order_request_order_item_t *new_order_request_order_item_malloc(
   check(malloc_memcpy_name_result == 0, "malloc_memcpy_name_result: %d",
     malloc_memcpy_name_result);
 
-  new_order_request_order_item->quantity = quantity;
+  int malloc_memcpy_quantity_result = malloc_memcpy_int(&(new_order_request_order_item->quantity), quantity);
+  check(malloc_memcpy_quantity_result == 0, "malloc_memcpy_quantity_result: %d",
+    malloc_memcpy_quantity_result);
 
   return new_order_request_order_item;
 
@@ -26,6 +29,48 @@ error:
   if (new_order_request_order_item != NULL) { new_order_request_order_item_free(new_order_request_order_item); }
 
   return NULL;
+}
+
+// validates a new order request order item
+int new_order_request_order_item_validate(
+  new_order_request_order_item_t *new_order_request_order_item,
+  int index,
+  validation_error_t ***validation_errors,
+  int *allocated_errors_count,
+  int *detected_errors_count)
+{
+  check(new_order_request_order_item != NULL, "new_order_request_order_item: NULL");
+  check(validation_errors != NULL, "validation_errors: NULL");
+  check(allocated_errors_count != NULL, "allocated_errors_count: NULL");
+  check(detected_errors_count != NULL, "detected_errors_count: NULL");
+
+  int validate_name_result = validate_string(new_order_request_order_item->name, 1, 1, 100);
+  if (validate_name_result != 0)
+  {
+    int validation_errors_add_result = validation_errors_add(
+      validation_errors, allocated_errors_count, detected_errors_count,
+      NEW_ORDER_REQUEST_ORDER_ITEM_NAME, index, validate_name_result);
+
+    check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
+      validation_errors_add_result);
+  }
+
+  int validate_quantity_result = validate_int(new_order_request_order_item->quantity, 1, 1, 999999);
+  if (validate_quantity_result != 0)
+  {
+    int validation_errors_add_result = validation_errors_add(
+      validation_errors, allocated_errors_count, detected_errors_count,
+      NEW_ORDER_REQUEST_ORDER_ITEM_QUANTITY, index, validate_quantity_result);
+
+    check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
+      validation_errors_add_result);
+  }
+
+  return 0;
+
+error:
+
+  return -1;
 }
 
 // frees a new order request order item
@@ -37,6 +82,7 @@ void new_order_request_order_item_free(new_order_request_order_item_t *new_order
   }
 
   if (new_order_request_order_item->name != NULL) { free(new_order_request_order_item->name); }
+  if (new_order_request_order_item->quantity != NULL) { free(new_order_request_order_item->quantity); }
 
   free(new_order_request_order_item);
 }

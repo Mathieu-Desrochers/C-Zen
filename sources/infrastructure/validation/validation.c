@@ -187,6 +187,32 @@ int validate_time(time_t *value, int required, time_t min_value, time_t max_valu
   return 0;
 }
 
+// validates an array
+int validate_array(void **array, int count, int required, int min_count, int max_count)
+{
+  if (array == NULL)
+  {
+    if (required)
+    {
+      return VALIDATION_RESULT_REQUIRED;
+    }
+
+    return 0;
+  }
+
+  if (count < min_count)
+  {
+    return VALIDATION_RESULT_TOO_FEW;
+  }
+
+  if (count > max_count)
+  {
+    return VALIDATION_RESULT_TOO_MANY;
+  }
+
+  return 0;
+}
+
 // frees a validation path
 void validation_path_free(validation_path_t *validation_path)
 {

@@ -4,6 +4,10 @@
 #include "../../core/services/new_order_request_order_item.h"
 #include "../../infrastructure/validation/validation.h"
 
+#define NEW_ORDER_REQUEST_CUSTOMER_NAME 1
+#define NEW_ORDER_REQUEST_ORDER_ITEMS 2
+#define NEW_ORDER_REQUEST_TOTAL 3
+
 // represents a new order request
 typedef struct new_order_request_t
 {
@@ -19,7 +23,10 @@ new_order_request_t *new_order_request_malloc(
   int *total);
 
 // validates a new order request
-int new_order_request_validate(new_order_request_t *new_order_request, validation_error_t ***validation_errors, int *count);
+int new_order_request_validate(
+  new_order_request_t *new_order_request,
+  validation_error_t ***validation_errors,
+  int *count);
 
 // frees a new order request
 void new_order_request_free(new_order_request_t *new_order_request);
