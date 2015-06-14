@@ -27,13 +27,39 @@ typedef struct validation_error_t
 } validation_error_t;
 
 // allocates a validation path
-validation_path_t *validation_path_malloc(int property, int index, validation_path_t *next);
+validation_path_t *validation_path_malloc(int property, int index);
 
 // allocates a validation error
-validation_error_t *validation_error_malloc(int property, int index, int error_code);
+validation_error_t *validation_error_malloc(
+  int property,
+  int index,
+  int error_code);
+
+validation_error_t *validation_error_malloc_level_2(
+  int property,
+  int index,
+  int property_level_2,
+  int index_level_2,
+  int error_code);
 
 // adds a validation error to an array
-int validation_errors_add(validation_error_t ***validation_errors, int *count, int *used, int property, int index, int error_code);
+int validation_errors_add(
+  validation_error_t ***validation_errors,
+  int *count,
+  int *used,
+  int property,
+  int index,
+  int error_code);
+
+int validation_errors_add_level_2(
+  validation_error_t ***validation_errors,
+  int *count,
+  int *used,
+  int property,
+  int index,
+  int property_level_2,
+  int index_level_2,
+  int error_code);
 
 // validates a double
 int validate_double(double *value, int required, double min_value, double max_value);

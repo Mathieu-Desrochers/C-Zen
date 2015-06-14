@@ -4,6 +4,19 @@
 #include "../../core/services/new_order_request.h"
 #include "../../infrastructure/dbg/dbg.h"
 
+void print_error(validation_error_t *validation_error)
+{
+  validation_path_t *validation_path = validation_error->validation_path;
+
+  while (validation_path != NULL)
+  {
+    printf("property: %d\tindex: %d\t", validation_path->property, validation_path->index);
+    validation_path = validation_path->next;
+  }
+
+  printf("error_code: %d\n", validation_error->error_code);
+}
+
 int main()
 {
   char *customer_name = "";
@@ -39,10 +52,7 @@ int main()
 
   for (int i = 0; i < count; i++)
   {
-    printf("property: %d\tindex: %d\t error_code: %d\n",
-      validation_errors[i]->validation_path->property,
-      validation_errors[i]->validation_path->index,
-      validation_errors[i]->error_code);
+    print_error(validation_errors[i]);
   }
 
   validation_errors_free(validation_errors, count);

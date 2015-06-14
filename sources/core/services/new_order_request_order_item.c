@@ -35,21 +35,22 @@ error:
 int new_order_request_order_item_validate(
   new_order_request_order_item_t *new_order_request_order_item,
   int index,
-  validation_error_t ***validation_errors,
+  validation_error_t ***validation_errors_return,
   int *allocated_errors_count,
-  int *detected_errors_count)
+  int *used_errors_count)
 {
   check(new_order_request_order_item != NULL, "new_order_request_order_item: NULL");
-  check(validation_errors != NULL, "validation_errors: NULL");
+  check(validation_errors_return != NULL, "validation_errors_return: NULL");
   check(allocated_errors_count != NULL, "allocated_errors_count: NULL");
-  check(detected_errors_count != NULL, "detected_errors_count: NULL");
+  check(used_errors_count != NULL, "used_errors_count: NULL");
 
   int validate_name_result = validate_string(new_order_request_order_item->name, 1, 1, 100);
   if (validate_name_result != 0)
   {
-    int validation_errors_add_result = validation_errors_add(
-      validation_errors, allocated_errors_count, detected_errors_count,
-      NEW_ORDER_REQUEST_ORDER_ITEM_NAME, index, validate_name_result);
+    int validation_errors_add_result = validation_errors_add_level_2(
+      validation_errors_return, allocated_errors_count, used_errors_count,
+      NEW_ORDER_REQUEST_ORDER_ITEMS, index,
+      NEW_ORDER_REQUEST_ORDER_ITEM_NAME, -1, validate_name_result);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
@@ -58,9 +59,10 @@ int new_order_request_order_item_validate(
   int validate_quantity_result = validate_int(new_order_request_order_item->quantity, 1, 1, 999999);
   if (validate_quantity_result != 0)
   {
-    int validation_errors_add_result = validation_errors_add(
-      validation_errors, allocated_errors_count, detected_errors_count,
-      NEW_ORDER_REQUEST_ORDER_ITEM_QUANTITY, index, validate_quantity_result);
+    int validation_errors_add_result = validation_errors_add_level_2(
+      validation_errors_return, allocated_errors_count, used_errors_count,
+      NEW_ORDER_REQUEST_ORDER_ITEMS, index,
+      NEW_ORDER_REQUEST_ORDER_ITEM_QUANTITY, -1, validate_quantity_result);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);

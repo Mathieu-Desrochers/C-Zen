@@ -43,7 +43,7 @@ int new_order_request_validate(
   validation_error_t **validation_errors_return = NULL;
 
   int allocated_errors_count = 0;
-  int detected_errors_count = 0;
+  int used_errors_count = 0;
 
   check(new_order_request != NULL, "new_order_request: NULL");
   check(validation_errors != NULL, "validation_errors: NULL");
@@ -53,7 +53,7 @@ int new_order_request_validate(
   if (validate_customer_name_result != 0)
   {
     int validation_errors_add_result = validation_errors_add(
-      &validation_errors_return, &allocated_errors_count, &detected_errors_count,
+      &validation_errors_return, &allocated_errors_count, &used_errors_count,
       NEW_ORDER_REQUEST_CUSTOMER_NAME, -1, validate_customer_name_result);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
@@ -65,34 +65,39 @@ int new_order_request_validate(
     new_order_request->order_items_count,
     1, 1, 100);
 
-  if (validate_order_items_result != 0)
+  if (validate_order_items_result == 0)
+  {
+    if (new_order_request->order_items != NULL)
+    {
+      for (int index = 0; index < new_order_request->order_items_count; index++)
+      {
+        int new_order_request_order_item_validate_result = new_order_request_order_item_validate(
+          new_order_request->order_items[index],
+          index,
+          &validation_errors_return,
+          &allocated_errors_count,
+          &used_errors_count);
+
+        check(new_order_request_order_item_validate_result == 0, "new_order_request_order_item_validate_result: %d",
+          new_order_request_order_item_validate_result);
+      }
+    }
+  }
+  else
   {
     int validation_errors_add_result = validation_errors_add(
-      &validation_errors_return, &allocated_errors_count, &detected_errors_count,
+      &validation_errors_return, &allocated_errors_count, &used_errors_count,
       NEW_ORDER_REQUEST_ORDER_ITEMS, -1, validate_order_items_result);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
   }
 
-  for (int index = 0; index < new_order_request->order_items_count; index++)
-  {
-    int new_order_request_order_item_validate_result = new_order_request_order_item_validate(
-      new_order_request->order_items[index],
-      index,
-      &validation_errors_return,
-      &allocated_errors_count,
-      &detected_errors_count);
-
-    check(new_order_request_order_item_validate_result == 0, "new_order_request_order_item_validate_result: %d",
-      new_order_request_order_item_validate_result);
-  }
-
   int validate_total_result = validate_int(new_order_request->total, 1, 0, 999999);
   if (validate_total_result != 0)
   {
     int validation_errors_add_result = validation_errors_add(
-      &validation_errors_return, &allocated_errors_count, &detected_errors_count,
+      &validation_errors_return, &allocated_errors_count, &used_errors_count,
       NEW_ORDER_REQUEST_TOTAL, -1, validate_total_result);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
@@ -100,13 +105,13 @@ int new_order_request_validate(
   }
 
   *validation_errors = validation_errors_return;
-  *count = detected_errors_count;
+  *count = used_errors_count;
 
   return 0;
 
 error:
 
-  if (validation_errors_return != NULL) { validation_errors_free(validation_errors_return, detected_errors_count); }
+  if (validation_errors_return != NULL) { validation_errors_free(validation_errors_return, used_errors_count); }
 
   return -1;
 }

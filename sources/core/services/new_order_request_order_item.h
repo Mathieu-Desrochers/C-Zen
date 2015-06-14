@@ -22,7 +22,7 @@ new_order_request_order_item_t *new_order_request_order_item_malloc(
 int new_order_request_order_item_validate(
   new_order_request_order_item_t *new_order_request_order_item,
   int index,
-  validation_error_t ***validation_errors,
+  validation_error_t ***validation_errors_return,
   int *allocated_errors_count,
   int *detected_errors_count);
 
