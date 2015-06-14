@@ -6,7 +6,7 @@
 #define NEW_ORDER_REQUEST_ORDER_ITEM_NAME 1
 #define NEW_ORDER_REQUEST_ORDER_ITEM_QUANTITY 2
 
-// represents an order item
+// represents a new order request order item
 typedef struct new_order_request_order_item_t
 {
   char *name;

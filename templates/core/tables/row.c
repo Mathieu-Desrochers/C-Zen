@@ -8,7 +8,8 @@
 // allocates a NAME_SINGLE_LOWER() row
 NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row_malloc(
   int *NAME_SINGLE_LOWER()_id,
-  char *name)
+  char *name,
+  double *weight)
 {
   NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row = malloc(sizeof(NAME_SINGLE_LOWER()_row_t));
   check_mem(NAME_SINGLE_LOWER()_row);
@@ -20,6 +21,10 @@ NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row_malloc(
   int malloc_memcpy_name_result = malloc_memcpy_string(&(NAME_SINGLE_LOWER()_row->name), name);
   check(malloc_memcpy_name_result == 0, "malloc_memcpy_name_result: %d",
     malloc_memcpy_name_result);
+
+  int malloc_memcpy_weight_result = malloc_memcpy_double(&(NAME_SINGLE_LOWER()_row->weight), weight);
+  check(malloc_memcpy_weight_result == 0, "malloc_memcpy_weight_result: %d",
+    malloc_memcpy_weight_result);
 
   return NAME_SINGLE_LOWER()_row;
 
@@ -64,6 +69,7 @@ void NAME_SINGLE_LOWER()_row_free(NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()
 
   if (NAME_SINGLE_LOWER()_row->NAME_SINGLE_LOWER()_id != NULL) { free(NAME_SINGLE_LOWER()_row->NAME_SINGLE_LOWER()_id); }
   if (NAME_SINGLE_LOWER()_row->name != NULL) { free(NAME_SINGLE_LOWER()_row->name); }
+  if (NAME_SINGLE_LOWER()_row->weight != NULL) { free(NAME_SINGLE_LOWER()_row->weight); }
 
   free(NAME_SINGLE_LOWER()_row);
 }
