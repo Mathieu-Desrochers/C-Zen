@@ -7,14 +7,14 @@
 
 // allocates a NAME_SINGLE_LOWER() request
 NAME_SINGLE_LOWER()_request_t *NAME_SINGLE_LOWER()_request_malloc(
-  char *name)
+  int *quantity)
 {
   NAME_SINGLE_LOWER()_request_t *NAME_SINGLE_LOWER()_request = malloc(sizeof(NAME_SINGLE_LOWER()_request_t));
   check_mem(NAME_SINGLE_LOWER()_request);
 
-  int malloc_memcpy_name_result = malloc_memcpy_string(&(NAME_SINGLE_LOWER()_request->name), name);
-  check(malloc_memcpy_name_result == 0, "malloc_memcpy_name_result: %d",
-    malloc_memcpy_name_result);
+  int malloc_memcpy_quantity_result = malloc_memcpy_int(&(NAME_SINGLE_LOWER()_request->quantity), quantity);
+  check(malloc_memcpy_quantity_result == 0, "malloc_memcpy_quantity_result: %d",
+    malloc_memcpy_quantity_result);
 
   NAME_SINGLE_LOWER()_request->subrequests = NULL;
   NAME_SINGLE_LOWER()_request->subrequests_count = 0;
@@ -43,12 +43,12 @@ int NAME_SINGLE_LOWER()_request_validate(
   check(validation_errors != NULL, "validation_errors: NULL");
   check(count != NULL, "count: NULL");
 
-  int validate_name_result = validate_string(NAME_SINGLE_LOWER()_request->name, 1, 1, 100);
-  if (validate_name_result != 0)
+  int validate_quantity_result = validate_int(NAME_SINGLE_LOWER()_request->quantity, 1, 1, 100);
+  if (validate_quantity_result != 0)
   {
     int validation_errors_add_result = validation_errors_add(
       &validation_errors_return, &allocated_errors_count, &used_errors_count,
-      NAME_SINGLE_UPPER()_REQUEST_NAME, -1, validate_name_result);
+      NAME_SINGLE_UPPER()_REQUEST_QUANTITY, -1, validate_quantity_result);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
@@ -107,7 +107,7 @@ void NAME_SINGLE_LOWER()_request_free(NAME_SINGLE_LOWER()_request_t *NAME_SINGLE
     return;
   }
 
-  if (NAME_SINGLE_LOWER()_request->name != NULL) { free(NAME_SINGLE_LOWER()_request->name); }
+  if (NAME_SINGLE_LOWER()_request->quantity != NULL) { free(NAME_SINGLE_LOWER()_request->quantity); }
 
   if (NAME_SINGLE_LOWER()_request->subrequests != NULL)
   {

@@ -3,20 +3,17 @@
 
 `#'include "../../infrastructure/validation/validation.h"
 
-`#'define NAME_SINGLE_UPPER()_REQUEST_`'SUBNAME_SINGLE_UPPER()_NAME 1
-`#'define NAME_SINGLE_UPPER()_REQUEST_`'SUBNAME_SINGLE_UPPER()_WEIGHT 2
+`#'define NAME_SINGLE_UPPER()_REQUEST_`'SUBNAME_SINGLE_UPPER()_QUANTITY 1
 
 // represents a NAME_SINGLE_LOWER() request SUBNAME_SINGLE_LOWER()
 typedef struct NAME_SINGLE_LOWER()_request_`'SUBNAME_SINGLE_LOWER()_t
 {
-  char *name;
-  double *weight;
+  int *quantity;
 } NAME_SINGLE_LOWER()_request_`'SUBNAME_SINGLE_LOWER()_t;
 
 // allocates a NAME_SINGLE_LOWER() request SUBNAME_SINGLE_LOWER()
 NAME_SINGLE_LOWER()_request_`'SUBNAME_SINGLE_LOWER()_t *NAME_SINGLE_LOWER()_request_`'SUBNAME_SINGLE_LOWER()_malloc(
-  char *name,
-  double *weight);
+  int *quantity);
 
 // validates a NAME_SINGLE_LOWER() request SUBNAME_SINGLE_LOWER()
 int NAME_SINGLE_LOWER()_request_`'SUBNAME_SINGLE_LOWER()_validate(
