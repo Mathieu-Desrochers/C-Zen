@@ -11,15 +11,13 @@
 typedef struct NAME_SINGLE_LOWER()_request_t
 {
   char *name;
-  double *weight;
   NAME_SINGLE_LOWER()_request_subrequest_t **subrequests;
   int subrequests_count;
 } NAME_SINGLE_LOWER()_request_t;
 
 // allocates a NAME_SINGLE_LOWER() request
 NAME_SINGLE_LOWER()_request_t *NAME_SINGLE_LOWER()_request_malloc(
-  char *name,
-  double *weight);
+  char *name);
 
 // validates a NAME_SINGLE_LOWER() request
 int NAME_SINGLE_LOWER()_request_validate(

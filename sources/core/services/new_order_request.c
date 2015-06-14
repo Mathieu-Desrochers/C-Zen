@@ -65,7 +65,16 @@ int new_order_request_validate(
     new_order_request->order_items_count,
     1, 1, 100);
 
-  if (validate_order_items_result == 0)
+  if (validate_order_items_result != 0)
+  {
+    int validation_errors_add_result = validation_errors_add(
+      &validation_errors_return, &allocated_errors_count, &used_errors_count,
+      NEW_ORDER_REQUEST_ORDER_ITEMS, -1, validate_order_items_result);
+
+    check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
+      validation_errors_add_result);
+  }
+  else
   {
     if (new_order_request->order_items != NULL)
     {
@@ -82,15 +91,6 @@ int new_order_request_validate(
           new_order_request_order_item_validate_result);
       }
     }
-  }
-  else
-  {
-    int validation_errors_add_result = validation_errors_add(
-      &validation_errors_return, &allocated_errors_count, &used_errors_count,
-      NEW_ORDER_REQUEST_ORDER_ITEMS, -1, validate_order_items_result);
-
-    check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
-      validation_errors_add_result);
   }
 
   int validate_total_result = validate_int(new_order_request->total, 1, 0, 999999);

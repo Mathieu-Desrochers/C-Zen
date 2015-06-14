@@ -6,14 +6,12 @@ typedef struct NAME_SINGLE_LOWER()_row_t
 {
   int *NAME_SINGLE_LOWER()_id;
   char *name;
-  double *weight;
 } NAME_SINGLE_LOWER()_row_t;
 
 // allocates a NAME_SINGLE_LOWER() row
 NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row_malloc(
   int *NAME_SINGLE_LOWER()_id,
-  char *name,
-  double *weight);
+  char *name);
 
 // adds a NAME_SINGLE_LOWER() row to an array
 int NAME_SINGLE_LOWER()_rows_add(NAME_SINGLE_LOWER()_row_t ***NAME_SINGLE_LOWER()_rows, int *count, int *used, NAME_SINGLE_LOWER()_row_t *NAME_SINGLE_LOWER()_row);
