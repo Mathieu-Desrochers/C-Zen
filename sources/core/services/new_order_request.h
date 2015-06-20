@@ -31,7 +31,4 @@ int new_order_request_validate(
 // frees a new order request
 void new_order_request_free(new_order_request_t *new_order_request);
 
-// frees an array of new order requests
-void new_order_requests_free(new_order_request_t **new_order_requests, int count);
-
 #endif
