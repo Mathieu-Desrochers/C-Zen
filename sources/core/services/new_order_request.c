@@ -78,11 +78,11 @@ int new_order_request_validate(
   {
     if (new_order_request->order_items != NULL)
     {
-      for (int index = 0; index < new_order_request->order_items_count; index++)
+      for (int i = 0; i < new_order_request->order_items_count; i++)
       {
         int new_order_request_order_item_validate_result = new_order_request_order_item_validate(
-          new_order_request->order_items[index],
-          index,
+          new_order_request->order_items[i],
+          i,
           &validation_errors_return,
           &allocated_errors_count,
           &used_errors_count);
