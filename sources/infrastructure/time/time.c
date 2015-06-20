@@ -8,6 +8,22 @@
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/time/time.h"
 
+// gets current utc time
+int utc_now(time_t *now)
+{
+  time_t time_result = time(NULL);
+  check((int)time_result != -1, "time_result: %d",
+    (int)time_result);
+
+  *now = time_result;
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
 // parses utc time
 int parse_utc_date(char *string, time_t *time)
 {

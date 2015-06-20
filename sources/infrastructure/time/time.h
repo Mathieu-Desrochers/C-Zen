@@ -3,6 +3,9 @@
 
 #include <time.h>
 
+// gets current utc time
+int utc_now(time_t *now);
+
 // parses utc time
 int parse_utc_date(char *string, time_t *time);
 int parse_utc_date_time(char *string, time_t *time);

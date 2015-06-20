@@ -9,7 +9,7 @@
 // allocates an new order request order item
 new_order_request_order_item_t *new_order_request_order_item_malloc(
   char *name,
-  int *quantity)
+  double *quantity)
 {
   new_order_request_order_item_t *new_order_request_order_item = malloc(sizeof(new_order_request_order_item_t));
   check_mem(new_order_request_order_item);
@@ -18,7 +18,7 @@ new_order_request_order_item_t *new_order_request_order_item_malloc(
   check(malloc_memcpy_name_result == 0, "malloc_memcpy_name_result: %d",
     malloc_memcpy_name_result);
 
-  int malloc_memcpy_quantity_result = malloc_memcpy_int(&(new_order_request_order_item->quantity), quantity);
+  int malloc_memcpy_quantity_result = malloc_memcpy_double(&(new_order_request_order_item->quantity), quantity);
   check(malloc_memcpy_quantity_result == 0, "malloc_memcpy_quantity_result: %d",
     malloc_memcpy_quantity_result);
 
@@ -56,7 +56,7 @@ int new_order_request_order_item_validate(
       validation_errors_add_result);
   }
 
-  int validate_quantity_result = validate_int(new_order_request_order_item->quantity, 1, 1, 999999);
+  int validate_quantity_result = validate_double(new_order_request_order_item->quantity, 1, 1, 999999);
   if (validate_quantity_result != 0)
   {
     int validation_errors_add_result = validation_errors_add_level_2(

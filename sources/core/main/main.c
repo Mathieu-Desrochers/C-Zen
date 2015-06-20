@@ -28,23 +28,26 @@ int main()
   check(sql_open_connection_result == 0, "sql_open_connection_result: %d",
     sql_open_connection_result);
 
-  char *customer_name = "";
-  int total = -1;
+  char *customer_name = "Alice";
+  int total = 100;
 
   new_order_request_t *new_order_request = new_order_request_malloc(
     customer_name,
     &total);
 
-  char *name = "";
-  int quantity = 9999999;
+  char *name_1 = "Pizza";
+  double quantity_1 = 3.8;
 
   new_order_request_order_item_t *new_order_request_order_item_1 = new_order_request_order_item_malloc(
-    name,
-    &quantity);
+    name_1,
+    &quantity_1);
+
+  char *name_2 = "Pirate hat";
+  double quantity_2 = 6;
 
   new_order_request_order_item_t *new_order_request_order_item_2 = new_order_request_order_item_malloc(
-    name,
-    &quantity);
+    name_2,
+    &quantity_2);
 
   new_order_request->order_items = malloc(sizeof(new_order_request_order_item_t *) * 2);
   new_order_request->order_items[0] = new_order_request_order_item_1;
@@ -66,6 +69,7 @@ int main()
   }
 
   validation_errors_free(validation_errors, count);
+  new_order_response_free(new_order_response);
   new_order_request_free(new_order_request);
   sql_close_connection(sql_connection);
 

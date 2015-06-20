@@ -24,7 +24,7 @@ SERVICES = sources/core/services/new_order_request.o \
 tags : $(INFRASTRUCTURE) $(TABLES) $(SERVICES)
 	ctags -R .
 
-main : sources/core/main/main.c $(INFRASTRUCTURE) $(TABLES) $(SERVICES)
+main : all sources/core/main/main.c
 	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(TABLES) $(SERVICES) \
 	-l sqlite3 sources/core/main/main.c -o $@
 

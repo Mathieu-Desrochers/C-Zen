@@ -10,13 +10,13 @@
 typedef struct new_order_request_order_item_t
 {
   char *name;
-  int *quantity;
+  double *quantity;
 } new_order_request_order_item_t;
 
 // allocates an new order request order item
 new_order_request_order_item_t *new_order_request_order_item_malloc(
   char *name,
-  int *quantity);
+  double *quantity);
 
 // validates a new order request order item
 int new_order_request_order_item_validate(
