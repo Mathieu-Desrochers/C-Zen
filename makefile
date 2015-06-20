@@ -1,6 +1,8 @@
 CC = c99
 CFLAGS  = -g -Wall
 
+all : $(INFRASTRUCTURE) $(TABLES) $(SERVICES) tags
+
 INFRASTRUCTURE = sources/infrastructure/mem/mem.o \
                  sources/infrastructure/sql/sql.o \
                  sources/infrastructure/time/time.o \
@@ -16,10 +18,11 @@ SERVICES = sources/core/services/new_order_request.o \
            sources/core/services/new_order_response.o \
            sources/core/services/new_order_service.o
 
-all : $(INFRASTRUCTURE) $(TABLES) $(SERVICES)
-
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+tags : $(INFRASTRUCTURE) $(TABLES) $(SERVICES)
+	ctags -R .
 
 main : sources/core/main/main.c $(INFRASTRUCTURE) $(TABLES) $(SERVICES)
 	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(TABLES) $(SERVICES) \
@@ -35,3 +38,4 @@ database :
 clean :
 	find . -name *.o | xargs -i /bin/rm {}
 	rm -f main
+	rm -f tags
