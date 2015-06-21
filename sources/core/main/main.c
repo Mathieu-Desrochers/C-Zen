@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../../core/services/new_order_request.h"
-#include "../../core/services/new_order_request_order_item.h"
-#include "../../core/services/new_order_response.h"
-#include "../../core/services/new_order_service.h"
+#include "../../core/services/update_order_request.h"
+#include "../../core/services/update_order_request_order_item.h"
+#include "../../core/services/update_order_response.h"
+#include "../../core/services/update_order_service.h"
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/sql/sql.h"
 
@@ -28,37 +28,20 @@ int main()
   check(sql_open_connection_result == 0, "sql_open_connection_result: %d",
     sql_open_connection_result);
 
+  int order_id = 199;
   char *customer_name = "Alice";
   int total = 100;
 
-  new_order_request_t *new_order_request = new_order_request_malloc(
+  update_order_request_t *update_order_request = update_order_request_malloc(
+    &order_id,
     customer_name,
     &total);
 
-  char *name_1 = "Pizza";
-  double quantity_1 = 3.8;
-
-  new_order_request_order_item_t *new_order_request_order_item_1 = new_order_request_order_item_malloc(
-    name_1,
-    &quantity_1);
-
-  char *name_2 = "Pirate hat";
-  double quantity_2 = 6;
-
-  new_order_request_order_item_t *new_order_request_order_item_2 = new_order_request_order_item_malloc(
-    name_2,
-    &quantity_2);
-
-  new_order_request->order_items = malloc(sizeof(new_order_request_order_item_t *) * 2);
-  new_order_request->order_items[0] = new_order_request_order_item_1;
-  new_order_request->order_items[1] = new_order_request_order_item_2;
-  new_order_request->order_items_count = 2;
-
-  new_order_response_t *new_order_response = NULL;
+  update_order_response_t *update_order_response = NULL;
   validation_error_t **validation_errors = NULL;
   int count = 0;
 
-  int result = new_order_service(sql_connection, new_order_request, &new_order_response, &validation_errors, &count);
+  int result = update_order_service(sql_connection, update_order_request, &update_order_response, &validation_errors, &count);
   check(result == 0, "result: %d", result);
 
   printf("count: %d\n", count);
@@ -69,8 +52,8 @@ int main()
   }
 
   validation_errors_free(validation_errors, count);
-  new_order_response_free(new_order_response);
-  new_order_request_free(new_order_request);
+  update_order_response_free(update_order_response);
+  update_order_request_free(update_order_request);
   sql_close_connection(sql_connection);
 
   return 0;
@@ -78,8 +61,8 @@ int main()
 error:
 
   if (validation_errors != NULL) { validation_errors_free(validation_errors, count); }
-  if (new_order_response != NULL) {new_order_response_free(new_order_response); }
-  if (new_order_request != NULL) {new_order_request_free(new_order_request); }
+  if (update_order_response != NULL) {update_order_response_free(update_order_response); }
+  if (update_order_request != NULL) {update_order_request_free(update_order_request); }
   if (sql_connection != NULL) {sql_close_connection(sql_connection); }
 
   return -1;

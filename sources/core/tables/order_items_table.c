@@ -217,6 +217,78 @@ error:
   return -1;
 }
 
+// selects order item rows by order id
+int order_items_table_select_by_order_id(sqlite3 *sql_connection, int order_id, order_item_row_t ***order_item_rows, int *count)
+{
+  sqlite3_stmt *sql_statement = NULL;
+  order_item_row_t **order_item_rows_return = NULL;
+  order_item_row_t *order_item_row = NULL;
+
+  check(sql_connection != NULL, "sql_connection: NULL");
+  check(order_item_rows != NULL, "order_item_rows: NULL");
+
+  int sql_prepare_statement_result = sql_prepare_statement(
+    sql_connection,
+    "SELECT "
+      "\"order-item-id\", "
+      "\"order-id\", "
+      "\"name\", "
+      "\"quantity\", "
+      "\"shipping-date\", "
+      "\"shipping-time-before\", "
+      "\"shipping-time-after\" "
+    "FROM \"order-items\" "
+    "WHERE \"order-id\" = ?1;",
+    &sql_statement);
+
+  check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
+    sql_prepare_statement_result);
+
+  int sql_bind_order_id_result = sql_bind_int(sql_statement, 1, &order_id);
+  check(sql_bind_order_id_result == 0, "sql_bind_order_id_result: %d",
+    sql_bind_order_id_result);
+
+  int allocated_order_item_rows_count = 0;
+  int read_order_item_rows_count = 0;
+
+  int is_row_available = 0;
+  int sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
+  check(sql_step_select_result == 0, "sql_step_select_result: %d",
+    sql_step_select_result);
+
+  while (is_row_available == 1)
+  {
+    int order_items_table_read_result = order_items_table_read(sql_statement, &order_item_row);
+    check(order_items_table_read_result == 0, "order_items_table_read_result: %d",
+      order_items_table_read_result);
+
+    int order_item_rows_add_result = order_item_rows_add(
+      &order_item_rows_return, &allocated_order_item_rows_count, &read_order_item_rows_count,
+      order_item_row);
+
+    check(order_item_rows_add_result == 0, "order_item_rows_add_result: %d",
+      order_item_rows_add_result);
+
+    sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
+    check(sql_step_select_result == 0, "sql_step_select_result: %d",
+      sql_step_select_result);
+  }
+
+  sql_finalize_statement(sql_statement);
+
+  *order_item_rows = order_item_rows_return;
+  *count = read_order_item_rows_count;
+
+  return 0;
+
+error:
+
+  if (order_item_rows_return != NULL) { order_item_rows_free(order_item_rows_return, read_order_item_rows_count); }
+  if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
+
+  return -1;
+}
+
 // selects all the order item rows
 int order_items_table_select_all(sqlite3 *sql_connection, order_item_row_t ***order_item_rows, int *count)
 {

@@ -31,6 +31,9 @@ validation_path_t *validation_path_malloc(int property, int index);
 
 // allocates a validation error
 validation_error_t *validation_error_malloc(
+  int error_code);
+
+validation_error_t *validation_error_malloc_level_1(
   int property,
   int index,
   int error_code);
@@ -47,6 +50,12 @@ int validation_errors_add(
   validation_error_t ***validation_errors,
   int *count,
   int *used,
+  int error_code);
+
+int validation_errors_add_level_1(
+  validation_error_t ***validation_errors,
+  int *count,
+  int *used,
   int property,
   int index,
   int error_code);
@@ -59,6 +68,12 @@ int validation_errors_add_level_2(
   int index,
   int property_level_2,
   int index_level_2,
+  int error_code);
+
+// adds a single validation error to an array
+int validation_errors_single(
+  validation_error_t ***validation_errors,
+  int *used,
   int error_code);
 
 // validates a double

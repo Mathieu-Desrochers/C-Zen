@@ -26,6 +26,26 @@ error:
 
 // allocates a validation error
 validation_error_t *validation_error_malloc(
+  int error_code)
+{
+  validation_error_t *validation_error = NULL;
+
+  validation_error = malloc(sizeof(validation_error_t));
+  check_mem(validation_error);
+
+  validation_error->validation_path = NULL;
+  validation_error->error_code = error_code;
+
+  return validation_error;
+
+error:
+
+  if (validation_error != NULL) { validation_error_free(validation_error); }
+
+  return NULL;
+}
+
+validation_error_t *validation_error_malloc_level_1(
   int property,
   int index,
   int error_code)
@@ -97,6 +117,40 @@ int validation_errors_add(
   validation_error_t ***validation_errors,
   int *count,
   int *used,
+  int error_code)
+{
+  validation_error_t **reallocated_validation_errors = NULL;
+  validation_error_t *validation_error = NULL;
+
+  if (*count == *used)
+  {
+    int new_count = (*count) == 0 ? 4 : ((*count) * 2);
+    reallocated_validation_errors = realloc(*validation_errors, sizeof(validation_error_t *) * new_count);
+    check_mem(reallocated_validation_errors);
+    *validation_errors = reallocated_validation_errors;
+    *count = new_count;
+  }
+
+  validation_error = validation_error_malloc(error_code);
+  check(validation_error != NULL, "validation_error: NULL");
+
+  (*validation_errors)[*used] = validation_error;
+  (*used)++;
+
+  return 0;
+
+error:
+
+  if (validation_error != NULL) { validation_error_free(validation_error); }
+
+  return -1;
+}
+
+// adds a validation error to an array
+int validation_errors_add_level_1(
+  validation_error_t ***validation_errors,
+  int *count,
+  int *used,
   int property,
   int index,
   int error_code)
@@ -113,7 +167,7 @@ int validation_errors_add(
     *count = new_count;
   }
 
-  validation_error = validation_error_malloc(property, index, error_code);
+  validation_error = validation_error_malloc_level_1(property, index, error_code);
   check(validation_error != NULL, "validation_error: NULL");
 
   (*validation_errors)[*used] = validation_error;
@@ -162,6 +216,36 @@ int validation_errors_add_level_2(
 error:
 
   if (validation_error != NULL) { validation_error_free(validation_error); }
+
+  return -1;
+}
+
+// adds a single validation error to an array
+int validation_errors_single(
+  validation_error_t ***validation_errors,
+  int *used,
+  int error_code)
+{
+  validation_error_t **validation_errors_return = NULL;
+  validation_error_t *validation_error = NULL;
+
+  validation_errors_return = malloc(sizeof(validation_error_t *));
+  check_mem(validation_errors_return);
+
+  validation_error = validation_error_malloc(error_code);
+  check(validation_error != NULL, "validation_error: NULL");
+
+  validation_errors_return[0] = validation_error;
+
+  *validation_errors = validation_errors_return;
+  *used = 1;
+
+  return 0;
+
+error:
+
+  if (validation_error != NULL) { validation_error_free(validation_error); }
+  if (validation_errors_return != NULL) { free(validation_errors_return); }
 
   return -1;
 }

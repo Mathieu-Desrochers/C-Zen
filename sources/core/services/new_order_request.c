@@ -52,7 +52,7 @@ int new_order_request_validate(
   int validate_customer_name_result = validate_string(new_order_request->customer_name, 1, 1, 100);
   if (validate_customer_name_result != 0)
   {
-    int validation_errors_add_result = validation_errors_add(
+    int validation_errors_add_result = validation_errors_add_level_1(
       &validation_errors_return, &allocated_errors_count, &used_errors_count,
       NEW_ORDER_REQUEST_CUSTOMER_NAME, -1, validate_customer_name_result);
 
@@ -67,7 +67,7 @@ int new_order_request_validate(
 
   if (validate_order_items_result != 0)
   {
-    int validation_errors_add_result = validation_errors_add(
+    int validation_errors_add_result = validation_errors_add_level_1(
       &validation_errors_return, &allocated_errors_count, &used_errors_count,
       NEW_ORDER_REQUEST_ORDER_ITEMS, -1, validate_order_items_result);
 
@@ -96,7 +96,7 @@ int new_order_request_validate(
   int validate_total_result = validate_int(new_order_request->total, 1, 0, 999999);
   if (validate_total_result != 0)
   {
-    int validation_errors_add_result = validation_errors_add(
+    int validation_errors_add_result = validation_errors_add_level_1(
       &validation_errors_return, &allocated_errors_count, &used_errors_count,
       NEW_ORDER_REQUEST_TOTAL, -1, validate_total_result);
 

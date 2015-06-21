@@ -19,7 +19,8 @@ SERVICES = sources/core/services/new_order_request.o \
            sources/core/services/new_order_service.o \
            sources/core/services/update_order_request.o \
            sources/core/services/update_order_request_order_item.o \
-           sources/core/services/update_order_response.o
+           sources/core/services/update_order_response.o \
+           sources/core/services/update_order_service.o
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
