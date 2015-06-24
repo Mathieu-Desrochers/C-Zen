@@ -20,7 +20,7 @@ order_row_t *order_row_malloc(
   int *total);
 
 // adds an order row to an array
-int order_rows_add(order_row_t ***order_rows, int *count, int *used, order_row_t *order_row);
+int order_rows_add(order_row_t ***order_rows, int *allocated_count, int *used_count, order_row_t *order_row);
 
 // frees an order row
 void order_row_free(order_row_t *order_row);

@@ -1,69 +1,46 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../../core/services/update_order_request.h"
-#include "../../core/services/update_order_request_order_item.h"
-#include "../../core/services/update_order_response.h"
-#include "../../core/services/update_order_service.h"
 #include "../../infrastructure/dbg/dbg.h"
-#include "../../infrastructure/sql/sql.h"
-
-void print_error(validation_error_t *validation_error)
-{
-  validation_path_t *validation_path = validation_error->validation_path;
-
-  while (validation_path != NULL)
-  {
-    printf("property: %d\tindex: %d\t", validation_path->property, validation_path->index);
-    validation_path = validation_path->next;
-  }
-
-  printf("error_code: %d\n", validation_error->error_code);
-}
+#include "../../infrastructure/hash/hash.h"
 
 int main()
 {
-  sqlite3 *sql_connection;
-  int sql_open_connection_result = sql_open_connection("/var/c-zen/c-zen.db", &sql_connection);
-  check(sql_open_connection_result == 0, "sql_open_connection_result: %d",
-    sql_open_connection_result);
+  hash_table_t *hash_table = NULL;
 
-  int order_id = 199;
-  char *customer_name = "Alice";
-  int total = 100;
+  int hash_malloc_result = hash_malloc(&hash_table, 2);
+  check(hash_malloc_result == 0, "hash_malloc_result: %d",
+    hash_malloc_result);
 
-  update_order_request_t *update_order_request = update_order_request_malloc(
-    &order_id,
-    customer_name,
-    &total);
+  int hash_set_result;
 
-  update_order_response_t *update_order_response = NULL;
-  validation_error_t **validation_errors = NULL;
-  int count = 0;
+  hash_set_result = hash_set(hash_table, 1, (void *)1);
+  check(hash_set_result == 0, "hash_set_result: %d",
+    hash_set_result);
 
-  int result = update_order_service(sql_connection, update_order_request, &update_order_response, &validation_errors, &count);
-  check(result == 0, "result: %d", result);
+  hash_set_result = hash_set(hash_table, 1, (void *)4);
+  check(hash_set_result == 0, "hash_set_result: %d",
+    hash_set_result);
 
-  printf("count: %d\n", count);
+  hash_set_result = hash_set(hash_table, 2, (void *)2);
+  check(hash_set_result == 0, "hash_set_result: %d",
+    hash_set_result);
 
-  for (int i = 0; i < count; i++)
-  {
-    print_error(validation_errors[i]);
-  }
+  int value;
 
-  validation_errors_free(validation_errors, count);
-  update_order_response_free(update_order_response);
-  update_order_request_free(update_order_request);
-  sql_close_connection(sql_connection);
+  int hash_get_result = hash_get(hash_table, 1, (void **)&value);
+  check(hash_get_result == 0, "hash_get_result: %d",
+    hash_get_result);
+
+  printf("%d\n", value);
+
+  hash_free(hash_table);
 
   return 0;
 
 error:
 
-  if (validation_errors != NULL) { validation_errors_free(validation_errors, count); }
-  if (update_order_response != NULL) {update_order_response_free(update_order_response); }
-  if (update_order_request != NULL) {update_order_request_free(update_order_request); }
-  if (sql_connection != NULL) {sql_close_connection(sql_connection); }
+  if (hash_table != NULL) { hash_free(hash_table); }
 
   return -1;
 }

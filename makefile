@@ -3,7 +3,8 @@ CFLAGS  = -g -Wall
 
 all : $(INFRASTRUCTURE) $(TABLES) $(SERVICES) tags
 
-INFRASTRUCTURE = sources/infrastructure/mem/mem.o \
+INFRASTRUCTURE = sources/infrastructure/hash/hash.o \
+                 sources/infrastructure/mem/mem.o \
                  sources/infrastructure/sql/sql.o \
                  sources/infrastructure/time/time.o \
                  sources/infrastructure/validation/validation.o
