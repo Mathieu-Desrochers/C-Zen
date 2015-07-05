@@ -5,6 +5,7 @@
 
 #include "../../core/tables/order_item_row.h"
 #include "../../core/tables/order_items_table.h"
+#include "../../infrastructure/array/array.h"
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/sql/sql.h"
 
@@ -262,12 +263,12 @@ int order_items_table_select_by_order_id(sqlite3 *sql_connection, int order_id, 
     check(order_items_table_read_result == 0, "order_items_table_read_result: %d",
       order_items_table_read_result);
 
-    int order_item_rows_add_result = order_item_rows_add(
-      &order_item_rows_return, &allocated_order_item_rows_count, &read_order_item_rows_count,
-      order_item_row);
+    int array_add_result = array_add_pointer(
+      (void ***)&order_item_rows_return, &allocated_order_item_rows_count, &read_order_item_rows_count,
+      (void *)order_item_row);
 
-    check(order_item_rows_add_result == 0, "order_item_rows_add_result: %d",
-      order_item_rows_add_result);
+    check(array_add_result == 0, "array_add_result: %d",
+      array_add_result);
 
     sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
     check(sql_step_select_result == 0, "sql_step_select_result: %d",
@@ -329,12 +330,12 @@ int order_items_table_select_all(sqlite3 *sql_connection, order_item_row_t ***or
     check(order_items_table_read_result == 0, "order_items_table_read_result: %d",
       order_items_table_read_result);
 
-    int order_item_rows_add_result = order_item_rows_add(
-      &order_item_rows_return, &allocated_order_item_rows_count, &read_order_item_rows_count,
-      order_item_row);
+    int array_add_result = array_add_pointer(
+      (void ***)&order_item_rows_return, &allocated_order_item_rows_count, &read_order_item_rows_count,
+      (void *)order_item_row);
 
-    check(order_item_rows_add_result == 0, "order_item_rows_add_result: %d",
-      order_item_rows_add_result);
+    check(array_add_result == 0, "array_add_result: %d",
+      array_add_result);
 
     sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
     check(sql_step_select_result == 0, "sql_step_select_result: %d",

@@ -5,6 +5,7 @@
 
 #include "../../core/tables/order_row.h"
 #include "../../core/tables/orders_table.h"
+#include "../../infrastructure/array/array.h"
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/sql/sql.h"
 
@@ -212,12 +213,12 @@ int orders_table_select_all(sqlite3 *sql_connection, order_row_t ***order_rows, 
     check(orders_table_read_result == 0, "orders_table_read_result: %d",
       orders_table_read_result);
 
-    int order_rows_add_result = order_rows_add(
-      &order_rows_return, &allocated_order_rows_count, &read_order_rows_count,
-      order_row);
+    int array_add_result = array_add_pointer(
+      (void ***)&order_rows_return, &allocated_order_rows_count, &read_order_rows_count,
+      (void *)order_row);
 
-    check(order_rows_add_result == 0, "order_rows_add_result: %d",
-      order_rows_add_result);
+    check(array_add_result == 0, "array_add_result: %d",
+      array_add_result);
 
     sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
     check(sql_step_select_result == 0, "sql_step_select_result: %d",

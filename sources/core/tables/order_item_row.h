@@ -25,9 +25,6 @@ order_item_row_t *order_item_row_malloc(
   time_t *shipping_time_before,
   time_t *shipping_time_after);
 
-// adds an order item row to an array
-int order_item_rows_add(order_item_row_t ***order_item_rows, int *allocated_count, int *used_count, order_item_row_t *order_item_row);
-
 // frees an order item row
 void order_item_row_free(order_item_row_t *order_item_row);
 

@@ -48,22 +48,22 @@ validation_error_t *validation_error_malloc_level_2(
 // adds a validation error to an array
 int validation_errors_add(
   validation_error_t ***validation_errors,
-  int *count,
-  int *used,
+  int *allocated_count,
+  int *used_count,
   int error_code);
 
 int validation_errors_add_level_1(
   validation_error_t ***validation_errors,
-  int *count,
-  int *used,
+  int *allocated_count,
+  int *used_count,
   int property,
   int index,
   int error_code);
 
 int validation_errors_add_level_2(
   validation_error_t ***validation_errors,
-  int *count,
-  int *used,
+  int *allocated_count,
+  int *used_count,
   int property,
   int index,
   int property_level_2,

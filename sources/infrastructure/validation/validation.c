@@ -2,6 +2,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "../../infrastructure/array/array.h"
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/validation/validation.h"
 
@@ -45,6 +46,7 @@ error:
   return NULL;
 }
 
+// allocates a validation error
 validation_error_t *validation_error_malloc_level_1(
   int property,
   int index,
@@ -115,27 +117,21 @@ error:
 // adds a validation error to an array
 int validation_errors_add(
   validation_error_t ***validation_errors,
-  int *count,
-  int *used,
+  int *allocated_count,
+  int *used_count,
   int error_code)
 {
-  validation_error_t **reallocated_validation_errors = NULL;
   validation_error_t *validation_error = NULL;
-
-  if (*count == *used)
-  {
-    int new_count = (*count) == 0 ? 4 : ((*count) * 2);
-    reallocated_validation_errors = realloc(*validation_errors, sizeof(validation_error_t *) * new_count);
-    check_mem(reallocated_validation_errors);
-    *validation_errors = reallocated_validation_errors;
-    *count = new_count;
-  }
 
   validation_error = validation_error_malloc(error_code);
   check(validation_error != NULL, "validation_error: NULL");
 
-  (*validation_errors)[*used] = validation_error;
-  (*used)++;
+  int array_add_result = array_add_pointer(
+    (void ***)validation_errors, allocated_count, used_count,
+    (void *)validation_error);
+
+  check(array_add_result == 0, "array_add_result: %d",
+    array_add_result);
 
   return 0;
 
@@ -149,29 +145,23 @@ error:
 // adds a validation error to an array
 int validation_errors_add_level_1(
   validation_error_t ***validation_errors,
-  int *count,
-  int *used,
+  int *allocated_count,
+  int *used_count,
   int property,
   int index,
   int error_code)
 {
-  validation_error_t **reallocated_validation_errors = NULL;
   validation_error_t *validation_error = NULL;
-
-  if (*count == *used)
-  {
-    int new_count = (*count) == 0 ? 4 : ((*count) * 2);
-    reallocated_validation_errors = realloc(*validation_errors, sizeof(validation_error_t *) * new_count);
-    check_mem(reallocated_validation_errors);
-    *validation_errors = reallocated_validation_errors;
-    *count = new_count;
-  }
 
   validation_error = validation_error_malloc_level_1(property, index, error_code);
   check(validation_error != NULL, "validation_error: NULL");
 
-  (*validation_errors)[*used] = validation_error;
-  (*used)++;
+  int array_add_result = array_add_pointer(
+    (void ***)validation_errors, allocated_count, used_count,
+    (void *)validation_error);
+
+  check(array_add_result == 0, "array_add_result: %d",
+    array_add_result);
 
   return 0;
 
@@ -185,31 +175,25 @@ error:
 // adds a validation error to an array
 int validation_errors_add_level_2(
   validation_error_t ***validation_errors,
-  int *count,
-  int *used,
+  int *allocated_count,
+  int *used_count,
   int property,
   int index,
   int property_level_2,
   int index_level_2,
   int error_code)
 {
-  validation_error_t **reallocated_validation_errors = NULL;
   validation_error_t *validation_error = NULL;
-
-  if (*count == *used)
-  {
-    int new_count = (*count) == 0 ? 4 : ((*count) * 2);
-    reallocated_validation_errors = realloc(*validation_errors, sizeof(validation_error_t *) * new_count);
-    check_mem(reallocated_validation_errors);
-    *validation_errors = reallocated_validation_errors;
-    *count = new_count;
-  }
 
   validation_error = validation_error_malloc_level_2(property, index, property_level_2, index_level_2, error_code);
   check(validation_error != NULL, "validation_error: NULL");
 
-  (*validation_errors)[*used] = validation_error;
-  (*used)++;
+  int array_add_result = array_add_pointer(
+    (void ***)validation_errors, allocated_count, used_count,
+    (void *)validation_error);
+
+  check(array_add_result == 0, "array_add_result: %d",
+    array_add_result);
 
   return 0;
 

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "../../infrastructure/array/array.h"
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/mem/mem.h"
 #include "../../core/tables/order_row.h"
@@ -39,30 +40,6 @@ error:
   if (order_row != NULL) { order_row_free(order_row); }
 
   return NULL;
-}
-
-// adds an order row to an array
-int order_rows_add(order_row_t ***order_rows, int *allocated_count, int *used_count, order_row_t *order_row)
-{
-  order_row_t **reallocated_order_rows = NULL;
-
-  if (*allocated_count == *used_count)
-  {
-    int reallocated_count = (*allocated_count) == 0 ? 4 : ((*allocated_count) * 2);
-    reallocated_order_rows = realloc(*order_rows, sizeof(order_row_t *) * reallocated_count);
-    check_mem(reallocated_order_rows);
-    *order_rows = reallocated_order_rows;
-    *allocated_count = reallocated_count;
-  }
-
-  (*order_rows)[*used_count] = order_row;
-  (*used_count)++;
-
-  return 0;
-
-error:
-
-  return -1;
 }
 
 // frees an order row
