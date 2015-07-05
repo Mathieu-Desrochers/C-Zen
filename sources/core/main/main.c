@@ -14,22 +14,22 @@ int main()
 
   int hash_set_result;
 
-  hash_set_result = hash_set(hash_table, 1, (void *)1);
-  check(hash_set_result == 0, "hash_set_result: %d",
+  hash_set_result = hash_set_int_int(hash_table, 1, 1);
+  check(hash_set_result == 0, "hash_set_int_int_result: %d",
     hash_set_result);
 
-  hash_set_result = hash_set(hash_table, 1, (void *)4);
-  check(hash_set_result == 0, "hash_set_result: %d",
+  hash_set_result = hash_set_int_int(hash_table, 1, 4);
+  check(hash_set_result == 0, "hash_set_int_int_result: %d",
     hash_set_result);
 
-  hash_set_result = hash_set(hash_table, 2, (void *)2);
-  check(hash_set_result == 0, "hash_set_result: %d",
+  hash_set_result = hash_set_int_int(hash_table, 2, 2);
+  check(hash_set_result == 0, "hash_set_int_int_result: %d",
     hash_set_result);
 
-  int value;
+  int value = 0;
 
-  int hash_get_result = hash_get(hash_table, 1, (void **)&value);
-  check(hash_get_result == 0, "hash_get_result: %d",
+  int hash_get_result = hash_get_int_int(hash_table, 1, &value);
+  check(hash_get_result == 0, "hash_get_int_int_result: %d",
     hash_get_result);
 
   printf("%d\n", value);
