@@ -88,55 +88,60 @@ error:
 // finds duplicates within an array
 int array_find_duplicates_int(int *array, int array_count, int **duplicate_indexes, int *duplicate_indexes_count)
 {
-//  int **duplicate_indexes_return = NULL;
-//  int duplicate_indexes_allocated_count = 0;
-//  int duplicate_indexes_used_count = 0;
-//
-//  check(array != NULL, "array: NULL");
-//  check(duplicate_indexes != NULL, "duplicate_indexes: NULL");
-//  check(duplicate_indexes_count != NULL, "duplicate_indexes_count: NULL");
-//
-//  hash_table_t *hash_table = NULL;
-//
-//  int hash_malloc_result = hash_malloc(&hash_table, count);
-//  check(hash_malloc_result == 0, "hash_malloc_result: %d",
-//    hash_malloc_result);
-//
-//  0 1 2 3 4
-//  a b a c a
-//
-//
-//
-//  for (int i = 0; i < array_count; i++)
-//  {
-//    int hash_get_int_int_result = hash_get_int_int(hash_table, array[i], &last_seen_index);
-//    check(hash_get_int_int_result == 0 || hash_get_int_int_result == 1, "hash_get_int_int_result: %d",
-//      hash_get_int_int_result);
-//
-//    if (hash_get_int_int_result == 0)
-//    {
-//      int hash_set_result = hash_set_int_int(hash_table, array[i], i);
-//      check(hash_set_result == 0, "hash_set_result: %d",
-//        hash_set_result);
-//    }
-//    else
-//    {
-//      int array_add_result = array_add_int(
-//        &duplicate_indexes_return,
-//        &duplicate_indexes_allocated_count,
-//        &duplicate_indexes_used_count,
-//        i);
-//
-//      check(array_add_result == 0, "array_add_result: %d",
-//        array_add_result);
-//    }
-//  }
-//
-//  return 0;
-//
-//error:
-//
-//  if (hash_table != NULL) { hash_free(hash_table); }
-//
+  int *duplicate_indexes_return = NULL;
+  int duplicate_indexes_allocated_count = 0;
+  int duplicate_indexes_used_count = 0;
+
+  hash_table_t *hash_table = NULL;
+
+  check(array != NULL, "array: NULL");
+  check(duplicate_indexes != NULL, "duplicate_indexes: NULL");
+  check(duplicate_indexes_count != NULL, "duplicate_indexes_count: NULL");
+
+  int hash_table_malloc_result = hash_table_malloc(&hash_table, array_count);
+  check(hash_table_malloc_result == 0, "hash_table_malloc_result: %d",
+    hash_table_malloc_result);
+
+  for (int i = 0; i < array_count; i++)
+  {
+    int hash_table_add_result = hash_table_add_int_int(hash_table, array[i], i);
+    check(hash_table_add_result == 0, "hash_table_add_result: %d",
+      hash_table_add_result);
+  }
+
+  int *values = NULL;
+  int values_count = 0;
+
+  for (int i = 0; i < array_count; i++)
+  {
+    int hash_table_get_result = hash_table_get_int_int(hash_table, array[i], &values, &values_count);
+    check(hash_table_get_result == 0, "hash_table_get_result: %d",
+      hash_table_get_result);
+
+    if (values_count > 1)
+    {
+      int array_add_result = array_add_int(
+        &duplicate_indexes_return,
+        &duplicate_indexes_allocated_count,
+        &duplicate_indexes_used_count,
+        i);
+
+      check(array_add_result == 0, "array_add_result: %d",
+        array_add_result);
+    }
+  }
+
+  hash_table_free(hash_table);
+
+  *duplicate_indexes = duplicate_indexes_return;
+  *duplicate_indexes_count = duplicate_indexes_used_count;
+
+  return 0;
+
+error:
+
+  if (duplicate_indexes_return != NULL) { free(duplicate_indexes_return); }
+  if (hash_table != NULL) { hash_table_free(hash_table); }
+
   return -1;
 }
