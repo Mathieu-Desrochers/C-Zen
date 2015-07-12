@@ -52,7 +52,8 @@ int update_order_request_order_item_validate(
   {
     int validation_errors_add_result = validation_errors_add_level_1(
       validation_errors_return, allocated_errors_count, used_errors_count,
-      UPDATE_ORDER_REQUEST_ORDER_ITEMS, index, VALIDATION_RESULT_REQUIRED);
+      UPDATE_ORDER_REQUEST_ORDER_ITEMS, index,
+      VALIDATION_RESULT_REQUIRED);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
@@ -66,7 +67,8 @@ int update_order_request_order_item_validate(
     int validation_errors_add_result = validation_errors_add_level_2(
       validation_errors_return, allocated_errors_count, used_errors_count,
       UPDATE_ORDER_REQUEST_ORDER_ITEMS, index,
-      UPDATE_ORDER_REQUEST_ORDER_ITEM_ID, -1, validate_order_item_id_result);
+      UPDATE_ORDER_REQUEST_ORDER_ITEM_ID, -1,
+      validate_order_item_id_result);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
@@ -78,7 +80,8 @@ int update_order_request_order_item_validate(
     int validation_errors_add_result = validation_errors_add_level_2(
       validation_errors_return, allocated_errors_count, used_errors_count,
       UPDATE_ORDER_REQUEST_ORDER_ITEMS, index,
-      UPDATE_ORDER_REQUEST_ORDER_ITEM_NAME, -1, validate_name_result);
+      UPDATE_ORDER_REQUEST_ORDER_ITEM_NAME, -1,
+      validate_name_result);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
@@ -90,7 +93,8 @@ int update_order_request_order_item_validate(
     int validation_errors_add_result = validation_errors_add_level_2(
       validation_errors_return, allocated_errors_count, used_errors_count,
       UPDATE_ORDER_REQUEST_ORDER_ITEMS, index,
-      UPDATE_ORDER_REQUEST_ORDER_ITEM_QUANTITY, -1, validate_quantity_result);
+      UPDATE_ORDER_REQUEST_ORDER_ITEM_QUANTITY, -1,
+      validate_quantity_result);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
