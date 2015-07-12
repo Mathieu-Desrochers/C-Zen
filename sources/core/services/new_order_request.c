@@ -54,7 +54,8 @@ int new_order_request_validate(
   {
     int validation_errors_add_result = validation_errors_add_level_1(
       &validation_errors_return, &allocated_errors_count, &used_errors_count,
-      NEW_ORDER_REQUEST_CUSTOMER_NAME, -1, validate_customer_name_result);
+      NEW_ORDER_REQUEST_CUSTOMER_NAME, -1,
+      validate_customer_name_result);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
@@ -130,7 +131,9 @@ void new_order_request_free(new_order_request_t *new_order_request)
 
   if (new_order_request->order_items != NULL)
   {
-    new_order_request_order_items_free(new_order_request->order_items, new_order_request->order_items_count);
+    new_order_request_order_items_free(
+      new_order_request->order_items,
+      new_order_request->order_items_count);
   }
 
   free(new_order_request);
