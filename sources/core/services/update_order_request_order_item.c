@@ -44,10 +44,21 @@ int update_order_request_order_item_validate(
   int *allocated_errors_count,
   int *used_errors_count)
 {
-  check(update_order_request_order_item != NULL, "update_order_request_order_item: NULL");
   check(validation_errors_return != NULL, "validation_errors_return: NULL");
   check(allocated_errors_count != NULL, "allocated_errors_count: NULL");
   check(used_errors_count != NULL, "used_errors_count: NULL");
+
+  if (update_order_request_order_item == NULL)
+  {
+    int validation_errors_add_result = validation_errors_add_level_1(
+      validation_errors_return, allocated_errors_count, used_errors_count,
+      UPDATE_ORDER_REQUEST_ORDER_ITEMS, index, VALIDATION_RESULT_REQUIRED);
+
+    check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
+      validation_errors_add_result);
+
+    goto shortcuit;
+  }
 
   int validate_order_item_id_result = validate_int(update_order_request_order_item->order_item_id, 1, 1, 999999);
   if (validate_order_item_id_result != 0)
@@ -84,6 +95,8 @@ int update_order_request_order_item_validate(
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
   }
+
+shortcuit:
 
   return 0;
 

@@ -10,6 +10,7 @@
 #define VALIDATION_RESULT_TOO_LONG 5
 #define VALIDATION_RESULT_TOO_FEW 6
 #define VALIDATION_RESULT_TOO_MANY 7
+#define VALIDATION_RESULT_DUPLICATE 8
 
 // represents a validated property
 typedef struct validation_path_t

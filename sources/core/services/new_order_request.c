@@ -38,7 +38,7 @@ error:
 int new_order_request_validate(
   new_order_request_t *new_order_request,
   validation_error_t ***validation_errors,
-  int *count)
+  int *validation_errors_count)
 {
   validation_error_t **validation_errors_return = NULL;
 
@@ -47,7 +47,7 @@ int new_order_request_validate(
 
   check(new_order_request != NULL, "new_order_request: NULL");
   check(validation_errors != NULL, "validation_errors: NULL");
-  check(count != NULL, "count: NULL");
+  check(validation_errors_count != NULL, "validation_errors_count: NULL");
 
   int validate_customer_name_result = validate_string(new_order_request->customer_name, 1, 1, 100);
   if (validate_customer_name_result != 0)
@@ -69,28 +69,26 @@ int new_order_request_validate(
   {
     int validation_errors_add_result = validation_errors_add_level_1(
       &validation_errors_return, &allocated_errors_count, &used_errors_count,
-      NEW_ORDER_REQUEST_ORDER_ITEMS, -1, validate_order_items_result);
+      NEW_ORDER_REQUEST_ORDER_ITEMS, -1,
+      validate_order_items_result);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
-  }
-  else
-  {
-    if (new_order_request->order_items != NULL)
-    {
-      for (int i = 0; i < new_order_request->order_items_count; i++)
-      {
-        int new_order_request_order_item_validate_result = new_order_request_order_item_validate(
-          new_order_request->order_items[i],
-          i,
-          &validation_errors_return,
-          &allocated_errors_count,
-          &used_errors_count);
 
-        check(new_order_request_order_item_validate_result == 0, "new_order_request_order_item_validate_result: %d",
-          new_order_request_order_item_validate_result);
-      }
-    }
+    goto shortcircuit;
+  }
+
+  for (int i = 0; i < new_order_request->order_items_count; i++)
+  {
+    int new_order_request_order_item_validate_result = new_order_request_order_item_validate(
+      new_order_request->order_items[i],
+      i,
+      &validation_errors_return,
+      &allocated_errors_count,
+      &used_errors_count);
+
+    check(new_order_request_order_item_validate_result == 0, "new_order_request_order_item_validate_result: %d",
+      new_order_request_order_item_validate_result);
   }
 
   int validate_total_result = validate_int(new_order_request->total, 1, 0, 999999);
@@ -98,14 +96,17 @@ int new_order_request_validate(
   {
     int validation_errors_add_result = validation_errors_add_level_1(
       &validation_errors_return, &allocated_errors_count, &used_errors_count,
-      NEW_ORDER_REQUEST_TOTAL, -1, validate_total_result);
+      NEW_ORDER_REQUEST_TOTAL, -1,
+      validate_total_result);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
   }
 
+shortcircuit:
+
   *validation_errors = validation_errors_return;
-  *count = used_errors_count;
+  *validation_errors_count = used_errors_count;
 
   return 0;
 
