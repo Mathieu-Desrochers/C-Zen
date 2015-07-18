@@ -29,7 +29,8 @@ update_order_request_t *update_order_request_malloc(
 int update_order_request_validate(
   update_order_request_t *update_order_request,
   validation_error_t ***validation_errors,
-  int *count);
+  int *allocated_errors_count,
+  int *used_errors_count);
 
 // frees an update order request
 void update_order_request_free(update_order_request_t *update_order_request);

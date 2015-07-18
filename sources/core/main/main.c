@@ -39,7 +39,7 @@ int main()
 
   int order_id = 1;
   char *customer_name = "Alice";
-  int total = 100;
+  int total = 0;
 
   update_order_request = update_order_request_malloc(
     &order_id,
@@ -53,7 +53,7 @@ int main()
   double quantity = 0.0;
   int allocated_order_items_count = 0;
 
-  order_item_id = 100;
+  order_item_id = 1;
   name = "Pirate hat";
   quantity = 5;
 
@@ -73,7 +73,7 @@ int main()
   check(array_add_result == 0, "array_add_result: %d",
     array_add_result);
 
-  order_item_id = 101;
+  order_item_id = 2;
   name = "Pirate hat";
   quantity = 5;
 
@@ -93,7 +93,7 @@ int main()
   check(array_add_result == 0, "array_add_result: %d",
     array_add_result);
 
-  order_item_id = 101;
+  order_item_id = 3;
   name = "Pirate hat";
   quantity = 5;
 

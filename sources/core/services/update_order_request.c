@@ -44,26 +44,23 @@ error:
 int update_order_request_validate(
   update_order_request_t *update_order_request,
   validation_error_t ***validation_errors,
-  int *validation_errors_count)
+  int *allocated_errors_count,
+  int *used_errors_count)
 {
-  validation_error_t **validation_errors_return = NULL;
-
-  int allocated_errors_count = 0;
-  int used_errors_count = 0;
-
   int *order_item_ids = NULL;
   int *duplicate_indexes = NULL;
   int duplicate_indexes_count = 0;
 
   check(update_order_request != NULL, "update_order_request: NULL");
   check(validation_errors != NULL, "validation_errors: NULL");
-  check(validation_errors_count != NULL, "validation_errors_count: NULL");
+  check(allocated_errors_count != NULL, "allocated_errors_count: NULL");
+  check(used_errors_count != NULL, "used_errors_count: NULL");
 
   int validate_order_id_result = validate_int(update_order_request->order_id, 1, 1, 999999);
   if (validate_order_id_result != 0)
   {
     int validation_errors_add_result = validation_errors_add_level_1(
-      &validation_errors_return, &allocated_errors_count, &used_errors_count,
+      validation_errors, allocated_errors_count, used_errors_count,
       UPDATE_ORDER_REQUEST_ORDER_ID, -1,
       validate_order_id_result);
 
@@ -75,7 +72,7 @@ int update_order_request_validate(
   if (validate_customer_name_result != 0)
   {
     int validation_errors_add_result = validation_errors_add_level_1(
-      &validation_errors_return, &allocated_errors_count, &used_errors_count,
+      validation_errors, allocated_errors_count, used_errors_count,
       UPDATE_ORDER_REQUEST_CUSTOMER_NAME, -1,
       validate_customer_name_result);
 
@@ -91,7 +88,7 @@ int update_order_request_validate(
   if (validate_order_items_result != 0)
   {
     int validation_errors_add_result = validation_errors_add_level_1(
-      &validation_errors_return, &allocated_errors_count, &used_errors_count,
+      validation_errors, allocated_errors_count, used_errors_count,
       UPDATE_ORDER_REQUEST_ORDER_ITEMS, -1,
       validate_order_items_result);
 
@@ -101,22 +98,21 @@ int update_order_request_validate(
     goto shortcircuit;
   }
 
-  int used_errors_count_before_order_items = used_errors_count;
+  int used_errors_count_before_order_items = *used_errors_count;
 
   for (int i = 0; i < update_order_request->order_items_count; i++)
   {
     int update_order_request_order_item_validate_result = update_order_request_order_item_validate(
-      update_order_request->order_items[i],
-      i,
-      &validation_errors_return,
-      &allocated_errors_count,
-      &used_errors_count);
+      update_order_request->order_items[i], i,
+      validation_errors,
+      allocated_errors_count,
+      used_errors_count);
 
     check(update_order_request_order_item_validate_result == 0, "update_order_request_order_item_validate_result: %d",
       update_order_request_order_item_validate_result);
   }
 
-  if (used_errors_count != used_errors_count_before_order_items)
+  if (*used_errors_count != used_errors_count_before_order_items)
   {
     goto shortcircuit;
   }
@@ -141,7 +137,7 @@ int update_order_request_validate(
   for (int i = 0; i < duplicate_indexes_count; i++)
   {
     int validation_errors_add_result = validation_errors_add_level_2(
-      &validation_errors_return, &allocated_errors_count, &used_errors_count,
+      validation_errors, allocated_errors_count, used_errors_count,
       UPDATE_ORDER_REQUEST_ORDER_ITEMS, duplicate_indexes[i],
       UPDATE_ORDER_REQUEST_ORDER_ITEM_ID, -1,
       VALIDATION_RESULT_DUPLICATE);
@@ -150,14 +146,11 @@ int update_order_request_validate(
       validation_errors_add_result);
   }
 
-  free(duplicate_indexes);
-  free(order_item_ids);
-
   int validate_total_result = validate_int(update_order_request->total, 1, 0, 999999);
   if (validate_total_result != 0)
   {
     int validation_errors_add_result = validation_errors_add_level_1(
-      &validation_errors_return, &allocated_errors_count, &used_errors_count,
+      validation_errors, allocated_errors_count, used_errors_count,
       UPDATE_ORDER_REQUEST_TOTAL, -1,
       validate_total_result);
 
@@ -165,10 +158,10 @@ int update_order_request_validate(
       validation_errors_add_result);
   }
 
-shortcircuit:
+  free(duplicate_indexes);
+  free(order_item_ids);
 
-  *validation_errors = validation_errors_return;
-  *validation_errors_count = used_errors_count;
+shortcircuit:
 
   return 0;
 
@@ -176,7 +169,6 @@ error:
 
   if (duplicate_indexes != NULL) { free(duplicate_indexes); }
   if (order_item_ids != NULL) { free(order_item_ids); }
-  if (validation_errors_return != NULL) { validation_errors_free(validation_errors_return, used_errors_count); }
 
   return -1;
 }

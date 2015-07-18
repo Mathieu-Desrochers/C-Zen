@@ -9,5 +9,8 @@ int array_add_string(char ***array, int *allocated_count, int *used_count, char 
 // finds duplicates within an array
 int array_find_duplicates_int(int *array, int array_count, int **duplicate_indexes, int *duplicate_indexes_count);
 
+// finds unknown values within an array
+int array_find_unknowns_int(int *array, int array_count, int* known_array, int known_array_count, int **unknown_indexes, int *unknown_indexes_count);
+
 #endif
 

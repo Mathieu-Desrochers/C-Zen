@@ -6,7 +6,8 @@
 #include "../../core/services/update_order_request.h"
 #include "../../core/services/update_order_response.h"
 
-#define UPDATE_ORDER_SERVICE_INVALID_ORDER_ID 1
+#define UPDATE_ORDER_SERVICE_UNKNOWN_ORDER_ID 100
+#define UPDATE_ORDER_SERVICE_UNKNOWN_ORDER_ITEM_ID 101
 
 // executes the update order service
 int update_order_service(

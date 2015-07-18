@@ -145,3 +145,65 @@ error:
 
   return -1;
 }
+
+// finds unknown values within an array
+int array_find_unknowns_int(int *array, int array_count, int* known_array, int known_array_count, int **unknown_indexes, int *unknown_indexes_count)
+{
+  int *unknown_indexes_return = NULL;
+  int unknown_indexes_allocated_count = 0;
+  int unknown_indexes_used_count = 0;
+
+  hash_table_t *hash_table = NULL;
+
+  check(array != NULL, "array: NULL");
+  check(known_array != NULL, "known_array: NULL");
+  check(unknown_indexes != NULL, "unknown_indexes: NULL");
+  check(unknown_indexes_count != NULL, "unknown_indexes_count: NULL");
+
+  int hash_table_malloc_result = hash_table_malloc(&hash_table, array_count);
+  check(hash_table_malloc_result == 0, "hash_table_malloc_result: %d",
+    hash_table_malloc_result);
+
+  for (int i = 0; i < known_array_count; i++)
+  {
+    int hash_table_add_result = hash_table_add_int_int(hash_table, known_array[i], i);
+    check(hash_table_add_result == 0, "hash_table_add_result: %d",
+      hash_table_add_result);
+  }
+
+  int *values = NULL;
+  int values_count = 0;
+
+  for (int i = 0; i < array_count; i++)
+  {
+    int hash_table_get_result = hash_table_get_int_int(hash_table, array[i], &values, &values_count);
+    check(hash_table_get_result == 0, "hash_table_get_result: %d",
+      hash_table_get_result);
+
+    if (values_count == 0)
+    {
+      int array_add_result = array_add_int(
+        &unknown_indexes_return,
+        &unknown_indexes_allocated_count,
+        &unknown_indexes_used_count,
+        i);
+
+      check(array_add_result == 0, "array_add_result: %d",
+        array_add_result);
+    }
+  }
+
+  hash_table_free(hash_table);
+
+  *unknown_indexes = unknown_indexes_return;
+  *unknown_indexes_count = unknown_indexes_used_count;
+
+  return 0;
+
+error:
+
+  if (unknown_indexes_return != NULL) { free(unknown_indexes_return); }
+  if (hash_table != NULL) { hash_table_free(hash_table); }
+
+  return -1;
+}

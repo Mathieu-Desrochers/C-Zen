@@ -71,12 +71,6 @@ int validation_errors_add_level_2(
   int index_level_2,
   int error_code);
 
-// adds a single validation error to an array
-int validation_errors_single(
-  validation_error_t ***validation_errors,
-  int *used,
-  int error_code);
-
 // validates a double
 int validate_double(double *value, int required, double min_value, double max_value);
 

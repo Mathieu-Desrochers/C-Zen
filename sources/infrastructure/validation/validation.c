@@ -204,36 +204,6 @@ error:
   return -1;
 }
 
-// adds a single validation error to an array
-int validation_errors_single(
-  validation_error_t ***validation_errors,
-  int *used,
-  int error_code)
-{
-  validation_error_t **validation_errors_return = NULL;
-  validation_error_t *validation_error = NULL;
-
-  validation_errors_return = malloc(sizeof(validation_error_t *));
-  check_mem(validation_errors_return);
-
-  validation_error = validation_error_malloc(error_code);
-  check(validation_error != NULL, "validation_error: NULL");
-
-  validation_errors_return[0] = validation_error;
-
-  *validation_errors = validation_errors_return;
-  *used = 1;
-
-  return 0;
-
-error:
-
-  if (validation_error != NULL) { validation_error_free(validation_error); }
-  if (validation_errors_return != NULL) { free(validation_errors_return); }
-
-  return -1;
-}
-
 // validates a double
 int validate_double(double *value, int required, double min_value, double max_value)
 {
