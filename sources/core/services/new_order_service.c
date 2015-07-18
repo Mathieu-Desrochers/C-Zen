@@ -20,8 +20,10 @@ int new_order_service(
   int *validation_errors_count)
 {
   new_order_response_t *new_order_response_return = NULL;
+
   validation_error_t **validation_errors_return = NULL;
-  int validation_errors_count_return = 0;
+  int allocated_errors_count = 0;
+  int used_errors_count = 0;
 
   order_row_t *order_row = NULL;
   order_item_row_t *order_item_row = NULL;
@@ -35,7 +37,8 @@ int new_order_service(
   int new_order_request_validate_result = new_order_request_validate(
     new_order_request,
     &validation_errors_return,
-    &validation_errors_count_return);
+    &allocated_errors_count,
+    &used_errors_count);
 
   check(new_order_request_validate_result == 0, "new_order_request_validate_result: %d",
     new_order_request_validate_result);
@@ -43,7 +46,8 @@ int new_order_service(
   if (validation_errors_return != NULL)
   {
     *validation_errors = validation_errors_return;
-    *validation_errors_count = validation_errors_count_return;
+    *validation_errors_count = used_errors_count;
+
     return 0;
   }
 
@@ -96,7 +100,7 @@ error:
 
   if (order_item_row != NULL) { order_item_row_free(order_item_row); }
   if (order_row != NULL) { order_row_free(order_row); }
-  if (validation_errors_return != NULL) { validation_errors_free(validation_errors_return, validation_errors_count_return); }
+  if (validation_errors_return != NULL) { validation_errors_free(validation_errors_return, used_errors_count); }
   if (new_order_response_return != NULL) { new_order_response_free(new_order_response_return); }
 
   return -1;

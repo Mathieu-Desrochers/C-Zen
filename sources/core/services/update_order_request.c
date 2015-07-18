@@ -98,7 +98,7 @@ int update_order_request_validate(
     goto shortcircuit;
   }
 
-  int used_errors_count_before_order_items = *used_errors_count;
+  int prior_errors_count = *used_errors_count;
 
   for (int i = 0; i < update_order_request->order_items_count; i++)
   {
@@ -112,7 +112,8 @@ int update_order_request_validate(
       update_order_request_order_item_validate_result);
   }
 
-  if (*used_errors_count != used_errors_count_before_order_items)
+  int all_order_items_valid = (*used_errors_count == prior_errors_count);
+  if (all_order_items_valid == 0)
   {
     goto shortcircuit;
   }
