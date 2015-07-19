@@ -157,7 +157,7 @@ error:
 }
 
 // finds unknown values within an array
-int array_find_unknowns_int(int **array, int array_count, int* known_array, int known_array_count, int **unknown_indexes, int *unknown_indexes_count)
+int array_find_unknowns_int(int **array, int array_count, int** known_array, int known_array_count, int **unknown_indexes, int *unknown_indexes_count)
 {
   int *unknown_indexes_return = NULL;
   int unknown_indexes_allocated_count = 0;
@@ -176,7 +176,12 @@ int array_find_unknowns_int(int **array, int array_count, int* known_array, int 
 
   for (int i = 0; i < known_array_count; i++)
   {
-    int hash_table_add_result = hash_table_add_int_int(hash_table, known_array[i], i);
+    if (known_array[i] == NULL)
+    {
+      continue;
+    }
+
+    int hash_table_add_result = hash_table_add_int_int(hash_table, *(known_array[i]), i);
     check(hash_table_add_result == 0, "hash_table_add_result: %d",
       hash_table_add_result);
   }

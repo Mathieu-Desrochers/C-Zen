@@ -98,7 +98,7 @@ int main()
   quantity = 55;
 
   update_order_request_order_item_3 = update_order_request_order_item_malloc(
-    &order_item_id,
+    NULL,
     name,
     &quantity);
 

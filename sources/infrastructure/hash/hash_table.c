@@ -57,9 +57,6 @@ error:
 // gets the hash values for a given key
 int hash_get_hash_values(hash_table_t *hash_table, char *key, hash_values_t **hash_values)
 {
-  hash_values_t *hash_values_return = NULL;
-  char *key_copied = NULL;
-
   check(hash_table != NULL, "hash_table: NULL");
   check(key != NULL, "key: NULL");
   check(hash_values != NULL, "hash_values: NULL");
@@ -73,9 +70,39 @@ int hash_get_hash_values(hash_table_t *hash_table, char *key, hash_values_t **ha
   check(hsearch_find_result != 0 || (hsearch_find_result == 0 && errno == ESRCH), "hsearch_find_result: %d",
     hsearch_find_result);
 
-  if (existing_entry != NULL)
+  if (existing_entry == NULL)
   {
-    *hash_values = (hash_values_t *)existing_entry->data;
+    *hash_values = NULL;
+  }
+  else
+  {
+    *hash_values = (hash_values_t *)(existing_entry->data);
+  }
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
+// gets or creates the hash values for a given key
+int hash_get_or_create_hash_values(hash_table_t *hash_table, char *key, hash_values_t **hash_values)
+{
+  hash_values_t *hash_values_return = NULL;
+  char *key_copied = NULL;
+
+  check(hash_table != NULL, "hash_table: NULL");
+  check(key != NULL, "key: NULL");
+  check(hash_values != NULL, "hash_values: NULL");
+
+  int hash_get_hash_values_result = hash_get_hash_values(hash_table, key, &hash_values_return);
+  check(hash_get_hash_values_result == 0, "hash_get_hash_values_result: %d",
+    hash_get_hash_values_result);
+
+  if (hash_values_return != NULL)
+  {
+    *hash_values = hash_values_return;
 
     return 0;
   }
@@ -147,7 +174,7 @@ int hash_table_add_int_int(hash_table_t *hash_table, int key, int value)
   check(sprintf_result > 0, "sprintf_result: %d",
     sprintf_result);
 
-  int hash_get_hash_values_result = hash_get_hash_values(hash_table, key_string, &hash_values);
+  int hash_get_hash_values_result = hash_get_or_create_hash_values(hash_table, key_string, &hash_values);
   check(hash_get_hash_values_result == 0, "hash_get_hash_values_result: %d",
     hash_get_hash_values_result);
 
@@ -186,7 +213,7 @@ int hash_table_add_int_pointer(hash_table_t *hash_table, int key, void *value)
   check(sprintf_result > 0, "sprintf_result: %d",
     sprintf_result);
 
-  int hash_get_hash_values_result = hash_get_hash_values(hash_table, key_string, &hash_values);
+  int hash_get_hash_values_result = hash_get_or_create_hash_values(hash_table, key_string, &hash_values);
   check(hash_get_hash_values_result == 0, "hash_get_hash_values_result: %d",
     hash_get_hash_values_result);
 
@@ -231,8 +258,16 @@ int hash_table_get_int_int(hash_table_t *hash_table, int key, int **values, int 
   check(hash_get_hash_values_result == 0, "hash_get_hash_values_result: %d",
     hash_get_hash_values_result);
 
-  *values = (int *)hash_values->values;
-  *values_count = hash_values->used_count;
+  if (hash_values == NULL)
+  {
+    *values = NULL;
+    *values_count = 0;
+  }
+  else
+  {
+    *values = (int *)(hash_values->values);
+    *values_count = hash_values->used_count;
+  }
 
   free(key_string);
 
@@ -266,8 +301,16 @@ int hash_table_get_int_pointer(hash_table_t *hash_table, int key, void ***values
   check(hash_get_hash_values_result == 0, "hash_get_hash_values_result: %d",
     hash_get_hash_values_result);
 
-  *values = (void **)hash_values->values;
-  *values_count = hash_values->used_count;
+  if (hash_values == NULL)
+  {
+    *values = NULL;
+    *values_count = 0;
+  }
+  else
+  {
+    *values = (void **)(hash_values->values);
+    *values_count = hash_values->used_count;
+  }
 
   free(key_string);
 
