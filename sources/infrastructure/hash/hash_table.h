@@ -26,9 +26,11 @@ int hash_table_malloc(hash_table_t **hash_table, int maximum_distinct_keys_count
 
 // adds a value for a given key
 int hash_table_add_int_int(hash_table_t *hash_table, int key, int value);
+int hash_table_add_int_pointer(hash_table_t *hash_table, int key, void *value);
 
 // gets the values for a given key
 int hash_table_get_int_int(hash_table_t *hash_table, int key, int **values, int *values_count);
+int hash_table_get_int_pointer(hash_table_t *hash_table, int key, void ***values, int *values_count);
 
 // frees a hash table
 void hash_table_free(hash_table_t *hash_table);

@@ -76,6 +76,7 @@ int hash_get_hash_values(hash_table_t *hash_table, char *key, hash_values_t **ha
   if (existing_entry != NULL)
   {
     *hash_values = (hash_values_t *)existing_entry->data;
+
     return 0;
   }
 
@@ -160,6 +161,46 @@ int hash_table_add_int_int(hash_table_t *hash_table, int key, int value)
     array_add_value_result);
 
   free(key_string);
+
+  return 0;
+
+error:
+
+  if (key_string != NULL) { free(key_string); }
+
+  return -1;
+}
+
+// adds a value for a given key
+int hash_table_add_int_pointer(hash_table_t *hash_table, int key, void *value)
+{
+  char *key_string = NULL;
+  hash_values_t *hash_values = NULL;
+
+  check(hash_table != NULL, "hash_table: NULL");
+
+  key_string = malloc(sizeof(char) * (sizeof(int) + 1));
+  check_mem(key_string);
+
+  int sprintf_result = sprintf(key_string, "%d", key);
+  check(sprintf_result > 0, "sprintf_result: %d",
+    sprintf_result);
+
+  int hash_get_hash_values_result = hash_get_hash_values(hash_table, key_string, &hash_values);
+  check(hash_get_hash_values_result == 0, "hash_get_hash_values_result: %d",
+    hash_get_hash_values_result);
+
+  int array_add_value_result = array_add_pointer(
+    (void ***)&(hash_values->values),
+    &(hash_values->allocated_count),
+    &(hash_values->used_count),
+    value);
+
+  check(array_add_value_result == 0, "array_add_value_result: %d",
+    array_add_value_result);
+
+  free(key_string);
+
   return 0;
 
 error:
@@ -194,6 +235,42 @@ int hash_table_get_int_int(hash_table_t *hash_table, int key, int **values, int 
   *values_count = hash_values->used_count;
 
   free(key_string);
+
+  return 0;
+
+error:
+
+  if (key_string != NULL) { free(key_string); }
+
+  return -1;
+}
+
+// gets the values for a given key
+int hash_table_get_int_pointer(hash_table_t *hash_table, int key, void ***values, int *values_count)
+{
+  char *key_string = NULL;
+  hash_values_t *hash_values = NULL;
+
+  check(hash_table != NULL, "hash_table: NULL");
+  check(values != NULL, "values: NULL");
+  check(values_count != NULL, "values_count: NULL");
+
+  key_string = malloc(sizeof(char) * (sizeof(int) + 1));
+  check_mem(key_string);
+
+  int sprintf_result = sprintf(key_string, "%d", key);
+  check(sprintf_result > 0, "sprintf_result: %d",
+    sprintf_result);
+
+  int hash_get_hash_values_result = hash_get_hash_values(hash_table, key_string, &hash_values);
+  check(hash_get_hash_values_result == 0, "hash_get_hash_values_result: %d",
+    hash_get_hash_values_result);
+
+  *values = (void **)hash_values->values;
+  *values_count = hash_values->used_count;
+
+  free(key_string);
+
   return 0;
 
 error:

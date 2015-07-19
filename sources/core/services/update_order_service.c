@@ -11,6 +11,7 @@
 #include "../../core/tables/order_items_table.h"
 #include "../../infrastructure/array/array.h"
 #include "../../infrastructure/dbg/dbg.h"
+#include "../../infrastructure/hash/hash_table.h"
 #include "../../infrastructure/time/time.h"
 
 // executes the update order service
@@ -30,6 +31,8 @@ int update_order_service(
   order_row_t *order_row = NULL;
   order_item_row_t **order_item_rows = NULL;
   int order_item_rows_count = 0;
+
+  hash_table_t *order_item_rows_hash_table = NULL;
 
   int *update_order_request_order_item_ids = NULL;
   int *order_item_row_order_item_ids = NULL;
@@ -142,6 +145,21 @@ int update_order_service(
     return 0;
   }
 
+  int order_item_rows_hash_table_malloc_result = hash_table_malloc(&order_item_rows_hash_table, order_item_rows_count);
+  check(order_item_rows_hash_table_malloc_result == 0, "order_item_rows_hash_table_malloc_result: %d",
+    order_item_rows_hash_table_malloc_result);
+
+  for (int i = 0; i < order_item_rows_count; i++)
+  {
+    int hash_table_add_result = hash_table_add_int_pointer(
+      order_item_rows_hash_table,
+      *(order_item_rows[i]->order_item_id),
+      order_item_rows[i]);
+
+    check(hash_table_add_result == 0, "hash_table_add_result: %d",
+      hash_table_add_result);
+  }
+
   order_row_free(order_row);
   order_item_rows_free(order_item_rows, order_item_rows_count);
 
@@ -149,12 +167,15 @@ int update_order_service(
   free(order_item_row_order_item_ids);
   free(unknown_order_item_id_indexes);
 
+  hash_table_free(order_item_rows_hash_table);
+
   *update_order_response = update_order_response_return;
 
   return 0;
 
 error:
 
+  if (order_item_rows_hash_table != NULL) { hash_table_free(order_item_rows_hash_table); }
   if (unknown_order_item_id_indexes != NULL) { free(unknown_order_item_id_indexes); }
   if (order_item_row_order_item_ids != NULL) { free(order_item_row_order_item_ids); }
   if (update_order_request_order_item_ids != NULL) { free(update_order_request_order_item_ids); }
