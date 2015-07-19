@@ -156,7 +156,11 @@ int update_order_service(
   {
     order_row_free(order_row);
     order_item_rows_free(order_item_rows, order_item_rows_count);
-    order_item_row_free(updated_order_item_row);
+    order_row_free(updated_order_row);
+
+    free(update_order_request_order_item_ids);
+    free(order_item_row_order_item_ids);
+    free(unknown_order_item_id_indexes);
 
     *validation_errors = validation_errors_return;
     *validation_errors_count = used_errors_count;
@@ -271,7 +275,7 @@ int update_order_service(
 
 error:
 
-  if (updated_order_item_row != NULL) { order_item_row_free(inserted_order_item_row); }
+  if (updated_order_item_row != NULL) { order_item_row_free(updated_order_item_row); }
   if (inserted_order_item_row != NULL) { order_item_row_free(inserted_order_item_row); }
   if (updated_order_row != NULL) { order_row_free(updated_order_row); }
   if (order_item_rows_hash_table != NULL) { hash_table_free(order_item_rows_hash_table); }
