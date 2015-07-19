@@ -34,7 +34,7 @@ int update_order_service(
 
   hash_table_t *order_item_rows_hash_table = NULL;
 
-  int *update_order_request_order_item_ids = NULL;
+  int **update_order_request_order_item_ids = NULL;
   int *order_item_row_order_item_ids = NULL;
   int *unknown_order_item_id_indexes = NULL;
   int unknown_order_item_id_indexes_count = 0;
@@ -95,12 +95,12 @@ int update_order_service(
   check(order_items_table_select_by_order_id_result == 0, "order_items_table_select_by_order_id_result: %d",
     order_items_table_select_by_order_id_result);
 
-  update_order_request_order_item_ids = malloc(sizeof(int) * (update_order_request->order_items_count));
+  update_order_request_order_item_ids = malloc(sizeof(int *) * (update_order_request->order_items_count));
   check_mem(update_order_request_order_item_ids);
 
   for (int i = 0; i < update_order_request->order_items_count; i++)
   {
-    update_order_request_order_item_ids[i] = *(update_order_request->order_items[i]->order_item_id);
+    update_order_request_order_item_ids[i] = update_order_request->order_items[i]->order_item_id;
   }
 
   order_item_row_order_item_ids = malloc(sizeof(int) * (order_item_rows_count));

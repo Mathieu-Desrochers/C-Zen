@@ -86,7 +86,7 @@ error:
 }
 
 // finds duplicates within an array
-int array_find_duplicates_int(int *array, int array_count, int **duplicate_indexes, int *duplicate_indexes_count)
+int array_find_duplicates_int(int **array, int array_count, int **duplicate_indexes, int *duplicate_indexes_count)
 {
   int *duplicate_indexes_return = NULL;
   int duplicate_indexes_allocated_count = 0;
@@ -104,7 +104,12 @@ int array_find_duplicates_int(int *array, int array_count, int **duplicate_index
 
   for (int i = 0; i < array_count; i++)
   {
-    int hash_table_add_result = hash_table_add_int_int(hash_table, array[i], i);
+    if (array[i] == NULL)
+    {
+      continue;
+    }
+
+    int hash_table_add_result = hash_table_add_int_int(hash_table, *(array[i]), i);
     check(hash_table_add_result == 0, "hash_table_add_result: %d",
       hash_table_add_result);
   }
@@ -114,7 +119,12 @@ int array_find_duplicates_int(int *array, int array_count, int **duplicate_index
 
   for (int i = 0; i < array_count; i++)
   {
-    int hash_table_get_result = hash_table_get_int_int(hash_table, array[i], &values, &values_count);
+    if (array[i] == NULL)
+    {
+      continue;
+    }
+
+    int hash_table_get_result = hash_table_get_int_int(hash_table, *(array[i]), &values, &values_count);
     check(hash_table_get_result == 0, "hash_table_get_result: %d",
       hash_table_get_result);
 
@@ -147,7 +157,7 @@ error:
 }
 
 // finds unknown values within an array
-int array_find_unknowns_int(int *array, int array_count, int* known_array, int known_array_count, int **unknown_indexes, int *unknown_indexes_count)
+int array_find_unknowns_int(int **array, int array_count, int* known_array, int known_array_count, int **unknown_indexes, int *unknown_indexes_count)
 {
   int *unknown_indexes_return = NULL;
   int unknown_indexes_allocated_count = 0;
@@ -176,7 +186,12 @@ int array_find_unknowns_int(int *array, int array_count, int* known_array, int k
 
   for (int i = 0; i < array_count; i++)
   {
-    int hash_table_get_result = hash_table_get_int_int(hash_table, array[i], &values, &values_count);
+    if (array[i] == NULL)
+    {
+      continue;
+    }
+
+    int hash_table_get_result = hash_table_get_int_int(hash_table, *(array[i]), &values, &values_count);
     check(hash_table_get_result == 0, "hash_table_get_result: %d",
       hash_table_get_result);
 

@@ -47,7 +47,7 @@ int update_order_request_validate(
   int *allocated_errors_count,
   int *used_errors_count)
 {
-  int *order_item_ids = NULL;
+  int **order_item_ids = NULL;
   int *duplicate_indexes = NULL;
   int duplicate_indexes_count = 0;
 
@@ -118,12 +118,12 @@ int update_order_request_validate(
     goto shortcircuit;
   }
 
-  order_item_ids = malloc(sizeof(int) * (update_order_request->order_items_count));
+  order_item_ids = malloc(sizeof(int *) * (update_order_request->order_items_count));
   check_mem(order_item_ids);
 
   for (int i = 0; i < update_order_request->order_items_count; i++)
   {
-    order_item_ids[i] = *(update_order_request->order_items[i]->order_item_id);
+    order_item_ids[i] = update_order_request->order_items[i]->order_item_id;
   }
 
   int array_find_duplicate_order_item_ids_result = array_find_duplicates_int(

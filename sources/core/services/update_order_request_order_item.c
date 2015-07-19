@@ -61,7 +61,7 @@ int update_order_request_order_item_validate(
     goto shortcuit;
   }
 
-  int validate_order_item_id_result = validate_int(update_order_request_order_item->order_item_id, 1, 1, 999999);
+  int validate_order_item_id_result = validate_int(update_order_request_order_item->order_item_id, 0, 1, 999999);
   if (validate_order_item_id_result != 0)
   {
     int validation_errors_add_result = validation_errors_add_level_2(
