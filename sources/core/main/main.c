@@ -38,7 +38,7 @@ int main()
     sql_open_connection_result);
 
   int order_id = 1;
-  char *customer_name = "Alice";
+  char *customer_name = "Alice!";
   int total = 0;
 
   update_order_request = update_order_request_malloc(
