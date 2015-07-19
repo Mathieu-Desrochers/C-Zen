@@ -32,12 +32,15 @@ int update_order_service(
   order_item_row_t **order_item_rows = NULL;
   int order_item_rows_count = 0;
 
-  hash_table_t *order_item_rows_hash_table = NULL;
-
   int **update_order_request_order_item_ids = NULL;
   int *order_item_row_order_item_ids = NULL;
   int *unknown_order_item_id_indexes = NULL;
   int unknown_order_item_id_indexes_count = 0;
+
+  hash_table_t *order_item_rows_hash_table = NULL;
+
+  order_item_row_t *inserted_order_item_row = NULL;
+  order_item_row_t *updated_order_item_row = NULL;
 
   check(sql_connection != NULL, "sql_connection: NULL");
   check(update_order_request != NULL, "update_order_request: NULL");
@@ -111,7 +114,7 @@ int update_order_service(
     order_item_row_order_item_ids[i] = *(order_item_rows[i]->order_item_id);
   }
 
-  int array_find_unknowns_result = array_find_unknowns_int(
+  int array_find_unknown_order_item_ids_result = array_find_unknowns_int(
     update_order_request_order_item_ids,
     update_order_request->order_items_count,
     order_item_row_order_item_ids,
@@ -119,8 +122,8 @@ int update_order_service(
     &unknown_order_item_id_indexes,
     &unknown_order_item_id_indexes_count);
 
-  check(array_find_unknowns_result == 0, "array_find_unknowns_result: %d",
-    array_find_unknowns_result);
+  check(array_find_unknown_order_item_ids_result == 0, "array_find_unknown_order_item_ids_result: %d",
+    array_find_unknown_order_item_ids_result);
 
   for (int i = 0; i < unknown_order_item_id_indexes_count; i++)
   {
@@ -151,13 +154,68 @@ int update_order_service(
 
   for (int i = 0; i < order_item_rows_count; i++)
   {
-    int hash_table_add_result = hash_table_add_int_pointer(
+    int order_item_rows_hash_table_add_result = hash_table_add_int_pointer(
       order_item_rows_hash_table,
       *(order_item_rows[i]->order_item_id),
       order_item_rows[i]);
 
-    check(hash_table_add_result == 0, "hash_table_add_result: %d",
-      hash_table_add_result);
+    check(order_item_rows_hash_table_add_result == 0, "order_item_rows_hash_table_add_result: %d",
+      order_item_rows_hash_table_add_result);
+  }
+
+  for (int i = 0; i < update_order_request->order_items_count; i++)
+  {
+    if (update_order_request->order_items[i]->order_item_id == NULL)
+    {
+      inserted_order_item_row = order_item_row_malloc(
+        NULL,
+        update_order_request->order_id,
+        update_order_request->order_items[i]->name,
+        update_order_request->order_items[i]->quantity,
+        NULL,
+        NULL,
+        NULL);
+
+      check(inserted_order_item_row != NULL, "inserted_order_item_row: NULL");
+
+      int order_items_table_insert_result = order_items_table_insert(sql_connection, inserted_order_item_row);
+      check(order_items_table_insert_result == 0, "order_items_table_insert_result: %d",
+        order_items_table_insert_result);
+
+      order_item_row_free(inserted_order_item_row);
+    }
+    else
+    {
+      order_item_row_t **values = NULL;
+      int values_count = 0;
+
+      int order_item_rows_hash_table_get_result = hash_table_get_int_pointer(
+        order_item_rows_hash_table,
+        *(update_order_request->order_items[i]->order_item_id),
+        (void ***)&values, &values_count);
+
+      check(order_item_rows_hash_table_get_result == 0, "order_item_rows_hash_table_get_result: %d",
+        order_item_rows_hash_table_get_result);
+
+      order_item_row_t *existing_order_item_row = values[0];
+
+      updated_order_item_row = order_item_row_malloc(
+        existing_order_item_row->order_item_id,
+        existing_order_item_row->order_id,
+        update_order_request->order_items[i]->name,
+        update_order_request->order_items[i]->quantity,
+        NULL,
+        NULL,
+        NULL);
+
+      check(updated_order_item_row != NULL, "updated_order_item_row: NULL");
+
+      int order_items_table_update_result = order_items_table_update(sql_connection, updated_order_item_row);
+      check(order_items_table_update_result == 0, "order_items_table_update_result: %d",
+        order_items_table_update_result);
+
+      order_item_row_free(updated_order_item_row);
+    }
   }
 
   order_row_free(order_row);
@@ -175,6 +233,8 @@ int update_order_service(
 
 error:
 
+  if (updated_order_item_row != NULL) { order_item_row_free(inserted_order_item_row); }
+  if (inserted_order_item_row != NULL) { order_item_row_free(inserted_order_item_row); }
   if (order_item_rows_hash_table != NULL) { hash_table_free(order_item_rows_hash_table); }
   if (unknown_order_item_id_indexes != NULL) { free(unknown_order_item_id_indexes); }
   if (order_item_row_order_item_ids != NULL) { free(order_item_row_order_item_ids); }

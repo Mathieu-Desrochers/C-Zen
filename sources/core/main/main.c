@@ -93,11 +93,12 @@ int main()
   check(array_add_result == 0, "array_add_result: %d",
     array_add_result);
 
-  name = "Pirate hat";
-  quantity = 5;
+  order_item_id = 3;
+  name = "Pirate hats";
+  quantity = 55;
 
   update_order_request_order_item_3 = update_order_request_order_item_malloc(
-    NULL,
+    &order_item_id,
     name,
     &quantity);
 
