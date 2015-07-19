@@ -26,7 +26,7 @@ int new_order_service(
   int used_errors_count = 0;
 
   order_row_t *order_row = NULL;
-  order_item_row_t *order_item_row = NULL;
+  order_item_row_t *inserted_order_item_row = NULL;
 
   check(sql_connection != NULL, "sql_connection: NULL");
   check(new_order_request != NULL, "new_order_request: NULL");
@@ -70,7 +70,7 @@ int new_order_service(
 
   for (int i = 0; i < new_order_request->order_items_count; i++)
   {
-    order_item_row = order_item_row_malloc(
+    inserted_order_item_row = order_item_row_malloc(
       NULL,
       order_row->order_id,
       new_order_request->order_items[i]->name,
@@ -79,16 +79,18 @@ int new_order_service(
       NULL,
       NULL);
 
-    check(order_item_row != NULL, "order_item_row: NULL");
+    check(inserted_order_item_row != NULL, "inserted_order_item_row: NULL");
 
-    int order_items_table_insert_result = order_items_table_insert(sql_connection, order_item_row);
+    int order_items_table_insert_result = order_items_table_insert(sql_connection, inserted_order_item_row);
     check(order_items_table_insert_result == 0, "order_items_table_insert_result: %d",
       order_items_table_insert_result);
 
-    order_item_row_free(order_item_row);
+    order_item_row_free(inserted_order_item_row);
+    inserted_order_item_row = NULL;
   }
 
   new_order_response_return = new_order_response_malloc(order_row->order_id);
+  check(new_order_response != NULL, "new_order_response: NULL");
 
   order_row_free(order_row);
 
@@ -98,10 +100,10 @@ int new_order_service(
 
 error:
 
-  if (order_item_row != NULL) { order_item_row_free(order_item_row); }
-  if (order_row != NULL) { order_row_free(order_row); }
-  if (validation_errors_return != NULL) { validation_errors_free(validation_errors_return, used_errors_count); }
   if (new_order_response_return != NULL) { new_order_response_free(new_order_response_return); }
+  if (validation_errors_return != NULL) { validation_errors_free(validation_errors_return, used_errors_count); }
+  if (order_row != NULL) { order_row_free(order_row); }
+  if (inserted_order_item_row != NULL) { order_item_row_free(inserted_order_item_row); }
 
   return -1;
 }

@@ -92,18 +92,6 @@ int update_order_service(
     return 0;
   }
 
-  updated_order_row = order_row_malloc(
-    update_order_request->order_id,
-    update_order_request->customer_name,
-    NULL,
-    NULL);
-
-  check(updated_order_row != NULL, "updated_order_row: NULL");
-
-  int orders_table_update_result = orders_table_update(sql_connection, updated_order_row);
-  check(orders_table_update_result == 0, "orders_table_update_result: %d",
-    orders_table_update_result);
-
   int order_items_table_select_by_order_id_result = order_items_table_select_by_order_id(
     sql_connection,
     *(update_order_request->order_id),
@@ -156,7 +144,6 @@ int update_order_service(
   {
     order_row_free(order_row);
     order_item_rows_free(order_item_rows, order_item_rows_count);
-    order_row_free(updated_order_row);
 
     free(update_order_request_order_item_ids);
     free(order_item_row_order_item_ids);
@@ -167,6 +154,18 @@ int update_order_service(
 
     return 0;
   }
+
+  updated_order_row = order_row_malloc(
+    update_order_request->order_id,
+    update_order_request->customer_name,
+    NULL,
+    NULL);
+
+  check(updated_order_row != NULL, "updated_order_row: NULL");
+
+  int orders_table_update_result = orders_table_update(sql_connection, updated_order_row);
+  check(orders_table_update_result == 0, "orders_table_update_result: %d",
+    orders_table_update_result);
 
   int order_item_rows_hash_table_malloc_result = hash_table_malloc(&order_item_rows_hash_table, order_item_rows_count);
   check(order_item_rows_hash_table_malloc_result == 0, "order_item_rows_hash_table_malloc_result: %d",
@@ -275,18 +274,18 @@ int update_order_service(
 
 error:
 
-  if (updated_order_item_row != NULL) { order_item_row_free(updated_order_item_row); }
-  if (inserted_order_item_row != NULL) { order_item_row_free(inserted_order_item_row); }
-  if (updated_order_row != NULL) { order_row_free(updated_order_row); }
-  if (order_item_rows_hash_table != NULL) { hash_table_free(order_item_rows_hash_table); }
-  if (deleted_order_item_id_indexes != NULL) { free(deleted_order_item_id_indexes); }
-  if (unknown_order_item_id_indexes != NULL) { free(unknown_order_item_id_indexes); }
-  if (order_item_row_order_item_ids != NULL) { free(order_item_row_order_item_ids); }
-  if (update_order_request_order_item_ids != NULL) { free(update_order_request_order_item_ids); }
-  if (order_item_rows != NULL) { order_item_rows_free(order_item_rows, order_item_rows_count); }
-  if (order_row != NULL) { order_row_free(order_row); }
-  if (validation_errors_return != NULL) { validation_errors_free(validation_errors_return, used_errors_count); }
   if (update_order_response_return != NULL) { update_order_response_free(update_order_response_return); }
+  if (validation_errors_return != NULL) { validation_errors_free(validation_errors_return, used_errors_count); }
+  if (order_row != NULL) { order_row_free(order_row); }
+  if (order_item_rows != NULL) { order_item_rows_free(order_item_rows, order_item_rows_count); }
+  if (updated_order_row != NULL) { order_row_free(updated_order_row); }
+  if (inserted_order_item_row != NULL) { order_item_row_free(inserted_order_item_row); }
+  if (updated_order_item_row != NULL) { order_item_row_free(updated_order_item_row); }
+  if (update_order_request_order_item_ids != NULL) { free(update_order_request_order_item_ids); }
+  if (order_item_row_order_item_ids != NULL) { free(order_item_row_order_item_ids); }
+  if (unknown_order_item_id_indexes != NULL) { free(unknown_order_item_id_indexes); }
+  if (deleted_order_item_id_indexes != NULL) { free(deleted_order_item_id_indexes); }
+  if (order_item_rows_hash_table != NULL) { hash_table_free(order_item_rows_hash_table); }
 
   return -1;
 }
