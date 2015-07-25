@@ -28,12 +28,17 @@ SERVICES = sources/core/services/new_order_request.o \
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-tags : $(INFRASTRUCTURE) $(TABLES) $(SERVICES)
-	ctags -R .
-
 main : all sources/core/main/main.c
 	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(TABLES) $(SERVICES) \
 	-l sqlite3 sources/core/main/main.c -o $@
+
+libraries: jansson
+
+jansson:
+	tar -xzf libraries/jansson-2.7.tar.gz -C /tmp
+	cd /tmp/jansson-2.7 && ./configure
+	$(MAKE) -C /tmp/jansson-2.7
+	$(MAKE) -C /tmp/jansson-2.7 install
 
 database :
 	mkdir -p /var/c-zen
@@ -41,6 +46,9 @@ database :
 	sqlite3 /var/c-zen/c-zen.db "PRAGMA journal_mode=WAL;"
 	chown mathieu /var/c-zen/
 	chown mathieu /var/c-zen/c-zen.db
+
+tags : $(INFRASTRUCTURE) $(TABLES) $(SERVICES)
+	ctags -R .
 
 clean :
 	find . -name *.o | xargs -i /bin/rm {}
