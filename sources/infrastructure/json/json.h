@@ -7,6 +7,8 @@
 int json_parse_string(char *string, json_t **json);
 
 // gets a json value from a key
+int json_get_bool(json_t *object, char *key, int **value);
+int json_get_double(json_t *object, char *key, double **value);
 int json_get_int(json_t *object, char *key, int **value);
 int json_get_string(json_t *object, char *key, char **value);
 

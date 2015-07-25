@@ -30,6 +30,82 @@ error:
 }
 
 // gets a json value from a key
+int json_get_bool(json_t *object, char *key, int **value)
+{
+  int *value_return = NULL;
+
+  check(object != NULL, "object: NULL");
+
+  json_t *json_boolean_peek = json_object_get(object, key);
+  if (json_boolean_peek == NULL)
+  {
+    *value = NULL;
+    return 0;
+  }
+
+  int json_typeof_result = json_typeof(json_boolean_peek);
+  if (json_typeof_result != JSON_TRUE && json_typeof_result != JSON_FALSE)
+  {
+    *value = NULL;
+    return 0;
+  }
+
+  int value_peek = json_boolean_value(json_boolean_peek);
+
+  int malloc_memcpy_int_result = malloc_memcpy_int(&value_return, &value_peek);
+  check(malloc_memcpy_int_result == 0, "malloc_memcpy_int_result: %d",
+    malloc_memcpy_int_result);
+
+  *value = value_return;
+
+  return 0;
+
+error:
+
+  if (value_return != NULL) { free(value_return); }
+
+  return -1;
+}
+
+// gets a json value from a key
+int json_get_double(json_t *object, char *key, double **value)
+{
+  double *value_return = NULL;
+
+  check(object != NULL, "object: NULL");
+
+  json_t *json_number_peek = json_object_get(object, key);
+  if (json_number_peek == NULL)
+  {
+    *value = NULL;
+    return 0;
+  }
+
+  int json_typeof_result = json_typeof(json_number_peek);
+  if (json_typeof_result != JSON_INTEGER && json_typeof_result != JSON_REAL)
+  {
+    *value = NULL;
+    return 0;
+  }
+
+  double value_peek = json_number_value(json_number_peek);
+
+  int malloc_memcpy_double_result = malloc_memcpy_double(&value_return, &value_peek);
+  check(malloc_memcpy_double_result == 0, "malloc_memcpy_double_result: %d",
+    malloc_memcpy_double_result);
+
+  *value = value_return;
+
+  return 0;
+
+error:
+
+  if (value_return != NULL) { free(value_return); }
+
+  return -1;
+}
+
+// gets a json value from a key
 int json_get_int(json_t *object, char *key, int **value)
 {
   int *value_return = NULL;
