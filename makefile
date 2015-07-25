@@ -6,6 +6,7 @@ all : $(INFRASTRUCTURE) $(TABLES) $(SERVICES) tags
 INFRASTRUCTURE = sources/infrastructure/array/array.o \
                  sources/infrastructure/hash/hash_table.o \
                  sources/infrastructure/hash/hash_values.o \
+                 sources/infrastructure/json/json.o \
                  sources/infrastructure/mem/mem.o \
                  sources/infrastructure/sql/sql.o \
                  sources/infrastructure/time/time.o \
@@ -30,7 +31,7 @@ SERVICES = sources/core/services/new_order_request.o \
 
 main : all sources/core/main/main.c
 	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(TABLES) $(SERVICES) \
-	-l sqlite3 sources/core/main/main.c -o $@
+	-l sqlite3 -l jansson sources/core/main/main.c -o $@
 
 libraries: jansson
 
