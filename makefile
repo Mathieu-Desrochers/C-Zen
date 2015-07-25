@@ -1,7 +1,7 @@
 CC = c99
 CFLAGS  = -g -Wall
 
-all : $(INFRASTRUCTURE) $(TABLES) $(SERVICES) tags
+all : $(INFRASTRUCTURE) $(TABLES) $(SERVICES) $(HTTP) tags
 
 INFRASTRUCTURE = sources/infrastructure/array/array.o \
                  sources/infrastructure/hash/hash_table.o \
@@ -26,11 +26,13 @@ SERVICES = sources/core/services/new_order_request.o \
            sources/core/services/update_order_response.o \
            sources/core/services/update_order_service.o
 
+HTTP = sources/http/new_order_request_json.o
+
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 main : all sources/core/main/main.c
-	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(TABLES) $(SERVICES) \
+	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(TABLES) $(SERVICES) $(HTTP) \
 	-l sqlite3 -l jansson sources/core/main/main.c -o $@
 
 libraries: jansson
@@ -48,7 +50,7 @@ database :
 	chown mathieu /var/c-zen/
 	chown mathieu /var/c-zen/c-zen.db
 
-tags : $(INFRASTRUCTURE) $(TABLES) $(SERVICES)
+tags : $(INFRASTRUCTURE) $(TABLES) $(SERVICES) $(HTTP)
 	ctags -R .
 
 clean :
