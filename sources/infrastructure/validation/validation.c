@@ -133,6 +133,8 @@ int validation_errors_add(
   check(array_add_result == 0, "array_add_result: %d",
     array_add_result);
 
+  validation_error = NULL;
+
   return 0;
 
 error:
@@ -162,6 +164,8 @@ int validation_errors_add_level_1(
 
   check(array_add_result == 0, "array_add_result: %d",
     array_add_result);
+
+  validation_error = NULL;
 
   return 0;
 
@@ -194,6 +198,8 @@ int validation_errors_add_level_2(
 
   check(array_add_result == 0, "array_add_result: %d",
     array_add_result);
+
+  validation_error = NULL;
 
   return 0;
 

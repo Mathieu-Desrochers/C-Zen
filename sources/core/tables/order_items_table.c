@@ -270,6 +270,8 @@ int order_items_table_select_by_order_id(sqlite3 *sql_connection, int order_id, 
     check(array_add_result == 0, "array_add_result: %d",
       array_add_result);
 
+    order_item_row = NULL;
+
     sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
     check(sql_step_select_result == 0, "sql_step_select_result: %d",
       sql_step_select_result);
@@ -285,6 +287,7 @@ int order_items_table_select_by_order_id(sqlite3 *sql_connection, int order_id, 
 error:
 
   if (order_item_rows_return != NULL) { order_item_rows_free(order_item_rows_return, read_order_item_rows_count); }
+  if (order_item_row != NULL) { order_item_row_free(order_item_row); }
   if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
 
   return -1;
@@ -337,6 +340,8 @@ int order_items_table_select_all(sqlite3 *sql_connection, order_item_row_t ***or
     check(array_add_result == 0, "array_add_result: %d",
       array_add_result);
 
+    order_item_row = NULL;
+
     sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
     check(sql_step_select_result == 0, "sql_step_select_result: %d",
       sql_step_select_result);
@@ -352,6 +357,7 @@ int order_items_table_select_all(sqlite3 *sql_connection, order_item_row_t ***or
 error:
 
   if (order_item_rows_return != NULL) { order_item_rows_free(order_item_rows_return, read_order_item_rows_count); }
+  if (order_item_row != NULL) { order_item_row_free(order_item_row); }
   if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
 
   return -1;

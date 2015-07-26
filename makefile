@@ -26,7 +26,8 @@ SERVICES = sources/core/services/new_order_request.o \
            sources/core/services/update_order_response.o \
            sources/core/services/update_order_service.o
 
-HTTP = sources/http/new_order_request_json.o
+HTTP = sources/http/new_order_request_json.o \
+       sources/http/new_order_request_order_item_json.o
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@

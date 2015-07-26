@@ -147,6 +147,8 @@ int hash_get_or_create_hash_values(hash_table_t *hash_table, char *key, hash_val
   check(array_add_values_result == 0, "array_add_values_result: %d",
     array_add_values_result);
 
+  hash_values_return = NULL;
+
   *hash_values = hash_values_return;
 
   return 0;

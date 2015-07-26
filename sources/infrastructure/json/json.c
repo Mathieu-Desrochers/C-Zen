@@ -30,7 +30,7 @@ error:
 }
 
 // gets a json value from a key
-int json_object_get_array(json_t *object, char *key, json_t **value)
+int json_object_get_array(json_t *object, char *key, json_t **value, int *size)
 {
   check(object != NULL, "object: NULL");
   check(key != NULL, "key: NULL");
@@ -51,6 +51,7 @@ int json_object_get_array(json_t *object, char *key, json_t **value)
   }
 
   *value = json_array_peek;
+  *size = json_array_size(json_array_peek);
 
   return 0;
 
@@ -255,7 +256,7 @@ error:
 }
 
 // gets a json value from an index
-int json_array_get_array(json_t *array, int index, json_t **value)
+int json_array_get_array(json_t *array, int index, json_t **value, int *size)
 {
   check(array != NULL, "array: NULL");
   check(value != NULL, "value: NULL");
@@ -275,6 +276,7 @@ int json_array_get_array(json_t *array, int index, json_t **value)
   }
 
   *value = json_array_peek;
+  *size = json_array_size(json_array_peek);
 
   return 0;
 

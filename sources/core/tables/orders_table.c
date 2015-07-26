@@ -220,6 +220,8 @@ int orders_table_select_all(sqlite3 *sql_connection, order_row_t ***order_rows, 
     check(array_add_result == 0, "array_add_result: %d",
       array_add_result);
 
+    order_row = NULL;
+
     sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
     check(sql_step_select_result == 0, "sql_step_select_result: %d",
       sql_step_select_result);
@@ -235,6 +237,7 @@ int orders_table_select_all(sqlite3 *sql_connection, order_row_t ***order_rows, 
 error:
 
   if (order_rows_return != NULL) { order_rows_free(order_rows_return, read_order_rows_count); }
+  if (order_row != NULL) { order_row_free(order_row); }
   if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
 
   return -1;
