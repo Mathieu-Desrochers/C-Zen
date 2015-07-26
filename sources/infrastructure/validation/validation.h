@@ -71,16 +71,10 @@ int validation_errors_add_level_2(
   int index_level_2,
   int error_code);
 
-// validates a double
+// validates a value
 int validate_double(double *value, int required, double min_value, double max_value);
-
-// validates an integer
 int validate_int(int *value, int required, int min_value, int max_value);
-
-// validates a string
 int validate_string(char *value, int required, int min_length, int max_length);
-
-// validates a time
 int validate_time(time_t *value, int required, time_t min_value, time_t max_value);
 
 // validates an array

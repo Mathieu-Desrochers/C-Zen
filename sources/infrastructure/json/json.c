@@ -480,3 +480,211 @@ void json_parse_string_free(json_t *json)
 
   json_decref(json);
 }
+
+// allocates a json wobject
+json_t *json_object_malloc()
+{
+  json_t *json_object_result = NULL;
+
+  json_object_result = json_object();
+  check(json_object_result != NULL, "json_object_result: NULL");
+
+  return json_object_result;
+
+error:
+
+  if (json_object_result != NULL) { json_free(json_object_result); }
+
+  return NULL;
+}
+
+// sets a json value for a key
+int json_object_set_bool(json_t *json, char *key, int *value)
+{
+  json_t *json_boolean_result = NULL;
+
+  check(json != NULL, "json: NULL");
+  check(key != NULL, "key: NULL");
+
+  if (value != NULL)
+  {
+    json_boolean_result = json_boolean(*value);
+    check(json_boolean_result != NULL, "json_boolean_result: NULL");
+
+    int json_object_set_result = json_object_set_new(json, key, json_boolean_result);
+    check(json_object_set_result == 0, "json_object_set_result: %d",
+      json_object_set_result);
+  }
+  else
+  {
+    int json_object_set_result = json_object_set(json, key, json_null());
+    check(json_object_set_result == 0, "json_object_set_result: %d",
+      json_object_set_result);
+  }
+
+  return 0;
+
+error:
+
+  if (json_boolean_result != NULL) { json_free(json_boolean_result); }
+
+  return -1;
+}
+
+// sets a json value for a key
+int json_object_set_double(json_t *json, char *key, double *value)
+{
+  json_t *json_real_result = NULL;
+
+  check(json != NULL, "json: NULL");
+  check(key != NULL, "key: NULL");
+
+  if (value != NULL)
+  {
+    json_real_result = json_real(*value);
+    check(json_real_result != NULL, "json_real_result: NULL");
+
+    int json_object_set_result = json_object_set_new(json, key, json_real_result);
+    check(json_object_set_result == 0, "json_object_set_result: %d",
+      json_object_set_result);
+  }
+  else
+  {
+    int json_object_set_result = json_object_set(json, key, json_null());
+    check(json_object_set_result == 0, "json_object_set_result: %d",
+      json_object_set_result);
+  }
+
+  return 0;
+
+error:
+
+  if (json_real_result != NULL) { json_free(json_real_result); }
+
+  return -1;
+}
+
+// sets a json value for a key
+int json_object_set_int(json_t *json, char *key, int *value)
+{
+  json_t *json_integer_result = NULL;
+
+  check(json != NULL, "json: NULL");
+  check(key != NULL, "key: NULL");
+
+  if (value != NULL)
+  {
+    json_integer_result = json_integer(*value);
+    check(json_integer_result != NULL, "json_integer_result: NULL");
+
+    int json_object_set_result = json_object_set_new(json, key, json_integer_result);
+    check(json_object_set_result == 0, "json_object_set_result: %d",
+      json_object_set_result);
+  }
+  else
+  {
+    int json_object_set_result = json_object_set(json, key, json_null());
+    check(json_object_set_result == 0, "json_object_set_result: %d",
+      json_object_set_result);
+  }
+
+  return 0;
+
+error:
+
+  if (json_integer_result != NULL) { json_free(json_integer_result); }
+
+  return -1;
+}
+
+// sets a json value for a key
+int json_object_set_object(json_t *json, char *key, json_t *value)
+{
+  check(json != NULL, "json: NULL");
+  check(key != NULL, "key: NULL");
+
+  if (value != NULL)
+  {
+    int json_object_set_result = json_object_set(json, key, value);
+    check(json_object_set_result == 0, "json_object_set_result: %d",
+      json_object_set_result);
+  }
+  else
+  {
+    int json_object_set_result = json_object_set(json, key, json_null());
+    check(json_object_set_result == 0, "json_object_set_result: %d",
+      json_object_set_result);
+  }
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
+// sets a json value for a key
+int json_object_set_string(json_t *json, char *key, char *value)
+{
+  json_t *json_string_result = NULL;
+
+  check(json != NULL, "json: NULL");
+  check(key != NULL, "key: NULL");
+
+  if (value != NULL)
+  {
+    json_string_result = json_string(value);
+    check(json_string_result != NULL, "json_string_result: NULL");
+
+    int json_object_set_result = json_object_set_new(json, key, json_string_result);
+    check(json_object_set_result == 0, "json_object_set_result: %d",
+      json_object_set_result);
+  }
+  else
+  {
+    int json_object_set_result = json_object_set(json, key, json_null());
+    check(json_object_set_result == 0, "json_object_set_result: %d",
+      json_object_set_result);
+  }
+
+  return 0;
+
+error:
+
+  if (json_string_result != NULL) { json_free(json_string_result); }
+
+  return -1;
+}
+
+// writes a json to string
+int json_to_string(json_t *json, char **string)
+{
+  char *json_dumps_result = NULL;
+
+  check(json != NULL, "json: NULL");
+  check(string != NULL, "string: NULL");
+
+  json_dumps_result = json_dumps(json, JSON_INDENT(2) | JSON_PRESERVE_ORDER);
+  check(json_dumps_result != NULL, "json_dumps_result: NULL");
+
+  *string = json_dumps_result;
+
+  return 0;
+
+error:
+
+  if (json_dumps_result != NULL) { free(json_dumps_result); }
+
+  return -1;
+}
+
+// frees a json object
+void json_free(json_t *json)
+{
+  if (json == NULL)
+  {
+    return;
+  }
+
+  json_decref(json);
+}

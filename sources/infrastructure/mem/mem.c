@@ -4,7 +4,7 @@
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/mem/mem.h"
 
-// allocates and copies a double
+// allocates and copies a value
 int malloc_memcpy_double(double **destination, double *source)
 {
   double *destination_return = NULL;
@@ -33,7 +33,7 @@ error:
   return -1;
 }
 
-// allocates and copies an integer
+// allocates and copies a value
 int malloc_memcpy_int(int **destination, int *source)
 {
   int *destination_return = NULL;
@@ -62,7 +62,7 @@ error:
   return -1;
 }
 
-// allocates and copies a string
+// allocates and copies a value
 int malloc_memcpy_string(char **destination, char *source)
 {
   char *destination_return = NULL;
@@ -91,7 +91,7 @@ error:
   return -1;
 }
 
-// allocates and copies a time
+// allocates and copies a value
 int malloc_memcpy_time(time_t **destination, time_t *source)
 {
   time_t *destination_return = NULL;

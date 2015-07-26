@@ -210,7 +210,7 @@ error:
   return -1;
 }
 
-// validates a double
+// validates a value
 int validate_double(double *value, int required, double min_value, double max_value)
 {
   if (value == NULL)
@@ -236,7 +236,7 @@ int validate_double(double *value, int required, double min_value, double max_va
   return 0;
 }
 
-// validates an integer
+// validates a value
 int validate_int(int *value, int required, int min_value, int max_value)
 {
   if (value == NULL)
@@ -262,7 +262,7 @@ int validate_int(int *value, int required, int min_value, int max_value)
   return 0;
 }
 
-// validates a string
+// validates a value
 int validate_string(char *value, int required, int min_length, int max_length)
 {
   if (value == NULL)
@@ -290,7 +290,7 @@ int validate_string(char *value, int required, int min_length, int max_length)
   return 0;
 }
 
-// validates a time
+// validates a value
 int validate_time(time_t *value, int required, time_t min_value, time_t max_value)
 {
   if (value == NULL)

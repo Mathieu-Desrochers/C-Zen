@@ -1,7 +1,7 @@
 CC = c99
 CFLAGS  = -g -Wall
 
-all : $(INFRASTRUCTURE) $(TABLES) $(SERVICES) $(HTTP) tags
+all : $(INFRASTRUCTURE) $(TABLES) $(SERVICES) $(HTTP) main tags
 
 INFRASTRUCTURE = sources/infrastructure/array/array.o \
                  sources/infrastructure/hash/hash_table.o \
@@ -32,7 +32,7 @@ HTTP = sources/http/new_order_request_json.o \
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-main : all sources/core/main/main.c
+main : $(INFRASTRUCTURE) $(TABLES) $(SERVICES) $(HTTP) sources/core/main/main.c
 	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(TABLES) $(SERVICES) $(HTTP) \
 	-l sqlite3 -l jansson sources/core/main/main.c -o $@
 
