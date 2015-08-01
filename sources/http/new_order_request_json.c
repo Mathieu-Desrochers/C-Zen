@@ -53,19 +53,22 @@ int new_order_request_json_parse(json_t *json, new_order_request_t **new_order_r
 
       if (order_item_json != NULL)
       {
-        int new_order_request_order_item_json_parse_result = new_order_request_order_item_json_parse(order_item_json, &new_order_request_order_item);
+        int new_order_request_order_item_json_parse_result = new_order_request_order_item_json_parse(
+          order_item_json,
+          &new_order_request_order_item);
+
         check(new_order_request_order_item_json_parse_result == 0, "new_order_request_order_item_json_parse_result: %d",
           new_order_request_order_item_json_parse_result);
       }
 
-      int array_add_order_item_order_item_request_result = array_add_pointer(
+      int array_add_pointer_result = array_add_pointer(
         (void ***)&(new_order_request_return->order_items),
         &allocated_new_order_request_order_items_count,
         &(new_order_request_return->order_items_count),
         new_order_request_order_item);
 
-      check(array_add_order_item_order_item_request_result == 0, "array_add_order_item_order_item_request_result: %d",
-        array_add_order_item_order_item_request_result);
+      check(array_add_pointer_result == 0, "array_add_pointer_result: %d",
+        array_add_pointer_result);
 
       new_order_request_order_item = NULL;
     }

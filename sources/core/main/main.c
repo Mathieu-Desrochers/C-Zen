@@ -1,48 +1,92 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../../core/services/new_order_request.h"
+#include "../../core/services/new_order_service.h"
+#include "../../http/new_order_request_json.h"
+#include "../../http/new_order_response_json.h"
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/json/json.h"
+#include "../../infrastructure/sql/sql.h"
 
 int main()
 {
-  char *json_string = NULL;
-  json_t *json = NULL;
-  json_t *json2 = NULL;
+  json_t *request_json = NULL;
+  new_order_request_t *new_order_request = NULL;
+  sqlite3 *sql_connection = NULL;
+  new_order_response_t *new_order_response = NULL;
+  validation_error_t **validation_errors = NULL;
+  int validation_errors_count = 0;
+  json_t *response_json = NULL;
+  char *response_string = NULL;
 
-  json = json_array_malloc();
-  check(json != NULL, "json: NULL");
+  char *request_string =
+    "{\
+       \"customer-name\":\"Alice\",\
+       \"total\":100,\
+       \"order-items\":[\
+         {\
+          \"name\":\"Nintendo\",\
+          \"quantity\":2\
+         },\
+         {\
+          \"name\":\"Dog\",\
+          \"quantity\":1\
+         }\
+       ]\
+     }";
 
-  json2 = json_object_malloc();
-  check(json2 != NULL, "json2: NULL");
+  int json_parse_string_result = json_parse_string(request_string, &request_json);
+  check(json_parse_string_result == 0, "json_parse_string_result: %d",
+    json_parse_string_result);
 
-  int json_object_set_child_result = json_array_add_object(json, json2);
-  check(json_object_set_child_result == 0, "json_object_set_child_result: %d",
-    json_object_set_child_result);
+  int new_order_request_json_parse_result = new_order_request_json_parse(request_json, &new_order_request);
+  check(new_order_request_json_parse_result == 0, "new_order_request_json_parse_result: %d",
+    new_order_request_json_parse_result);
 
-  char *value = "Alice";
+  int sql_open_connection_result = sql_open_connection("/var/c-zen/c-zen.db", &sql_connection);
+  check(sql_open_connection_result == 0, "sql_open_connection_result: %d",
+    sql_open_connection_result);
 
-  int json_object_set_number_result = json_object_set_string(json2, "Name", value);
-  check(json_object_set_number_result == 0, "json_object_set_number_result %d",
-    json_object_set_number_result);
+  int new_order_service_result = new_order_service(
+    sql_connection,
+    new_order_request,
+    &new_order_response,
+    &validation_errors,
+    &validation_errors_count);
 
-  int json_to_string_result = json_to_string(json, &json_string);
+  check(new_order_service_result == 0, "new_order_service_result: %d",
+    new_order_service_result);
+
+  int new_order_response_json_format_result = new_order_response_json_format(new_order_response, &response_json);
+  check(new_order_response_json_format_result == 0, "new_order_response_json_format_result: %d",
+    new_order_response_json_format_result);
+
+  int json_to_string_result = json_to_string(response_json, &response_string);
   check(json_to_string_result == 0, "json_to_string_result: %d",
     json_to_string_result);
 
-  printf("%s\n", json_string);
+  printf("%s\n", response_string);
 
-  free(json_string);
-  json_free(json2);
-  json_free(json);
+  free(response_string);
+  json_free(response_json);
+  validation_errors_free(validation_errors, validation_errors_count);
+  new_order_response_free(new_order_response);
+  sql_close_connection(sql_connection);
+  new_order_request_free(new_order_request);
+  json_free(request_json);
 
   return 0;
 
 error:
 
-  if (json_string != NULL) { free(json_string); }
-  if (json2 != NULL) { json_free(json2); }
-  if (json != NULL) { json_free(json); }
+  if (response_string != NULL) { free(response_string); }
+  if (response_json != NULL) { json_free(response_json); }
+  if (validation_errors != NULL) { validation_errors_free(validation_errors, validation_errors_count); }
+  if (new_order_response != NULL) { new_order_response_free(new_order_response); }
+  if (sql_connection != NULL) { sql_close_connection(sql_connection); }
+  if (new_order_request != NULL) { new_order_request_free(new_order_request); }
+  if (request_json != NULL) { json_free(request_json); }
 
   return -1;
 }
