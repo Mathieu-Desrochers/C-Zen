@@ -481,7 +481,7 @@ void json_parse_string_free(json_t *json)
   json_decref(json);
 }
 
-// allocates a json wobject
+// allocates a json object
 json_t *json_object_malloc()
 {
   json_t *json_object_result = NULL;
@@ -499,11 +499,37 @@ error:
 }
 
 // sets a json value for a key
-int json_object_set_bool(json_t *json, char *key, int *value)
+int json_object_set_array(json_t *object, char *key, json_t *value)
+{
+  check(object != NULL, "object: NULL");
+  check(key != NULL, "key: NULL");
+
+  if (value != NULL)
+  {
+    int json_object_set_result = json_object_set(object, key, value);
+    check(json_object_set_result == 0, "json_object_set_result: %d",
+      json_object_set_result);
+  }
+  else
+  {
+    int json_object_set_result = json_object_set(object, key, json_null());
+    check(json_object_set_result == 0, "json_object_set_result: %d",
+      json_object_set_result);
+  }
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
+// sets a json value for a key
+int json_object_set_bool(json_t *object, char *key, int *value)
 {
   json_t *json_boolean_result = NULL;
 
-  check(json != NULL, "json: NULL");
+  check(object != NULL, "object: NULL");
   check(key != NULL, "key: NULL");
 
   if (value != NULL)
@@ -511,13 +537,13 @@ int json_object_set_bool(json_t *json, char *key, int *value)
     json_boolean_result = json_boolean(*value);
     check(json_boolean_result != NULL, "json_boolean_result: NULL");
 
-    int json_object_set_result = json_object_set_new(json, key, json_boolean_result);
+    int json_object_set_result = json_object_set_new(object, key, json_boolean_result);
     check(json_object_set_result == 0, "json_object_set_result: %d",
       json_object_set_result);
   }
   else
   {
-    int json_object_set_result = json_object_set(json, key, json_null());
+    int json_object_set_result = json_object_set(object, key, json_null());
     check(json_object_set_result == 0, "json_object_set_result: %d",
       json_object_set_result);
   }
@@ -532,11 +558,11 @@ error:
 }
 
 // sets a json value for a key
-int json_object_set_double(json_t *json, char *key, double *value)
+int json_object_set_double(json_t *object, char *key, double *value)
 {
   json_t *json_real_result = NULL;
 
-  check(json != NULL, "json: NULL");
+  check(object != NULL, "object: NULL");
   check(key != NULL, "key: NULL");
 
   if (value != NULL)
@@ -544,13 +570,13 @@ int json_object_set_double(json_t *json, char *key, double *value)
     json_real_result = json_real(*value);
     check(json_real_result != NULL, "json_real_result: NULL");
 
-    int json_object_set_result = json_object_set_new(json, key, json_real_result);
+    int json_object_set_result = json_object_set_new(object, key, json_real_result);
     check(json_object_set_result == 0, "json_object_set_result: %d",
       json_object_set_result);
   }
   else
   {
-    int json_object_set_result = json_object_set(json, key, json_null());
+    int json_object_set_result = json_object_set(object, key, json_null());
     check(json_object_set_result == 0, "json_object_set_result: %d",
       json_object_set_result);
   }
@@ -565,11 +591,11 @@ error:
 }
 
 // sets a json value for a key
-int json_object_set_int(json_t *json, char *key, int *value)
+int json_object_set_int(json_t *object, char *key, int *value)
 {
   json_t *json_integer_result = NULL;
 
-  check(json != NULL, "json: NULL");
+  check(object != NULL, "object: NULL");
   check(key != NULL, "key: NULL");
 
   if (value != NULL)
@@ -577,13 +603,13 @@ int json_object_set_int(json_t *json, char *key, int *value)
     json_integer_result = json_integer(*value);
     check(json_integer_result != NULL, "json_integer_result: NULL");
 
-    int json_object_set_result = json_object_set_new(json, key, json_integer_result);
+    int json_object_set_result = json_object_set_new(object, key, json_integer_result);
     check(json_object_set_result == 0, "json_object_set_result: %d",
       json_object_set_result);
   }
   else
   {
-    int json_object_set_result = json_object_set(json, key, json_null());
+    int json_object_set_result = json_object_set(object, key, json_null());
     check(json_object_set_result == 0, "json_object_set_result: %d",
       json_object_set_result);
   }
@@ -598,20 +624,20 @@ error:
 }
 
 // sets a json value for a key
-int json_object_set_object(json_t *json, char *key, json_t *value)
+int json_object_set_object(json_t *object, char *key, json_t *value)
 {
-  check(json != NULL, "json: NULL");
+  check(object != NULL, "object: NULL");
   check(key != NULL, "key: NULL");
 
   if (value != NULL)
   {
-    int json_object_set_result = json_object_set(json, key, value);
+    int json_object_set_result = json_object_set(object, key, value);
     check(json_object_set_result == 0, "json_object_set_result: %d",
       json_object_set_result);
   }
   else
   {
-    int json_object_set_result = json_object_set(json, key, json_null());
+    int json_object_set_result = json_object_set(object, key, json_null());
     check(json_object_set_result == 0, "json_object_set_result: %d",
       json_object_set_result);
   }
@@ -624,11 +650,11 @@ error:
 }
 
 // sets a json value for a key
-int json_object_set_string(json_t *json, char *key, char *value)
+int json_object_set_string(json_t *object, char *key, char *value)
 {
   json_t *json_string_result = NULL;
 
-  check(json != NULL, "json: NULL");
+  check(object != NULL, "object: NULL");
   check(key != NULL, "key: NULL");
 
   if (value != NULL)
@@ -636,15 +662,218 @@ int json_object_set_string(json_t *json, char *key, char *value)
     json_string_result = json_string(value);
     check(json_string_result != NULL, "json_string_result: NULL");
 
-    int json_object_set_result = json_object_set_new(json, key, json_string_result);
+    int json_object_set_result = json_object_set_new(object, key, json_string_result);
     check(json_object_set_result == 0, "json_object_set_result: %d",
       json_object_set_result);
   }
   else
   {
-    int json_object_set_result = json_object_set(json, key, json_null());
+    int json_object_set_result = json_object_set(object, key, json_null());
     check(json_object_set_result == 0, "json_object_set_result: %d",
       json_object_set_result);
+  }
+
+  return 0;
+
+error:
+
+  if (json_string_result != NULL) { json_free(json_string_result); }
+
+  return -1;
+}
+
+// allocates a json array
+json_t *json_array_malloc()
+{
+  json_t *json_array_result = NULL;
+
+  json_array_result = json_array();
+  check(json_array_result != NULL, "json_array_result: NULL");
+
+  return json_array_result;
+
+error:
+
+  if (json_array_result != NULL) { json_free(json_array_result); }
+
+  return NULL;
+}
+
+// sets a json value for the next index
+int json_array_add_array(json_t *array, json_t *value)
+{
+  check(array != NULL, "array: NULL");
+
+  if (value != NULL)
+  {
+    int json_array_append_result = json_array_append(array, value);
+    check(json_array_append_result == 0, "json_array_append_result: %d",
+      json_array_append_result);
+  }
+  else
+  {
+    int json_array_append_result = json_array_append(array, json_null());
+    check(json_array_append_result == 0, "json_array_append_result: %d",
+      json_array_append_result);
+  }
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
+// sets a json value for the next index
+int json_array_add_bool(json_t *array, int *value)
+{
+  json_t *json_boolean_result = NULL;
+
+  check(array != NULL, "array: NULL");
+
+  if (value != NULL)
+  {
+    json_boolean_result = json_boolean(*value);
+    check(json_boolean_result != NULL, "json_boolean_result: NULL");
+
+    int json_array_append_result = json_array_append_new(array, json_boolean_result);
+    check(json_array_append_result == 0, "json_array_append_result: %d",
+      json_array_append_result);
+
+    json_boolean_result = NULL;
+  }
+  else
+  {
+    int json_array_append_result = json_array_append(array, json_null());
+    check(json_array_append_result == 0, "json_array_append_result: %d",
+      json_array_append_result);
+  }
+
+  return 0;
+
+error:
+
+  if (json_boolean_result != NULL) { json_free(json_boolean_result); }
+
+  return -1;
+}
+
+// sets a json value for the next index
+int json_array_add_double(json_t *array, double *value)
+{
+  json_t *json_real_result = NULL;
+
+  check(array != NULL, "array: NULL");
+
+  if (value != NULL)
+  {
+    json_real_result = json_real(*value);
+    check(json_real_result != NULL, "json_real_result: NULL");
+
+    int json_array_append_result = json_array_append_new(array, json_real_result);
+    check(json_array_append_result == 0, "json_array_append_result: %d",
+      json_array_append_result);
+
+    json_real_result = NULL;
+  }
+  else
+  {
+    int json_array_append_result = json_array_append(array, json_null());
+    check(json_array_append_result == 0, "json_array_append_result: %d",
+      json_array_append_result);
+  }
+
+  return 0;
+
+error:
+
+  if (json_real_result != NULL) { json_free(json_real_result); }
+
+  return -1;
+}
+
+// sets a json value for the next index
+int json_array_add_int(json_t *array, int *value)
+{
+  json_t *json_integer_result = NULL;
+
+  check(array != NULL, "array: NULL");
+
+  if (value != NULL)
+  {
+    json_integer_result = json_integer(*value);
+    check(json_integer_result != NULL, "json_integer_result: NULL");
+
+    int json_array_append_result = json_array_append_new(array, json_integer_result);
+    check(json_array_append_result == 0, "json_array_append_result: %d",
+      json_array_append_result);
+
+    json_integer_result = NULL;
+  }
+  else
+  {
+    int json_array_append_result = json_array_append(array, json_null());
+    check(json_array_append_result == 0, "json_array_append_result: %d",
+      json_array_append_result);
+  }
+
+  return 0;
+
+error:
+
+  if (json_integer_result != NULL) { json_free(json_integer_result); }
+
+  return -1;
+}
+
+// sets a json value for the next index
+int json_array_add_object(json_t *array, json_t *value)
+{
+  check(array != NULL, "array: NULL");
+
+  if (value != NULL)
+  {
+    int json_array_append_result = json_array_append(array, value);
+    check(json_array_append_result == 0, "json_array_append_result: %d",
+      json_array_append_result);
+  }
+  else
+  {
+    int json_array_append_result = json_array_append(array, json_null());
+    check(json_array_append_result == 0, "json_array_append_result: %d",
+      json_array_append_result);
+  }
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
+// sets a json value for the next index
+int json_array_add_string(json_t *array, char *value)
+{
+  json_t *json_string_result = NULL;
+
+  check(array != NULL, "array: NULL");
+
+  if (value != NULL)
+  {
+    json_string_result = json_string(value);
+    check(json_string_result != NULL, "json_string_result: NULL");
+
+    int json_array_append_result = json_array_append_new(array, json_string_result);
+    check(json_array_append_result == 0, "json_array_append_result: %d",
+      json_array_append_result);
+
+    json_string_result = NULL;
+  }
+  else
+  {
+    int json_array_append_result = json_array_append(array, json_null());
+    check(json_array_append_result == 0, "json_array_append_result: %d",
+      json_array_append_result);
   }
 
   return 0;

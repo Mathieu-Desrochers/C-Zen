@@ -10,19 +10,19 @@ int main()
   json_t *json = NULL;
   json_t *json2 = NULL;
 
-  json = json_object_malloc();
+  json = json_array_malloc();
   check(json != NULL, "json: NULL");
 
   json2 = json_object_malloc();
   check(json2 != NULL, "json2: NULL");
 
-  int json_object_set_child_result = json_object_set_object(json, "child", json2);
+  int json_object_set_child_result = json_array_add_object(json, json2);
   check(json_object_set_child_result == 0, "json_object_set_child_result: %d",
     json_object_set_child_result);
 
   char *value = "Alice";
 
-  int json_object_set_number_result = json_object_set_string(json2, "number", value);
+  int json_object_set_number_result = json_object_set_string(json2, "Name", value);
   check(json_object_set_number_result == 0, "json_object_set_number_result %d",
     json_object_set_number_result);
 

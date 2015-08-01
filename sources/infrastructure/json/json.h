@@ -29,11 +29,23 @@ void json_parse_string_free(json_t *json);
 json_t *json_object_malloc();
 
 // sets a json value for a key
-int json_object_set_bool(json_t *json, char *key, int *value);
-int json_object_set_double(json_t *json, char *key, double *value);
-int json_object_set_int(json_t *json, char *key, int *value);
-int json_object_set_object(json_t *json, char *key, json_t *value);
-int json_object_set_string(json_t *json, char *key, char *value);
+int json_object_set_array(json_t *object, char *key, json_t *value);
+int json_object_set_bool(json_t *object, char *key, int *value);
+int json_object_set_double(json_t *object, char *key, double *value);
+int json_object_set_int(json_t *object, char *key, int *value);
+int json_object_set_object(json_t *object, char *key, json_t *value);
+int json_object_set_string(json_t *object, char *key, char *value);
+
+// allocates a json array
+json_t *json_array_malloc();
+
+// sets a json value for the next index
+int json_array_add_array(json_t *array, json_t *value);
+int json_array_add_bool(json_t *array, int *value);
+int json_array_add_double(json_t *array, double *value);
+int json_array_add_int(json_t *array, int *value);
+int json_array_add_object(json_t *array, json_t *value);
+int json_array_add_string(json_t *array, char *value);
 
 // writes a json to string
 int json_to_string(json_t *json, char **string);
