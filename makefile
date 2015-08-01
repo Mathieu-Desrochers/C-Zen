@@ -37,15 +37,24 @@ main : $(INFRASTRUCTURE) $(TABLES) $(SERVICES) $(HTTP) sources/core/main/main.c
 	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(TABLES) $(SERVICES) $(HTTP) \
 	-l sqlite3 -l jansson sources/core/main/main.c -o $@
 
-libraries: jansson
+libraries: fastcgi \
+           jansson
 
-jansson:
+fastcgi: libraries/fcgi-2.4.0.tar.gz
+	tar -xzf libraries/fcgi-2.4.0.tar.gz -C /tmp
+	cd /tmp/fcgi-2.4.0/libfcgi && sed '25 i #include <stdio.h>' fcgio.cpp > fcgio.cpp.tmp
+	cd /tmp/fcgi-2.4.0/libfcgi && mv fcgio.cpp.tmp fcgio.cpp
+	cd /tmp/fcgi-2.4.0 && ./configure
+	$(MAKE) -C /tmp/fcgi-2.4.0
+	$(MAKE) -C /tmp/fcgi-2.4.0 install
+
+jansson: libraries/jansson-2.7.tar.gz
 	tar -xzf libraries/jansson-2.7.tar.gz -C /tmp
 	cd /tmp/jansson-2.7 && ./configure
 	$(MAKE) -C /tmp/jansson-2.7
 	$(MAKE) -C /tmp/jansson-2.7 install
 
-database :
+database: sources/database/create_database.sql
 	mkdir -p /var/c-zen
 	sqlite3 /var/c-zen/c-zen.db < sources/database/create_database.sql
 	sqlite3 /var/c-zen/c-zen.db "PRAGMA journal_mode=WAL;"
