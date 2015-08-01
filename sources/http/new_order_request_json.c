@@ -14,11 +14,11 @@ int new_order_request_json_parse(json_t *json, new_order_request_t **new_order_r
   new_order_request_t *new_order_request_return = NULL;
 
   char *customer_name = NULL;
-  json_t *order_items_json = NULL;
-  json_t *order_item_json = NULL;
-  int order_items_json_count = 0;
   int *total = NULL;
 
+  json_t *order_items_json = NULL;
+  int order_items_json_count = 0;
+  json_t *order_item_json = NULL;
   new_order_request_order_item_t *new_order_request_order_item = NULL;
   int allocated_new_order_request_order_items_count = 0;
 
