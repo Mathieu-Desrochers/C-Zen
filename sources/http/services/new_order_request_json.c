@@ -1,12 +1,12 @@
 #include <stdlib.h>
 
-#include "../http/new_order_request_json.h"
-#include "../http/new_order_request_order_item_json.h"
-#include "../core/services/new_order_request.h"
-#include "../core/services/new_order_request_order_item.h"
-#include "../infrastructure/array/array.h"
-#include "../infrastructure/dbg/dbg.h"
-#include "../infrastructure/json/json.h"
+#include "../../http/services/new_order_request_json.h"
+#include "../../http/services/new_order_request_order_item_json.h"
+#include "../../core/services/new_order_request.h"
+#include "../../core/services/new_order_request_order_item.h"
+#include "../../infrastructure/array/array.h"
+#include "../../infrastructure/dbg/dbg.h"
+#include "../../infrastructure/json/json.h"
 
 // parses a new order request from json
 int new_order_request_json_parse(json_t *json, new_order_request_t **new_order_request)
