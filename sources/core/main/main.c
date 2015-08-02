@@ -3,8 +3,8 @@
 
 #include "../../core/services/new_order_request.h"
 #include "../../core/services/new_order_service.h"
-#include "../../http/new_order_request_json.h"
-#include "../../http/new_order_response_json.h"
+#include "../../http/services/new_order_request_json.h"
+#include "../../http/services/new_order_response_json.h"
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/json/json.h"
 #include "../../infrastructure/sql/sql.h"

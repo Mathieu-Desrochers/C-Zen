@@ -1,7 +1,7 @@
 CC = c99
 CFLAGS  = -g -Wall
 
-all : $(INFRASTRUCTURE) $(TABLES) $(SERVICES) $(HTTP) main tags
+all : $(INFRASTRUCTURE) $(CORE) $(HTTP) main_shell main_http tags
 
 INFRASTRUCTURE = sources/infrastructure/array/array.o \
                  sources/infrastructure/hash/hash_table.o \
@@ -12,19 +12,18 @@ INFRASTRUCTURE = sources/infrastructure/array/array.o \
                  sources/infrastructure/time/time.o \
                  sources/infrastructure/validation/validation.o
 
-TABLES = sources/core/tables/order_row.o \
-         sources/core/tables/orders_table.o \
-         sources/core/tables/order_item_row.o \
-         sources/core/tables/order_items_table.o \
-
-SERVICES = sources/core/services/new_order_request.o \
-           sources/core/services/new_order_request_order_item.o \
-           sources/core/services/new_order_response.o \
-           sources/core/services/new_order_service.o \
-           sources/core/services/update_order_request.o \
-           sources/core/services/update_order_request_order_item.o \
-           sources/core/services/update_order_response.o \
-           sources/core/services/update_order_service.o
+CORE = sources/core/tables/order_row.o \
+       sources/core/tables/orders_table.o \
+       sources/core/tables/order_item_row.o \
+       sources/core/tables/order_items_table.o \
+       sources/core/services/new_order_request.o \
+       sources/core/services/new_order_request_order_item.o \
+       sources/core/services/new_order_response.o \
+       sources/core/services/new_order_service.o \
+       sources/core/services/update_order_request.o \
+       sources/core/services/update_order_request_order_item.o \
+       sources/core/services/update_order_response.o \
+       sources/core/services/update_order_service.o
 
 HTTP = sources/http/services/new_order_request_json.o \
        sources/http/services/new_order_request_order_item_json.o \
@@ -33,14 +32,18 @@ HTTP = sources/http/services/new_order_request_json.o \
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-main : $(INFRASTRUCTURE) $(TABLES) $(SERVICES) $(HTTP) sources/core/main/main.c
-	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(TABLES) $(SERVICES) $(HTTP) \
-	-l sqlite3 -l jansson sources/core/main/main.c -o $@
+main_http : $(INFRASTRUCTURE) $(CORE) $(HTTP) sources/http/main.c
+	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(CORE) $(HTTP) \
+	sources/http/main.c -lsqlite3 -ljansson -lfcgi -o main_http
+
+main_shell : $(INFRASTRUCTURE) $(CORE) $(HTTP) sources/core/main/main.c
+	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(CORE) $(HTTP) \
+	sources/core/main/main.c -lsqlite3 -ljansson -lfcgi -o main_shell
 
 libraries: fastcgi \
            jansson
 
-fastcgi: libraries/fcgi-2.4.0.tar.gz
+fastcgi:
 	tar -xzf libraries/fcgi-2.4.0.tar.gz -C /tmp
 	cd /tmp/fcgi-2.4.0/libfcgi && sed '25 i #include <stdio.h>' fcgio.cpp > fcgio.cpp.tmp
 	cd /tmp/fcgi-2.4.0/libfcgi && mv fcgio.cpp.tmp fcgio.cpp
@@ -48,23 +51,24 @@ fastcgi: libraries/fcgi-2.4.0.tar.gz
 	$(MAKE) -C /tmp/fcgi-2.4.0
 	$(MAKE) -C /tmp/fcgi-2.4.0 install
 
-jansson: libraries/jansson-2.7.tar.gz
+jansson:
 	tar -xzf libraries/jansson-2.7.tar.gz -C /tmp
 	cd /tmp/jansson-2.7 && ./configure
 	$(MAKE) -C /tmp/jansson-2.7
 	$(MAKE) -C /tmp/jansson-2.7 install
 
-database: sources/database/create_database.sql
+database:
 	mkdir -p /var/c-zen
 	sqlite3 /var/c-zen/c-zen.db < sources/database/create_database.sql
 	sqlite3 /var/c-zen/c-zen.db "PRAGMA journal_mode=WAL;"
 	chown mathieu /var/c-zen/
 	chown mathieu /var/c-zen/c-zen.db
 
-tags : $(INFRASTRUCTURE) $(TABLES) $(SERVICES) $(HTTP)
+tags : $(INFRASTRUCTURE) $(CORE) $(HTTP)
 	ctags -R .
 
 clean :
 	find . -name *.o | xargs -i /bin/rm {}
-	rm -f main
+	rm -f main_http
+	rm -f main_shell
 	rm -f tags
