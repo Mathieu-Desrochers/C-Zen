@@ -27,7 +27,8 @@ CORE = sources/core/tables/order_row.o \
 
 HTTP = sources/http/services/new_order_request_http.o \
        sources/http/services/new_order_request_order_item_http.o \
-       sources/http/services/new_order_response_http.o
+       sources/http/services/new_order_response_http.o \
+       sources/http/services/new_order_service_http.o
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@

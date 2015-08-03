@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "../infrastructure/dbg/dbg.h"
+#include "../http/services/new_order_service_http.h"
 
 int main()
 {
@@ -19,9 +20,30 @@ int main()
 
   while (FCGX_Accept_r(request) == 0)
   {
+    FCGX_ParamArray envp = request->envp;
+
+    char *method = FCGX_GetParam("REQUEST_METHOD", envp);
+    char *url = FCGX_GetParam("REQUEST_URI", envp);
+
+    log_info("%s", method);
+    log_info("%s", url);
+
+    int matched = 0;
+    char **url_tokens = NULL;
+    int url_tokens_count = 0;
+
+    int parse_url_result = new_order_service_http_parse_url(method, url, &matched, &url_tokens, &url_tokens_count);
+    check(parse_url_result == 0, "parse_url_result: %d",
+      parse_url_result);
+
     FCGX_PutS("Content-type: text/html\r\n", request->out);
     FCGX_PutS("\r\n", request->out);
     FCGX_PutS("HELLO\r\n", request->out);
+
+    if (matched == 1)
+    {
+      FCGX_PutS("HELLO!\r\n", request->out);
+    }
 
     FCGX_Finish_r(request);
   }

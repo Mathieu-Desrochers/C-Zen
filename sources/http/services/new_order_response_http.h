@@ -1,5 +1,5 @@
-#ifndef NEW_ORDER_RESPONSE_JSON_H
-#define NEW_ORDER_RESPONSE_JSON_H
+#ifndef NEW_ORDER_RESPONSE_HTTP_H
+#define NEW_ORDER_RESPONSE_HTTP_H
 
 #include "../../core/services/new_order_response.h"
 #include "../../infrastructure/json/json.h"
