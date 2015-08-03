@@ -227,3 +227,19 @@ error:
 
   return -1;
 }
+
+// frees an array
+void array_free_string(char **array, int count)
+{
+  if (array == NULL)
+  {
+    return;
+  }
+
+  for (int i = 0; i < count; i++)
+  {
+    free(array[i]);
+  }
+
+  free(array);
+}

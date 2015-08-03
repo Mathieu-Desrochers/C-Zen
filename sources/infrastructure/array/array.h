@@ -12,4 +12,7 @@ int array_find_duplicates_int(int **array, int array_count, int **duplicate_inde
 // finds unknown values within an array
 int array_find_unknowns_int(int **array, int array_count, int** known_array, int known_array_count, int **unknown_indexes, int *unknown_indexes_count);
 
+// frees an array
+void array_free_string(char **array, int count);
+
 #endif
