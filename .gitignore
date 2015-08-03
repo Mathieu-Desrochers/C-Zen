@@ -1,5 +1,5 @@
 *.o
 *.swp
+/main_core
 /main_http
-/main_shell
 /tags

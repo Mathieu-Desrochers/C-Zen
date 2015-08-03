@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../infrastructure/dbg/dbg.h"
-#include "../http/services/new_order_service_http.h"
+#include "../../infrastructure/dbg/dbg.h"
+#include "../../http/services/new_order_service_http.h"
 
 int main()
 {

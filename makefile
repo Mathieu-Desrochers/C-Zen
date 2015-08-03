@@ -1,13 +1,14 @@
 CC = c99
 CFLAGS  = -g -Wall
 
-all : $(INFRASTRUCTURE) $(CORE) $(HTTP) main_shell main_http tags
+all : $(INFRASTRUCTURE) $(CORE) $(HTTP) main_core main_http tags
 
 INFRASTRUCTURE = sources/infrastructure/array/array.o \
                  sources/infrastructure/hash/hash_table.o \
                  sources/infrastructure/hash/hash_values.o \
                  sources/infrastructure/json/json.o \
                  sources/infrastructure/mem/mem.o \
+                 sources/infrastructure/regex/regex.o \
                  sources/infrastructure/sql/sql.o \
                  sources/infrastructure/time/time.o \
                  sources/infrastructure/validation/validation.o
@@ -33,13 +34,13 @@ HTTP = sources/http/services/new_order_request_http.o \
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-main_http : $(INFRASTRUCTURE) $(CORE) $(HTTP) sources/http/main.c
+main_core : $(INFRASTRUCTURE) $(CORE) $(HTTP) sources/core/main/main.c
 	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(CORE) $(HTTP) \
-	sources/http/main.c -lsqlite3 -ljansson -lfcgi -o main_http
+	sources/core/main/main.c -lsqlite3 -ljansson -lfcgi -lpcre -o main_core
 
-main_shell : $(INFRASTRUCTURE) $(CORE) $(HTTP) sources/core/main/main.c
+main_http : $(INFRASTRUCTURE) $(CORE) $(HTTP) sources/http/main/main.c
 	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(CORE) $(HTTP) \
-	sources/core/main/main.c -lsqlite3 -ljansson -lfcgi -o main_shell
+	sources/http/main/main.c -lsqlite3 -ljansson -lfcgi -lpcre -o main_http
 
 libraries: fastcgi \
            jansson
@@ -70,6 +71,6 @@ tags : $(INFRASTRUCTURE) $(CORE) $(HTTP)
 
 clean :
 	find . -name *.o | xargs -i /bin/rm {}
+	rm -f main_core
 	rm -f main_http
-	rm -f main_shell
 	rm -f tags
