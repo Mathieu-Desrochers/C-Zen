@@ -25,9 +25,9 @@ CORE = sources/core/tables/order_row.o \
        sources/core/services/update_order_response.o \
        sources/core/services/update_order_service.o
 
-HTTP = sources/http/services/new_order_request_json.o \
-       sources/http/services/new_order_request_order_item_json.o \
-       sources/http/services/new_order_response_json.o
+HTTP = sources/http/services/new_order_request_http.o \
+       sources/http/services/new_order_request_order_item_http.o \
+       sources/http/services/new_order_response_http.o
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@

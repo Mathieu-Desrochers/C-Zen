@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
-#include "../../http/services/new_order_request_json.h"
-#include "../../http/services/new_order_request_order_item_json.h"
+#include "../../http/services/new_order_request_http.h"
+#include "../../http/services/new_order_request_order_item_http.h"
 #include "../../core/services/new_order_request.h"
 #include "../../core/services/new_order_request_order_item.h"
 #include "../../infrastructure/array/array.h"
