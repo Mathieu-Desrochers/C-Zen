@@ -24,7 +24,7 @@ int json_parse_string(char *string, json_t **json)
 
 error:
 
-  if (json_return != NULL) { json_parse_string_free(json_return); }
+  if (json_return != NULL) { json_free(json_return); }
 
   return -1;
 }
@@ -470,17 +470,6 @@ error:
   return -1;
 }
 
-// frees a parsed json string
-void json_parse_string_free(json_t *json)
-{
-  if (json == NULL)
-  {
-    return;
-  }
-
-  json_decref(json);
-}
-
 // allocates a json object
 json_t *json_object_malloc()
 {
@@ -885,8 +874,8 @@ error:
   return -1;
 }
 
-// writes a json to string
-int json_to_string(json_t *json, char **string)
+// formats a json to string
+int json_format_string(json_t *json, char **string)
 {
   char *json_dumps_result = NULL;
 

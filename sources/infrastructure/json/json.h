@@ -22,9 +22,6 @@ int json_array_get_int(json_t *array, int index, int **value);
 int json_array_get_object(json_t *array, int index, json_t **value);
 int json_array_get_string(json_t *array, int index, char **value);
 
-// frees a parsed json string
-void json_parse_string_free(json_t *json);
-
 // allocates a json object
 json_t *json_object_malloc();
 
@@ -47,8 +44,8 @@ int json_array_add_int(json_t *array, int *value);
 int json_array_add_object(json_t *array, json_t *value);
 int json_array_add_string(json_t *array, char *value);
 
-// writes a json to string
-int json_to_string(json_t *json, char **string);
+// formats a json to string
+int json_format_string(json_t *json, char **string);
 
 // frees a json object
 void json_free(json_t *json);

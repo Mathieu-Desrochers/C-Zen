@@ -32,7 +32,7 @@ int main()
     char **url_tokens = NULL;
     int url_tokens_count = 0;
 
-    int parse_url_result = new_order_service_http_parse_url(method, url, &matched, &url_tokens, &url_tokens_count);
+    int parse_url_result = new_order_service_parse_url(method, url, &matched, &url_tokens, &url_tokens_count);
     check(parse_url_result == 0, "parse_url_result: %d",
       parse_url_result);
 
