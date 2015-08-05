@@ -4,6 +4,7 @@ CFLAGS  = -g -Wall
 all : $(INFRASTRUCTURE) $(CORE) $(HTTP) main_core main_http tags
 
 INFRASTRUCTURE = sources/infrastructure/array/array.o \
+                 sources/infrastructure/fastcgi/fastcgi.o \
                  sources/infrastructure/hash/hash_table.o \
                  sources/infrastructure/hash/hash_values.o \
                  sources/infrastructure/json/json.o \

@@ -17,7 +17,7 @@ int new_order_service_parse_url(char *method, char *url, int *matched, char ***u
   char **url_tokens_return = NULL;
   int url_tokens_count_return = 0;
 
-  if (strcmp(method, "GET") == 0)
+  if (strcmp(method, "POST") == 0)
   {
     int regex_match_result = regex_match(
       "^/new-order$",
