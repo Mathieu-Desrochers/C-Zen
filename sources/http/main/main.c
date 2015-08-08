@@ -1,55 +1,41 @@
-#include <fcgiapp.h>
-#include <stdio.h>
 #include <stdlib.h>
 
+#include "../../infrastructure/array/array.h"
 #include "../../infrastructure/dbg/dbg.h"
+#include "../../infrastructure/http/http.h"
+#include "../../infrastructure/json/json.h"
 #include "../../http/services/new_order_service_http.h"
 
 int main()
 {
-  FCGX_Request* request = malloc(sizeof(FCGX_Request));
-  check_mem(request);
+  http_route_t **http_routes = NULL;
+  int allocated_http_routes = 0;
+  int used_http_routes = 0;
 
-  int init_result = FCGX_Init();
-  check(init_result == 0, "init_result: %d",
-    init_result);
+  http_route_t *http_route = NULL;
 
-  int init_request_result = FCGX_InitRequest(request, 0, 0);
-  check(init_request_result == 0, "init_request_result: %d",
-    init_request_result);
+  int http_route_malloc_result = http_route_malloc(
+    &(http_routes[0]),
+    new_order_service_parse_url,
+    new_order_service_http);
 
-  while (FCGX_Accept_r(request) == 0)
-  {
-    FCGX_ParamArray envp = request->envp;
+  check(http_route_malloc_result, "http_route_malloc_result: %d",
+    http_route_malloc_result);
 
-    char *method = FCGX_GetParam("REQUEST_METHOD", envp);
-    char *url = FCGX_GetParam("REQUEST_URI", envp);
+  int array_add_pointer_result = array_add_pointer(
+    (void ***)(&http_routes),
+    &allocated_http_routes,
+    &used_http_routes,
+    http_route);
 
-    log_info("%s", method);
-    log_info("%s", url);
+  check(array_add_pointer_result == 0, "array_add_pointer_result: %d",
+    array_add_pointer_result);
 
-    int matched = 0;
-    char **url_tokens = NULL;
-    int url_tokens_count = 0;
+  http_route = NULL;
 
-    int parse_url_result = new_order_service_parse_url(method, url, &matched, &url_tokens, &url_tokens_count);
-    check(parse_url_result == 0, "parse_url_result: %d",
-      parse_url_result);
-
-    FCGX_PutS("Content-type: text/html\r\n", request->out);
-    FCGX_PutS("\r\n", request->out);
-    FCGX_PutS("HELLO\r\n", request->out);
-
-    if (matched == 1)
-    {
-      FCGX_PutS("HELLO!\r\n", request->out);
-    }
-
-    FCGX_Finish_r(request);
-  }
-
-  FCGX_Free(request, 1);
-  free(request);
+  int http_serve_requests_result = http_serve_requests(http_routes, 1);
+  check(http_serve_requests_result == 0, "http_serve_requests_result: %d",
+    http_serve_requests_result);
 
   return 0;
 

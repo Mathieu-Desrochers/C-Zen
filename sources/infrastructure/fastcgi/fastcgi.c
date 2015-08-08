@@ -10,6 +10,9 @@ int fastcgi_read_stream(FCGX_Stream *stream, char **string)
   char *string_return = NULL;
   char *string_return_temp = NULL;
 
+  check(stream != NULL, "stream: NULL");
+  check(string != NULL, "string: NULL");
+
   int buffer_size = 32;
   int buffer_offset = 0;
 
@@ -25,7 +28,7 @@ int fastcgi_read_stream(FCGX_Stream *stream, char **string)
 
     if (get_str_result < length)
     {
-      string_return[buffer_offset + get_str_result] = NULL;
+      string_return[buffer_offset + get_str_result] = '\0';
       break;
     }
 

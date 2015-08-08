@@ -7,6 +7,7 @@ INFRASTRUCTURE = sources/infrastructure/array/array.o \
                  sources/infrastructure/fastcgi/fastcgi.o \
                  sources/infrastructure/hash/hash_table.o \
                  sources/infrastructure/hash/hash_values.o \
+                 sources/infrastructure/http/http.o \
                  sources/infrastructure/json/json.o \
                  sources/infrastructure/mem/mem.o \
                  sources/infrastructure/regex/regex.o \

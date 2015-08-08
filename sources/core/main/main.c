@@ -25,7 +25,7 @@ int main()
   check(json_parse_string_result == 0, "json_parse_string_result: %d",
     json_parse_string_result);
 
-  int new_order_service_json_result = new_order_service_json(sql_connection, NULL, 0, json_request, &json_response);
+  int new_order_service_json_result = new_order_service_http(sql_connection, NULL, 0, json_request, &json_response);
   check(new_order_service_json_result == 0, "new_order_service_json_result: %d",
     new_order_service_json_result);
 
