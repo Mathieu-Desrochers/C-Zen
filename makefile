@@ -1,5 +1,5 @@
-CC = c99
-CFLAGS  = -g -Wall
+CC = gcc
+CFLAGS  = -std=c99 -g -Wall
 
 all : $(INFRASTRUCTURE) $(CORE) $(HTTP) main_core main_http tags
 
