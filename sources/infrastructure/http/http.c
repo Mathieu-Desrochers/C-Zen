@@ -98,8 +98,12 @@ error:
 }
 
 // serves a request
-int http_serve_request(FCGX_Request* request, http_route_t *http_route, char **url_tokens, int url_tokens_count)
+int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int http_routes_count)
 {
+  http_route_t *http_route = NULL;
+  char **url_tokens = NULL;
+  int url_tokens_count = 0;
+
   char *request_body = NULL;
   char *response_body = NULL;
 
@@ -109,6 +113,31 @@ int http_serve_request(FCGX_Request* request, http_route_t *http_route, char **u
   sqlite3 *sql_connection = NULL;
 
   check(request != NULL, "request: NULL");
+  check(http_routes != NULL, "http_routes: NULL");
+
+  int http_match_route_result = http_match_route(
+    request,
+    http_routes,
+    http_routes_count,
+    &http_route,
+    &url_tokens,
+    &url_tokens_count);
+
+  check(http_match_route_result == 0, "http_match_route_result: %d",
+    http_match_route_result);
+
+  if (http_route == NULL)
+  {
+    int fastcgi_write_header_result = fastcgi_write_header(request->out, "Status", "404 Not Found");
+    check(fastcgi_write_header_result == 0, "fastcgi_write_header_result: %d",
+      fastcgi_write_header_result);
+
+    int fastcgi_close_headers_result = fastcgi_close_headers(request->out);
+    check(fastcgi_close_headers_result == 0, "fastcgi_close_headers_result: %d",
+      fastcgi_close_headers_result);
+
+    return 0;
+  }
 
   int fastcgi_read_stream_result = fastcgi_read_stream(request->in, &request_body);
   check(fastcgi_read_stream_result == 0, "fastcgi_read_stream_result: %d",
@@ -117,6 +146,23 @@ int http_serve_request(FCGX_Request* request, http_route_t *http_route, char **u
   int json_parse_string_result = json_parse_string(request_body, &request_json);
   check(json_parse_string_result == 0, "json_parse_string_result: %d",
     json_parse_string_result);
+
+  if (request_json == NULL)
+  {
+    int fastcgi_write_header_result = fastcgi_write_header(request->out, "Status", "400 Bad Request");
+    check(fastcgi_write_header_result == 0, "fastcgi_write_header_result: %d",
+      fastcgi_write_header_result);
+
+    int fastcgi_close_headers_result = fastcgi_close_headers(request->out);
+    check(fastcgi_close_headers_result == 0, "fastcgi_close_headers_result: %d",
+      fastcgi_close_headers_result);
+
+    array_free_string(url_tokens, url_tokens_count);
+
+    free(request_body);
+
+    return 0;
+  }
 
   int sql_open_connection_result = sql_open_connection("/var/main-http/database.db", &sql_connection);
   check(sql_open_connection_result == 0, "sql_open_connection_result: %d",
@@ -151,6 +197,8 @@ int http_serve_request(FCGX_Request* request, http_route_t *http_route, char **u
   free(response_body);
   free(request_body);
 
+  array_free_string(url_tokens, url_tokens_count);
+
   return 0;
 
 error:
@@ -160,6 +208,7 @@ error:
   if (request_json != NULL) { json_free(request_json); }
   if (response_body != NULL) { free(response_body); }
   if (request_body != NULL) { free(request_body); }
+  if (url_tokens != NULL) { array_free_string(url_tokens, url_tokens_count); }
 
   return -1;
 }
@@ -168,8 +217,6 @@ error:
 int http_serve_requests(http_route_t **http_routes, int http_routes_count)
 {
   FCGX_Request* request = NULL;
-  char **url_tokens = NULL;
-  int url_tokens_count = 0;
 
   check(http_routes != NULL, "http_routes: NULL");
 
@@ -186,40 +233,9 @@ int http_serve_requests(http_route_t **http_routes, int http_routes_count)
 
   while (FCGX_Accept_r(request) == 0)
   {
-    http_route_t *http_route = NULL;
-
-    int http_match_route_result = http_match_route(
-      request,
-      http_routes,
-      http_routes_count,
-      &http_route,
-      &url_tokens,
-      &url_tokens_count);
-
-    check(http_match_route_result == 0, "http_match_route_result: %d",
-      http_match_route_result);
-
-    if (http_route != NULL)
-    {
-      int http_serve_request_result = http_serve_request(request, http_route, url_tokens, url_tokens_count);
-      check(http_serve_request_result == 0, "http_serve_request_result: %d",
-        http_serve_request_result);
-    }
-    else
-    {
-      int fastcgi_write_header_result = fastcgi_write_header(request->out, "Status", "404 Not Found");
-      check(fastcgi_write_header_result == 0, "fastcgi_write_header_result: %d",
-        fastcgi_write_header_result);
-
-      int fastcgi_close_headers_result = fastcgi_close_headers(request->out);
-      check(fastcgi_close_headers_result == 0, "fastcgi_close_headers_result: %d",
-        fastcgi_close_headers_result);
-    }
-
-    array_free_string(url_tokens, url_tokens_count);
-
-    url_tokens = NULL;
-    url_tokens_count = 0;
+    int http_serve_request_result = http_serve_request(request, http_routes, http_routes_count);
+    check(http_serve_request_result == 0, "http_serve_request_result: %d",
+      http_serve_request_result);
 
     FCGX_Finish_r(request);
   }
@@ -230,8 +246,6 @@ int http_serve_requests(http_route_t **http_routes, int http_routes_count)
   return 0;
 
 error:
-
-  if (url_tokens != NULL) { array_free_string(url_tokens, url_tokens_count); }
 
   if (request != NULL)
   {

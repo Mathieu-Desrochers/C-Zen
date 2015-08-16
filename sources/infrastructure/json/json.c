@@ -10,12 +10,14 @@ int json_parse_string(char *string, json_t **json)
   json_t *json_return = NULL;
 
   check(string != NULL, "string: NULL");
+  check(json != NULL, "json: NULL");
 
   json_return = json_loads(string, JSON_REJECT_DUPLICATES, NULL);
   if (json_return == NULL)
   {
     *json = NULL;
-    return -1;
+
+    return 0;
   }
 
   *json = json_return;
