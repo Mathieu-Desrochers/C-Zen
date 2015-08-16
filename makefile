@@ -74,9 +74,10 @@ http-configuration:
 	echo '  "/api/" =>' >> /etc/lighttpd/lighttpd.conf
 	echo '  ( "main-http" =>' >> /etc/lighttpd/lighttpd.conf
 	echo '    (' >> /etc/lighttpd/lighttpd.conf
-	echo '      "socket" => "/tmp/main-http.socket",' >> /etc/lighttpd/lighttpd.conf
 	echo '      "bin-path" => "/usr/local/bin/main-http-wrapper",' >> /etc/lighttpd/lighttpd.conf
-	echo '      "check-local" => "disable"' >> /etc/lighttpd/lighttpd.conf
+	echo '      "check-local" => "disable",' >> /etc/lighttpd/lighttpd.conf
+	echo '      "socket" => "/tmp/main-http.socket",' >> /etc/lighttpd/lighttpd.conf
+	echo '      "strip-request-uri" => "/api/"' >> /etc/lighttpd/lighttpd.conf
 	echo '    )' >> /etc/lighttpd/lighttpd.conf
 	echo '  )' >> /etc/lighttpd/lighttpd.conf
 	echo ')' >> /etc/lighttpd/lighttpd.conf

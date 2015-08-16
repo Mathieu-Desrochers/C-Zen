@@ -23,7 +23,7 @@ int new_order_service_parse_url(char *method, char *url, int *matched, char ***u
   if (strcmp(method, "POST") == 0)
   {
     int regex_match_result = regex_match(
-      "^/api/new-order$",
+      "^/new-order$",
       url,
       &matched_return,
       &url_tokens_return,
