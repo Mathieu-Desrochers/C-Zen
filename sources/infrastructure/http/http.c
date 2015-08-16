@@ -205,6 +205,16 @@ int http_serve_requests(http_route_t **http_routes, int http_routes_count)
       check(http_serve_request_result == 0, "http_serve_request_result: %d",
         http_serve_request_result);
     }
+    else
+    {
+      int fastcgi_write_header_result = fastcgi_write_header(request->out, "Status", "404 Not Found");
+      check(fastcgi_write_header_result == 0, "fastcgi_write_header_result: %d",
+        fastcgi_write_header_result);
+
+      int fastcgi_close_headers_result = fastcgi_close_headers(request->out);
+      check(fastcgi_close_headers_result == 0, "fastcgi_close_headers_result: %d",
+        fastcgi_close_headers_result);
+    }
 
     array_free_string(url_tokens, url_tokens_count);
 

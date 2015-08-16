@@ -52,3 +52,53 @@ error:
 
   return -1;
 }
+
+// writes a header
+int fastcgi_write_header(FCGX_Stream *stream, char *name, char *value)
+{
+  int puts_result = 0;
+
+  check(stream != NULL, "stream: NULL");
+  check(name != NULL, "name: NULL");
+  check(value != NULL, "value: NULL");
+
+  puts_result = FCGX_PutS(name, stream);
+  check(puts_result != -1, "puts_result: %d",
+    puts_result);
+
+  puts_result = FCGX_PutS(": ", stream);
+  check(puts_result != -1, "puts_result: %d",
+    puts_result);
+
+  puts_result = FCGX_PutS(value, stream);
+  check(puts_result != -1, "puts_result: %d",
+    puts_result);
+
+  puts_result = FCGX_PutS("\r\n", stream);
+  check(puts_result != -1, "puts_result: %d",
+    puts_result);
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
+// closes the headers
+int fastcgi_close_headers(FCGX_Stream *stream)
+{
+  int puts_result = 0;
+
+  check(stream != NULL, "stream: NULL");
+
+  puts_result = FCGX_PutS("\r\n", stream);
+  check(puts_result != -1, "puts_result: %d",
+    puts_result);
+
+  return 0;
+
+error:
+
+  return -1;
+}
