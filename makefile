@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS  = -std=c99 -g -Wall
 
-all : $(INFRASTRUCTURE) $(CORE) $(HTTP) main_core main_http tags
+all : $(INFRASTRUCTURE) $(CORE) $(HTTP) main-core main-http tags
 
 INFRASTRUCTURE = sources/infrastructure/array/array.o \
                  sources/infrastructure/fastcgi/fastcgi.o \
@@ -36,13 +36,13 @@ HTTP = sources/http/services/new_order_request_http.o \
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-main_core : $(INFRASTRUCTURE) $(CORE) $(HTTP) sources/core/main/main.c
+main-core : $(INFRASTRUCTURE) $(CORE) $(HTTP) sources/core/main/main.c
 	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(CORE) $(HTTP) \
-	sources/core/main/main.c -lsqlite3 -ljansson -lfcgi -lpcre -o main_core
+	sources/core/main/main.c -lsqlite3 -ljansson -lfcgi -lpcre -o main-core
 
-main_http : $(INFRASTRUCTURE) $(CORE) $(HTTP) sources/http/main/main.c
+main-http : $(INFRASTRUCTURE) $(CORE) $(HTTP) sources/http/main/main.c
 	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(CORE) $(HTTP) \
-	sources/http/main/main.c -lsqlite3 -ljansson -lfcgi -lpcre -o main_http
+	sources/http/main/main.c -lsqlite3 -ljansson -lfcgi -lpcre -o main-http
 
 libraries: fastcgi \
            jansson
@@ -62,17 +62,43 @@ jansson:
 	$(MAKE) -C /tmp/jansson-2.7 install
 
 database:
-	mkdir -p /var/c-zen
-	sqlite3 /var/c-zen/c-zen.db < sources/database/create_database.sql
-	sqlite3 /var/c-zen/c-zen.db "PRAGMA journal_mode=WAL;"
-	chown mathieu /var/c-zen/
-	chown mathieu /var/c-zen/c-zen.db
+	mkdir -p /var/main-http
+	sqlite3 /var/main-http/database.db < sources/database/create_database.sql
+	sqlite3 /var/main-http/database.db "PRAGMA journal_mode=WAL;"
+	chown lighttpd:lighttpd /var/main-http
+	chown lighttpd:lighttpd /var/main-http/database.db
+
+http-configuration:
+	echo '' >> /etc/lighttpd/lighttpd.conf
+	echo 'fastcgi.server = (' >> /etc/lighttpd/lighttpd.conf
+	echo '  "/api/" =>' >> /etc/lighttpd/lighttpd.conf
+	echo '  ( "main-http" =>' >> /etc/lighttpd/lighttpd.conf
+	echo '    (' >> /etc/lighttpd/lighttpd.conf
+	echo '      "socket" => "/tmp/main-http.socket",' >> /etc/lighttpd/lighttpd.conf
+	echo '      "bin-path" => "/usr/local/bin/main-http-wrapper",' >> /etc/lighttpd/lighttpd.conf
+	echo '      "check-local" => "disable"' >> /etc/lighttpd/lighttpd.conf
+	echo '    )' >> /etc/lighttpd/lighttpd.conf
+	echo '  )' >> /etc/lighttpd/lighttpd.conf
+	echo ')' >> /etc/lighttpd/lighttpd.conf
+	touch /usr/local/bin/main-http-wrapper
+	chmod +x /usr/local/bin/main-http-wrapper
+	echo '#!/bin/bash' >> /usr/local/bin/main-http-wrapper
+	echo 'export LD_LIBRARY_PATH=/usr/local/lib' >> /usr/local/bin/main-http-wrapper
+	echo '/usr/local/bin/main-http 2>>/var/log/lighttpd/main-http.log' >> /usr/local/bin/main-http-wrapper
+	touch /var/log/lighttpd/main-http.log
+	chown lighttpd:lighttpd /var/log/lighttpd/main-http.log
+
+http-install:
+	/etc/rc.d/rc.lighttpd stop
+	- pkill main-http
+	cp main-http /usr/local/bin
+	/etc/rc.d/rc.lighttpd start
 
 tags : $(INFRASTRUCTURE) $(CORE) $(HTTP)
 	ctags -R .
 
 clean :
 	find . -name *.o | xargs -i /bin/rm {}
-	rm -f main_core
-	rm -f main_http
+	rm -f main-core
+	rm -f main-http
 	rm -f tags

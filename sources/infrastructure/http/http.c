@@ -118,7 +118,7 @@ int http_serve_request(FCGX_Request* request, http_route_t *http_route, char **u
   check(json_parse_string_result == 0, "json_parse_string_result: %d",
     json_parse_string_result);
 
-  int sql_open_connection_result = sql_open_connection("/var/c-zen/c-zen.db", &sql_connection);
+  int sql_open_connection_result = sql_open_connection("/var/main-http/database.db", &sql_connection);
   check(sql_open_connection_result == 0, "sql_open_connection_result: %d",
     sql_open_connection_result);
 

@@ -1,5 +1,6 @@
+*~
 *.o
 *.swp
-/main_core
-/main_http
+/main-core
+/main-http
 /tags
