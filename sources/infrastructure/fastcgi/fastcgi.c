@@ -91,3 +91,26 @@ error:
 
   return -1;
 }
+
+// writes a body
+int fastcgi_write_body(FCGX_Stream *stream, char *content)
+{
+  int puts_result = 0;
+
+  check(stream != NULL, "stream: NULL");
+  check(content != NULL, "content: NULL");
+
+  puts_result = FCGX_PutS(content, stream);
+  check(puts_result != -1, "puts_result: %d",
+    puts_result);
+
+  puts_result = FCGX_PutS("\r\n", stream);
+  check(puts_result != -1, "puts_result: %d",
+    puts_result);
+
+  return 0;
+
+error:
+
+  return -1;
+}

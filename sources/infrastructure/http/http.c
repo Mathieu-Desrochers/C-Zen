@@ -125,9 +125,9 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
 
   if (http_route == NULL)
   {
-    int fastcgi_write_header_result = fastcgi_write_header(request->out, "Status", "404 Not Found", 1);
-    check(fastcgi_write_header_result == 0, "fastcgi_write_header_result: %d",
-      fastcgi_write_header_result);
+    int fastcgi_write_header_status_result = fastcgi_write_header(request->out, "Status", "404 Not Found", 1);
+    check(fastcgi_write_header_status_result == 0, "fastcgi_write_header_status_result: %d",
+      fastcgi_write_header_status_result);
 
     return 0;
   }
@@ -142,9 +142,9 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
 
   if (request_json == NULL)
   {
-    int fastcgi_write_header_result = fastcgi_write_header(request->out, "Status", "400 Bad Request", 1);
-    check(fastcgi_write_header_result == 0, "fastcgi_write_header_result: %d",
-      fastcgi_write_header_result);
+    int fastcgi_write_header_status_result = fastcgi_write_header(request->out, "Status", "400 Bad Request", 1);
+    check(fastcgi_write_header_status_result == 0, "fastcgi_write_header_status_result: %d",
+      fastcgi_write_header_status_result);
 
     array_free_string(url_tokens, url_tokens_count);
 
@@ -175,10 +175,13 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
   check(json_format_string_result == 0, "json_format_string_result: %d",
     json_format_string_result);
 
-  FCGX_PutS("Content-type: text/html\r\n", request->out);
-  FCGX_PutS("\r\n", request->out);
-  FCGX_PutS(response_body, request->out);
-  FCGX_PutS("\r\n", request->out);
+  int fastcgi_write_header_result = fastcgi_write_header(request->out, "Content-type", "application/json", 1);
+  check(fastcgi_write_header_result == 0, "fastcgi_write_header_result: %d",
+    fastcgi_write_header_result);
+
+  int fastcgi_write_body_result = fastcgi_write_body(request->out, response_body);
+  check(fastcgi_write_body_result == 0, "fastcgi_write_body_result: %d",
+    fastcgi_write_body_result);
 
   json_free(response_json);
   json_free(request_json);
