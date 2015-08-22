@@ -28,10 +28,6 @@ int new_order_request_json_parse(json_t *json, new_order_request_t **new_order_r
   check(json_object_get_customer_name_result == 0, "json_object_get_customer_name_result: %d",
     json_object_get_customer_name_result);
 
-  int json_object_get_total_result = json_object_get_int(json, "total", &total);
-  check(json_object_get_total_result == 0, "json_object_get_total_result: %d",
-    json_object_get_total_result);
-
   json_t *order_items_json = NULL;
   int order_items_json_count = 0;
 
@@ -71,6 +67,10 @@ int new_order_request_json_parse(json_t *json, new_order_request_t **new_order_r
       new_order_request_order_item = NULL;
     }
   }
+
+  int json_object_get_total_result = json_object_get_int(json, "total", &total);
+  check(json_object_get_total_result == 0, "json_object_get_total_result: %d",
+    json_object_get_total_result);
 
   new_order_request_return = new_order_request_malloc(
     customer_name,
