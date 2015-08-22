@@ -10,7 +10,7 @@
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/regex/regex.h"
 
-// parses a url and returns whether it matches the new order service
+// returns whether a route matches the new order service
 int new_order_service_parse_url(char *method, char *url, int *matched, char ***url_tokens, int *url_tokens_count)
 {
   int matched_return = 0;
@@ -51,16 +51,21 @@ error:
 }
 
 // executes the new order service
-int new_order_service_http(sqlite3 *sql_connection, char **url_tokens, int url_tokens_count, json_t *body_request, json_t **body_response)
+int new_order_service_http(
+  sqlite3 *sql_connection,
+  char **url_tokens,
+  int url_tokens_count,
+  json_t *request_body,
+  json_t **response_body)
 {
-  json_t *body_response_return = NULL;
+  json_t *response_body_return = NULL;
 
   new_order_request_t *new_order_request = NULL;
   new_order_response_t *new_order_response = NULL;
   validation_error_t **validation_errors = NULL;
   int validation_errors_count = 0;
 
-  int new_order_request_json_parse_result = new_order_request_json_parse(body_request, &new_order_request);
+  int new_order_request_json_parse_result = new_order_request_json_parse(request_body, &new_order_request);
   check(new_order_request_json_parse_result == 0, "new_order_request_json_parse_result: %d",
     new_order_request_json_parse_result);
 
@@ -74,15 +79,31 @@ int new_order_service_http(sqlite3 *sql_connection, char **url_tokens, int url_t
   check(new_order_service_result == 0, "new_order_service_result: %d",
     new_order_service_result);
 
-  int new_order_response_json_format_result = new_order_response_json_format(new_order_response, &body_response_return);
-  check(new_order_response_json_format_result == 0, "new_order_response_json_format_result: %d",
-    new_order_response_json_format_result);
+  if (validation_errors == NULL)
+  {
+    int new_order_response_json_format_result = new_order_response_json_format(
+      new_order_response,
+      &response_body_return);
+
+    check(new_order_response_json_format_result == 0, "new_order_response_json_format_result: %d",
+      new_order_response_json_format_result);
+  }
+  else
+  {
+    int new_order_validation_errors_json_format_result = new_order_validation_errors_json_format(
+      validation_errors,
+      validation_errors_count,
+      &response_body_return);
+
+    check(new_order_validation_errors_json_format_result == 0, "new_order_validation_errors_json_format_result: %d",
+      new_order_validation_errors_json_format_result);
+  }
 
   new_order_request_free(new_order_request);
   new_order_response_free(new_order_response);
   validation_errors_free(validation_errors, validation_errors_count);
 
-  *body_response = body_response_return;
+  *response_body = response_body_return;
 
   return 0;
 
@@ -91,7 +112,7 @@ error:
   if (new_order_request != NULL) { new_order_request_free(new_order_request); }
   if (new_order_response != NULL) { new_order_response_free(new_order_response); }
   if (validation_errors != NULL) { validation_errors_free(validation_errors, validation_errors_count); }
-  if (body_response_return != NULL) { json_free(body_response_return); }
+  if (response_body_return != NULL) { json_free(response_body_return); }
 
   return -1;
 }

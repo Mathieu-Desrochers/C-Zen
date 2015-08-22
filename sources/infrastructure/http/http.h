@@ -7,15 +7,35 @@
 // represents a route
 typedef struct http_route_t
 {
-  int (*service_parse_url)(char *method, char *url, int *matched, char ***url_tokens, int *url_tokens_count);
-  int (*service_http)(sqlite3 *sql_connection, char **url_tokens, int url_tokens_count, json_t *body_request, json_t **body_response);
+  int (*service_parse_url)(
+    char *method,
+    char *url,
+    int *matched,
+    char ***url_tokens,
+    int *url_tokens_count);
+  int (*service_http)(
+    sqlite3 *sql_connection,
+    char **url_tokens,
+    int url_tokens_count,
+    json_t *request_body,
+    json_t **response_body);
 } http_route_t;
 
 // allocates a route
 int http_route_malloc(
   http_route_t **http_route,
-  int (*service_parse_url)(char *method, char *url, int *matched, char ***url_tokens, int *url_tokens_count),
-  int (*service_http)(sqlite3 *sql_connection, char **url_tokens, int url_tokens_count, json_t *body_request, json_t **body_response));
+  int (*service_parse_url)(
+    char *method,
+    char *url,
+    int *matched,
+    char ***url_tokens,
+    int *url_tokens_count),
+  int (*service_http)(
+    sqlite3 *sql_connection,
+    char **url_tokens,
+    int url_tokens_count,
+    json_t *request_body,
+    json_t **response_body));
 
 // starts serving requests
 int http_serve_requests(http_route_t **http_routes, int http_routes_count);
