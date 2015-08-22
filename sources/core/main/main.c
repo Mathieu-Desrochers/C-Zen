@@ -17,9 +17,9 @@ int main()
   char *json_request_string = "{\"customer-name\":\"Alice\",\"order-items\":[{\"name\":\"Pirate hat\",\"quantity\":1.25}],\"total\":100}";
   char *json_response_string = NULL;
 
-  int sql_open_connection_result = sql_open_connection("/var/c-zen/c-zen.db", &sql_connection);
-  check(sql_open_connection_result == 0, "sql_open_connection_result: %d",
-    sql_open_connection_result);
+  int sql_connection_open_result = sql_connection_open("/var/c-zen/c-zen.db", &sql_connection);
+  check(sql_connection_open_result == 0, "sql_connection_open_result: %d",
+    sql_connection_open_result);
 
   int json_parse_string_result = json_parse_string(json_request_string, &json_request);
   check(json_parse_string_result == 0, "json_parse_string_result: %d",
@@ -35,7 +35,7 @@ int main()
 
   printf("%s\n", json_response_string);
 
-  sql_close_connection(sql_connection);
+  sql_connection_close(sql_connection);
   json_free(json_request);
   json_free(json_response);
   free(json_response_string);
@@ -44,7 +44,7 @@ int main()
 
 error:
 
-  if (sql_connection != NULL) { sql_close_connection(sql_connection); }
+  if (sql_connection != NULL) { sql_connection_close(sql_connection); }
   if (json_request != NULL) { json_free(json_request); }
   if (json_response != NULL) { json_free(json_response); }
   if (json_response_string != NULL) { free(json_response_string); }

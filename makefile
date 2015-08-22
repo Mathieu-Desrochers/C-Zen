@@ -89,7 +89,7 @@ http-configuration:
 	touch /var/log/lighttpd/main-http.log
 	chown lighttpd:lighttpd /var/log/lighttpd/main-http.log
 
-http-install:
+http-run:
 	/etc/rc.d/rc.lighttpd stop
 	- pkill main-http
 	cp main-http /usr/local/bin

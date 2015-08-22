@@ -79,9 +79,6 @@ int http_match_route(
 
       break;
     }
-
-    url_tokens_return = NULL;
-    url_tokens_count_return = 0;
   }
 
   *http_route = http_route_return;
@@ -128,13 +125,9 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
 
   if (http_route == NULL)
   {
-    int fastcgi_write_header_result = fastcgi_write_header(request->out, "Status", "404 Not Found");
+    int fastcgi_write_header_result = fastcgi_write_header(request->out, "Status", "404 Not Found", 1);
     check(fastcgi_write_header_result == 0, "fastcgi_write_header_result: %d",
       fastcgi_write_header_result);
-
-    int fastcgi_close_headers_result = fastcgi_close_headers(request->out);
-    check(fastcgi_close_headers_result == 0, "fastcgi_close_headers_result: %d",
-      fastcgi_close_headers_result);
 
     return 0;
   }
@@ -149,13 +142,9 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
 
   if (request_json == NULL)
   {
-    int fastcgi_write_header_result = fastcgi_write_header(request->out, "Status", "400 Bad Request");
+    int fastcgi_write_header_result = fastcgi_write_header(request->out, "Status", "400 Bad Request", 1);
     check(fastcgi_write_header_result == 0, "fastcgi_write_header_result: %d",
       fastcgi_write_header_result);
-
-    int fastcgi_close_headers_result = fastcgi_close_headers(request->out);
-    check(fastcgi_close_headers_result == 0, "fastcgi_close_headers_result: %d",
-      fastcgi_close_headers_result);
 
     array_free_string(url_tokens, url_tokens_count);
 
@@ -164,9 +153,9 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
     return 0;
   }
 
-  int sql_open_connection_result = sql_open_connection("/var/main-http/database.db", &sql_connection);
-  check(sql_open_connection_result == 0, "sql_open_connection_result: %d",
-    sql_open_connection_result);
+  int sql_connection_open_result = sql_connection_open("/var/main-http/database.db", &sql_connection);
+  check(sql_connection_open_result == 0, "sql_connection_open_result: %d",
+    sql_connection_open_result);
 
   int service_http_result = http_route->service_http(
     sql_connection,
@@ -178,7 +167,7 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
   check(service_http_result == 0, "service_http_result: %d",
     service_http_result);
 
-  sql_close_connection(sql_connection);
+  sql_connection_close(sql_connection);
 
   sql_connection = NULL;
 
@@ -203,7 +192,7 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
 
 error:
 
-  if (sql_connection != NULL) { sql_close_connection(sql_connection); }
+  if (sql_connection != NULL) { sql_connection_close(sql_connection); }
   if (response_json != NULL) { json_free(response_json); }
   if (request_json != NULL) { json_free(request_json); }
   if (response_body != NULL) { free(response_body); }

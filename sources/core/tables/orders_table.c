@@ -76,7 +76,7 @@ int orders_table_insert(sqlite3 *sql_connection, order_row_t *order_row)
   check(sql_connection != NULL, "sql_connection: NULL");
   check(order_row != NULL, "order_row: NULL");
 
-  int sql_prepare_insert_statement_result = sql_prepare_statement(
+  int sql_statement_prepare_result = sql_statement_prepare(
     sql_connection,
     "INSERT INTO \"orders\" ("
       "\"customer-name\", "
@@ -85,8 +85,8 @@ int orders_table_insert(sqlite3 *sql_connection, order_row_t *order_row)
     "VALUES (?1, ?2, ?3);",
     &sql_statement);
 
-  check(sql_prepare_insert_statement_result == 0, "sql_prepare_insert_statement_result: %d",
-    sql_prepare_insert_statement_result);
+  check(sql_statement_prepare_result == 0, "sql_statement_prepare_result: %d",
+    sql_statement_prepare_result);
 
   int sql_bind_customer_name_result = sql_bind_string(sql_statement, 1, order_row->customer_name);
   check(sql_bind_customer_name_result == 0, "sql_bind_customer_name_result: %d",
@@ -104,21 +104,21 @@ int orders_table_insert(sqlite3 *sql_connection, order_row_t *order_row)
   check(sql_step_execute_result == 0, "sql_step_execute_result: %d",
     sql_step_execute_result);
 
-  int sql_select_last_insert_row_id_result = sql_select_last_insert_row_id(sql_connection, &order_id_return);
-  check(sql_select_last_insert_row_id_result == 0, "sql_select_last_insert_row_id_result: %d",
-    sql_select_last_insert_row_id_result);
+  int sql_last_generated_id_result = sql_last_generated_id(sql_connection, &order_id_return);
+  check(sql_last_generated_id_result == 0, "sql_last_generated_id_result: %d",
+    sql_last_generated_id_result);
 
   free(order_row->order_id);
   order_row->order_id = order_id_return;
 
-  sql_finalize_statement(sql_statement);
+  sql_statement_finalize(sql_statement);
 
   return 0;
 
 error:
 
   if (order_id_return != NULL) { free(order_id_return); }
-  if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
+  if (sql_statement != NULL) { sql_statement_finalize(sql_statement); }
 
   return -1;
 }
@@ -132,7 +132,7 @@ int orders_table_select_by_order_id(sqlite3 *sql_connection, int order_id, order
   check(sql_connection != NULL, "sql_connection: NULL");
   check(order_row != NULL, "order_row: NULL");
 
-  int sql_prepare_statement_result = sql_prepare_statement(
+  int sql_statement_prepare_result = sql_statement_prepare(
     sql_connection,
     "SELECT "
       "\"order-id\", "
@@ -143,8 +143,8 @@ int orders_table_select_by_order_id(sqlite3 *sql_connection, int order_id, order
     "WHERE \"order-id\" = ?1;",
     &sql_statement);
 
-  check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
-    sql_prepare_statement_result);
+  check(sql_statement_prepare_result == 0, "sql_statement_prepare_result: %d",
+    sql_statement_prepare_result);
 
   int sql_bind_order_id_result = sql_bind_int(sql_statement, 1, &order_id);
   check(sql_bind_order_id_result == 0, "sql_bind_order_id_result: %d",
@@ -162,7 +162,7 @@ int orders_table_select_by_order_id(sqlite3 *sql_connection, int order_id, order
       orders_table_read_result);
   }
 
-  sql_finalize_statement(sql_statement);
+  sql_statement_finalize(sql_statement);
 
   *order_row = order_row_return;
 
@@ -171,7 +171,7 @@ int orders_table_select_by_order_id(sqlite3 *sql_connection, int order_id, order
 error:
 
   if (order_row_return != NULL) { order_row_free(order_row_return); }
-  if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
+  if (sql_statement != NULL) { sql_statement_finalize(sql_statement); }
 
   return -1;
 }
@@ -186,7 +186,7 @@ int orders_table_select_all(sqlite3 *sql_connection, order_row_t ***order_rows, 
   check(sql_connection != NULL, "sql_connection: NULL");
   check(order_rows != NULL, "order_rows: NULL");
 
-  int sql_prepare_statement_result = sql_prepare_statement(
+  int sql_statement_prepare_result = sql_statement_prepare(
     sql_connection,
     "SELECT "
       "\"order-id\", "
@@ -196,8 +196,8 @@ int orders_table_select_all(sqlite3 *sql_connection, order_row_t ***order_rows, 
     "FROM \"orders\";",
     &sql_statement);
 
-  check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
-    sql_prepare_statement_result);
+  check(sql_statement_prepare_result == 0, "sql_statement_prepare_result: %d",
+    sql_statement_prepare_result);
 
   int allocated_order_rows_count = 0;
   int read_order_rows_count = 0;
@@ -227,7 +227,7 @@ int orders_table_select_all(sqlite3 *sql_connection, order_row_t ***order_rows, 
       sql_step_select_result);
   }
 
-  sql_finalize_statement(sql_statement);
+  sql_statement_finalize(sql_statement);
 
   *order_rows = order_rows_return;
   *count = read_order_rows_count;
@@ -238,7 +238,7 @@ error:
 
   if (order_rows_return != NULL) { order_rows_free(order_rows_return, read_order_rows_count); }
   if (order_row != NULL) { order_row_free(order_row); }
-  if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
+  if (sql_statement != NULL) { sql_statement_finalize(sql_statement); }
 
   return -1;
 }
@@ -251,7 +251,7 @@ int orders_table_update(sqlite3 *sql_connection, order_row_t *order_row)
   check(sql_connection != NULL, "sql_connection: NULL");
   check(order_row != NULL, "order_row: NULL");
 
-  int sql_prepare_statement_result = sql_prepare_statement(
+  int sql_statement_prepare_result = sql_statement_prepare(
     sql_connection,
     "UPDATE \"orders\" SET "
       "\"customer-name\" = ?1, "
@@ -260,8 +260,8 @@ int orders_table_update(sqlite3 *sql_connection, order_row_t *order_row)
     "WHERE \"order-id\" = ?4;",
     &sql_statement);
 
-  check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
-    sql_prepare_statement_result);
+  check(sql_statement_prepare_result == 0, "sql_statement_prepare_result: %d",
+    sql_statement_prepare_result);
 
   int sql_bind_customer_name_result = sql_bind_string(sql_statement, 1, order_row->customer_name);
   check(sql_bind_customer_name_result == 0, "sql_bind_customer_name_result: %d",
@@ -283,13 +283,13 @@ int orders_table_update(sqlite3 *sql_connection, order_row_t *order_row)
   check(sql_step_execute_result == 0, "sql_step_execute_result: %d",
     sql_step_execute_result);
 
-  sql_finalize_statement(sql_statement);
+  sql_statement_finalize(sql_statement);
 
   return 0;
 
 error:
 
-  if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
+  if (sql_statement != NULL) { sql_statement_finalize(sql_statement); }
 
   return -1;
 }
@@ -302,14 +302,14 @@ int orders_table_delete(sqlite3 *sql_connection, order_row_t *order_row)
   check(sql_connection != NULL, "sql_connection: NULL");
   check(order_row != NULL, "order_row: NULL");
 
-  int sql_prepare_statement_result = sql_prepare_statement(
+  int sql_statement_prepare_result = sql_statement_prepare(
     sql_connection,
     "DELETE FROM \"orders\" "
     "WHERE \"order-id\" = ?1;",
     &sql_statement);
 
-  check(sql_prepare_statement_result == 0, "sql_prepare_statement_result: %d",
-    sql_prepare_statement_result);
+  check(sql_statement_prepare_result == 0, "sql_statement_prepare_result: %d",
+    sql_statement_prepare_result);
 
   int sql_bind_order_id_result = sql_bind_int(sql_statement, 1, order_row->order_id);
   check(sql_bind_order_id_result == 0, "sql_bind_order_id_result: %d",
@@ -319,13 +319,13 @@ int orders_table_delete(sqlite3 *sql_connection, order_row_t *order_row)
   check(sql_step_execute_result == 0, "sql_step_execute_result: %d",
     sql_step_execute_result);
 
-  sql_finalize_statement(sql_statement);
+  sql_statement_finalize(sql_statement);
 
   return 0;
 
 error:
 
-  if (sql_statement != NULL) { sql_finalize_statement(sql_statement); }
+  if (sql_statement != NULL) { sql_statement_finalize(sql_statement); }
 
   return -1;
 }
