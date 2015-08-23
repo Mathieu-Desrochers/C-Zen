@@ -1,5 +1,6 @@
 #include <jansson.h>
 
+#include "../../infrastructure/array/array.h"
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/json/json.h"
 #include "../../infrastructure/mem/mem.h"
@@ -37,6 +38,7 @@ int json_object_get_array(json_t *object, char *key, json_t **value, int *size)
   check(object != NULL, "object: NULL");
   check(key != NULL, "key: NULL");
   check(value != NULL, "value: NULL");
+  check(size != NULL, "size: NULL");
 
   json_t *json_array_peek = json_object_get(object, key);
   if (json_array_peek == NULL)
@@ -262,6 +264,7 @@ int json_array_get_array(json_t *array, int index, json_t **value, int *size)
 {
   check(array != NULL, "array: NULL");
   check(value != NULL, "value: NULL");
+  check(size != NULL, "size: NULL");
 
   json_t *json_array_peek = json_array_get(array, index);
   if (json_array_peek == NULL)
@@ -472,28 +475,79 @@ error:
   return -1;
 }
 
-// allocates a json object
-json_t *json_object_malloc()
+// allocates a json context
+int json_context_malloc(json_context_t **json_context)
 {
-  json_t *json_object_result = NULL;
+  json_context_t *json_context_return = NULL;
 
-  json_object_result = json_object();
-  check(json_object_result != NULL, "json_object_result: NULL");
+  check(json_context != NULL, "json_context: NULL");
 
-  return json_object_result;
+  json_context_return = malloc(sizeof(json_context_t));
+  check_mem(json_context_return);
+
+  json_context_return->strings = NULL;
+  json_context_return->strings_allocated_count = 0;
+  json_context_return->strings_used_count = 0;
+
+  *json_context = json_context_return;
+
+  return 0;
 
 error:
 
-  if (json_object_result != NULL) { json_free(json_object_result); }
+  if (json_context_return != NULL) { free(json_context_return); }
 
-  return NULL;
+  return -1;
+}
+
+// allocates a json object
+int json_object_malloc(json_t **json)
+{
+  json_t *json_return = NULL;
+
+  check(json != NULL, "json: NULL");
+
+  json_return = json_object();
+  check(json_return != NULL, "json_return: NULL");
+
+  *json = json_return;
+
+  return 0;
+
+error:
+
+  if (json_return != NULL) { json_free(json_return); }
+
+  return -1;
+}
+
+// allocates a json array
+int json_array_malloc(json_t **json)
+{
+  json_t *json_result = NULL;
+
+  check(json != NULL, "json: NULL");
+
+  json_result = json_array();
+  check(json_result != NULL, "json_result: NULL");
+
+  *json = json_result;
+
+  return 0;
+
+error:
+
+  if (json_result != NULL) { json_free(json_result); }
+
+  return -1;
 }
 
 // sets a json value for a key
-int json_object_set_array(json_t *object, char *key, json_t *value)
+int json_object_set_array(json_t *object, char *key, json_t *value, json_context_t *json_context)
 {
   check(object != NULL, "object: NULL");
   check(key != NULL, "key: NULL");
+  check(json_context != NULL, "json_context: NULL");
 
   if (value != NULL)
   {
@@ -516,12 +570,13 @@ error:
 }
 
 // sets a json value for a key
-int json_object_set_bool(json_t *object, char *key, int *value)
+int json_object_set_bool(json_t *object, char *key, int *value, json_context_t *json_context)
 {
   json_t *json_boolean_result = NULL;
 
   check(object != NULL, "object: NULL");
   check(key != NULL, "key: NULL");
+  check(json_context != NULL, "json_context: NULL");
 
   if (value != NULL)
   {
@@ -531,6 +586,8 @@ int json_object_set_bool(json_t *object, char *key, int *value)
     int json_object_set_result = json_object_set_new(object, key, json_boolean_result);
     check(json_object_set_result == 0, "json_object_set_result: %d",
       json_object_set_result);
+
+    json_boolean_result = NULL;
   }
   else
   {
@@ -549,12 +606,13 @@ error:
 }
 
 // sets a json value for a key
-int json_object_set_double(json_t *object, char *key, double *value)
+int json_object_set_double(json_t *object, char *key, double *value, json_context_t *json_context)
 {
   json_t *json_real_result = NULL;
 
   check(object != NULL, "object: NULL");
   check(key != NULL, "key: NULL");
+  check(json_context != NULL, "json_context: NULL");
 
   if (value != NULL)
   {
@@ -564,6 +622,8 @@ int json_object_set_double(json_t *object, char *key, double *value)
     int json_object_set_result = json_object_set_new(object, key, json_real_result);
     check(json_object_set_result == 0, "json_object_set_result: %d",
       json_object_set_result);
+
+    json_real_result = NULL;
   }
   else
   {
@@ -582,12 +642,13 @@ error:
 }
 
 // sets a json value for a key
-int json_object_set_int(json_t *object, char *key, int *value)
+int json_object_set_int(json_t *object, char *key, int *value, json_context_t *json_context)
 {
   json_t *json_integer_result = NULL;
 
   check(object != NULL, "object: NULL");
   check(key != NULL, "key: NULL");
+  check(json_context != NULL, "json_context: NULL");
 
   if (value != NULL)
   {
@@ -597,6 +658,8 @@ int json_object_set_int(json_t *object, char *key, int *value)
     int json_object_set_result = json_object_set_new(object, key, json_integer_result);
     check(json_object_set_result == 0, "json_object_set_result: %d",
       json_object_set_result);
+
+    json_integer_result = NULL;
   }
   else
   {
@@ -615,10 +678,11 @@ error:
 }
 
 // sets a json value for a key
-int json_object_set_object(json_t *object, char *key, json_t *value)
+int json_object_set_object(json_t *object, char *key, json_t *value, json_context_t *json_context)
 {
   check(object != NULL, "object: NULL");
   check(key != NULL, "key: NULL");
+  check(json_context != NULL, "json_context: NULL");
 
   if (value != NULL)
   {
@@ -641,21 +705,40 @@ error:
 }
 
 // sets a json value for a key
-int json_object_set_string(json_t *object, char *key, char *value)
+int json_object_set_string(json_t *object, char *key, char *value, json_context_t *json_context)
 {
   json_t *json_string_result = NULL;
+  char *value_copied = NULL;
 
   check(object != NULL, "object: NULL");
   check(key != NULL, "key: NULL");
+  check(json_context != NULL, "json_context: NULL");
 
   if (value != NULL)
   {
-    json_string_result = json_string(value);
+    int malloc_memcpy_string_result = malloc_memcpy_string(&value_copied, value);
+    check(malloc_memcpy_string_result == 0, "malloc_memcpy_string_result: %d",
+      malloc_memcpy_string_result);
+
+    json_string_result = json_string(value_copied);
     check(json_string_result != NULL, "json_string_result: NULL");
 
     int json_object_set_result = json_object_set_new(object, key, json_string_result);
     check(json_object_set_result == 0, "json_object_set_result: %d",
       json_object_set_result);
+
+    json_string_result = NULL;
+
+    int array_add_result = array_add_string(
+      &(json_context->strings),
+      &(json_context->strings_allocated_count),
+      &(json_context->strings_used_count),
+      value_copied);
+
+    check(array_add_result == 0, "array_add_result: %d",
+      array_add_result);
+
+    value_copied = NULL;
   }
   else
   {
@@ -668,32 +751,17 @@ int json_object_set_string(json_t *object, char *key, char *value)
 
 error:
 
+  if (value_copied != NULL) { free(value_copied); }
   if (json_string_result != NULL) { json_free(json_string_result); }
 
   return -1;
 }
 
-// allocates a json array
-json_t *json_array_malloc()
-{
-  json_t *json_array_result = NULL;
-
-  json_array_result = json_array();
-  check(json_array_result != NULL, "json_array_result: NULL");
-
-  return json_array_result;
-
-error:
-
-  if (json_array_result != NULL) { json_free(json_array_result); }
-
-  return NULL;
-}
-
 // sets a json value for the next index
-int json_array_add_array(json_t *array, json_t *value)
+int json_array_add_array(json_t *array, json_t *value, json_context_t *json_context)
 {
   check(array != NULL, "array: NULL");
+  check(json_context != NULL, "json_context: NULL");
 
   if (value != NULL)
   {
@@ -716,11 +784,12 @@ error:
 }
 
 // sets a json value for the next index
-int json_array_add_bool(json_t *array, int *value)
+int json_array_add_bool(json_t *array, int *value, json_context_t *json_context)
 {
   json_t *json_boolean_result = NULL;
 
   check(array != NULL, "array: NULL");
+  check(json_context != NULL, "json_context: NULL");
 
   if (value != NULL)
   {
@@ -750,11 +819,12 @@ error:
 }
 
 // sets a json value for the next index
-int json_array_add_double(json_t *array, double *value)
+int json_array_add_double(json_t *array, double *value, json_context_t *json_context)
 {
   json_t *json_real_result = NULL;
 
   check(array != NULL, "array: NULL");
+  check(json_context != NULL, "json_context: NULL");
 
   if (value != NULL)
   {
@@ -784,11 +854,12 @@ error:
 }
 
 // sets a json value for the next index
-int json_array_add_int(json_t *array, int *value)
+int json_array_add_int(json_t *array, int *value, json_context_t *json_context)
 {
   json_t *json_integer_result = NULL;
 
   check(array != NULL, "array: NULL");
+  check(json_context != NULL, "json_context: NULL");
 
   if (value != NULL)
   {
@@ -818,9 +889,10 @@ error:
 }
 
 // sets a json value for the next index
-int json_array_add_object(json_t *array, json_t *value)
+int json_array_add_object(json_t *array, json_t *value, json_context_t *json_context)
 {
   check(array != NULL, "array: NULL");
+  check(json_context != NULL, "json_context: NULL");
 
   if (value != NULL)
   {
@@ -843,15 +915,21 @@ error:
 }
 
 // sets a json value for the next index
-int json_array_add_string(json_t *array, char *value)
+int json_array_add_string(json_t *array, char *value, json_context_t *json_context)
 {
   json_t *json_string_result = NULL;
+  char *value_copied = NULL;
 
   check(array != NULL, "array: NULL");
+  check(json_context != NULL, "json_context: NULL");
 
   if (value != NULL)
   {
-    json_string_result = json_string(value);
+    int malloc_memcpy_string_result = malloc_memcpy_string(&value_copied, value);
+    check(malloc_memcpy_string_result == 0, "malloc_memcpy_string_result: %d",
+      malloc_memcpy_string_result);
+
+    json_string_result = json_string(value_copied);
     check(json_string_result != NULL, "json_string_result: NULL");
 
     int json_array_append_result = json_array_append_new(array, json_string_result);
@@ -859,6 +937,17 @@ int json_array_add_string(json_t *array, char *value)
       json_array_append_result);
 
     json_string_result = NULL;
+
+    int array_add_result = array_add_string(
+      &(json_context->strings),
+      &(json_context->strings_allocated_count),
+      &(json_context->strings_used_count),
+      value_copied);
+
+    check(array_add_result == 0, "array_add_result: %d",
+      array_add_result);
+
+    value_copied = NULL;
   }
   else
   {
@@ -872,6 +961,7 @@ int json_array_add_string(json_t *array, char *value)
 error:
 
   if (json_string_result != NULL) { json_free(json_string_result); }
+  if (value_copied != NULL) { free(value_copied); }
 
   return -1;
 }
@@ -907,4 +997,17 @@ void json_free(json_t *json)
   }
 
   json_decref(json);
+}
+
+// frees a json context
+void json_context_free(json_context_t *json_context)
+{
+  if (json_context == NULL)
+  {
+    return;
+  }
+
+  array_free_string(json_context->strings, json_context->strings_used_count);
+
+  free(json_context);
 }
