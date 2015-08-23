@@ -22,8 +22,9 @@ int http_route_malloc(
     sqlite3 *sql_connection,
     char **url_tokens,
     int url_tokens_count,
-    json_t *body_request,
-    json_t **body_response))
+    json_t *request_json,
+    json_t **response_json,
+    json_context_t *response_json_context))
 {
   http_route_t *http_route_return = NULL;
 
@@ -116,6 +117,7 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
 
   json_t *request_json = NULL;
   json_t *response_json = NULL;
+  json_context_t *response_json_context = NULL;
 
   sqlite3 *sql_connection = NULL;
 
@@ -163,6 +165,10 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
     return 0;
   }
 
+  int json_context_malloc_result = json_context_malloc(&response_json_context);
+  check(json_context_malloc_result == 0, "json_context_malloc_result: %d",
+    json_context_malloc_result);
+
   int sql_connection_open_result = sql_connection_open("/var/main-http/database.db", &sql_connection);
   check(sql_connection_open_result == 0, "sql_connection_open_result: %d",
     sql_connection_open_result);
@@ -172,7 +178,8 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
     url_tokens,
     url_tokens_count,
     request_json,
-    &response_json);
+    &response_json,
+    response_json_context);
 
   check(service_http_result == 0, "service_http_result: %d",
     service_http_result);
@@ -193,6 +200,7 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
   check(fastcgi_write_body_result == 0, "fastcgi_write_body_result: %d",
     fastcgi_write_body_result);
 
+  json_context_free(response_json_context);
   json_free(response_json);
   json_free(request_json);
 
@@ -206,6 +214,7 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
 error:
 
   if (sql_connection != NULL) { sql_connection_close(sql_connection); }
+  if (response_json_context != NULL) { json_context_free(response_json_context); }
   if (response_json != NULL) { json_free(response_json); }
   if (request_json != NULL) { json_free(request_json); }
   if (response_body != NULL) { free(response_body); }

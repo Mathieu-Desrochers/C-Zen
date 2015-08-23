@@ -13,6 +13,7 @@ int sql_connection_open(char *filename, sqlite3 **sql_connection)
   sqlite3 *sql_connection_return = NULL;
 
   check(filename != NULL, "filename: NULL");
+  check(sql_connection != NULL, "sql_connection: NULL");
 
   int sqlite3_open_result = sqlite3_open_v2(filename, &sql_connection_return, SQLITE_OPEN_READWRITE, NULL);
   check(sqlite3_open_result == SQLITE_OK, "sqlite3_open_result: %d | filename: %s",
@@ -36,6 +37,7 @@ int sql_statement_prepare(sqlite3 *sql_connection, char *sql, sqlite3_stmt **sql
 
   check(sql_connection != NULL, "sql_connection: NULL");
   check(sql != NULL, "sql: NULL");
+  check(sql_statement != NULL, "sql_statement: NULL");
 
   int sqlite3_prepare_result = sqlite3_prepare_v2(sql_connection, sql, -1, &sql_statement_return, NULL);
   check(sqlite3_prepare_result == SQLITE_OK, "sqlite3_prepare_result: %d | sql: %s",

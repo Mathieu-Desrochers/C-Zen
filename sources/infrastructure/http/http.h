@@ -4,6 +4,8 @@
 #include <jansson.h>
 #include <sqlite3.h>
 
+#include "../../infrastructure/json/json.h"
+
 // represents a route
 typedef struct http_route_t
 {
@@ -17,8 +19,9 @@ typedef struct http_route_t
     sqlite3 *sql_connection,
     char **url_tokens,
     int url_tokens_count,
-    json_t *request_body,
-    json_t **response_body);
+    json_t *request_json,
+    json_t **response_json,
+    json_context_t *response_json_context);
 } http_route_t;
 
 // allocates a route
@@ -34,8 +37,9 @@ int http_route_malloc(
     sqlite3 *sql_connection,
     char **url_tokens,
     int url_tokens_count,
-    json_t *request_body,
-    json_t **response_body));
+    json_t *request_json,
+    json_t **response_json,
+    json_context_t *response_json_context));
 
 // starts serving requests
 int http_serve_requests(http_route_t **http_routes, int http_routes_count);

@@ -55,17 +55,18 @@ int new_order_service_http(
   sqlite3 *sql_connection,
   char **url_tokens,
   int url_tokens_count,
-  json_t *request_body,
-  json_t **response_body)
+  json_t *request_json,
+  json_t **response_json,
+  json_context_t *response_json_context)
 {
-  json_t *response_body_return = NULL;
+  json_t *response_json_return = NULL;
 
   new_order_request_t *new_order_request = NULL;
   new_order_response_t *new_order_response = NULL;
   validation_error_t **validation_errors = NULL;
   int validation_errors_count = 0;
 
-  int new_order_request_json_parse_result = new_order_request_json_parse(request_body, &new_order_request);
+  int new_order_request_json_parse_result = new_order_request_json_parse(request_json, &new_order_request);
   check(new_order_request_json_parse_result == 0, "new_order_request_json_parse_result: %d",
     new_order_request_json_parse_result);
 
@@ -83,7 +84,8 @@ int new_order_service_http(
   {
     int new_order_response_json_format_result = new_order_response_json_format(
       new_order_response,
-      &response_body_return);
+      &response_json_return,
+      response_json_context);
 
     check(new_order_response_json_format_result == 0, "new_order_response_json_format_result: %d",
       new_order_response_json_format_result);
@@ -93,7 +95,8 @@ int new_order_service_http(
     int new_order_validation_errors_json_format_result = new_order_validation_errors_json_format(
       validation_errors,
       validation_errors_count,
-      &response_body_return);
+      &response_json_return,
+      response_json_context);
 
     check(new_order_validation_errors_json_format_result == 0, "new_order_validation_errors_json_format_result: %d",
       new_order_validation_errors_json_format_result);
@@ -103,7 +106,7 @@ int new_order_service_http(
   new_order_response_free(new_order_response);
   validation_errors_free(validation_errors, validation_errors_count);
 
-  *response_body = response_body_return;
+  *response_json = response_json_return;
 
   return 0;
 
@@ -112,7 +115,7 @@ error:
   if (new_order_request != NULL) { new_order_request_free(new_order_request); }
   if (new_order_response != NULL) { new_order_response_free(new_order_response); }
   if (validation_errors != NULL) { validation_errors_free(validation_errors, validation_errors_count); }
-  if (response_body_return != NULL) { json_free(response_body_return); }
+  if (response_json_return != NULL) { json_free(response_json_return); }
 
   return -1;
 }
