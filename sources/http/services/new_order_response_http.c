@@ -35,14 +35,28 @@ error:
   return -1;
 }
 
-// formats validation errors to json
+// formats new order validation errors to json
 int new_order_validation_errors_json_format(
   validation_error_t **validation_errors,
   int validation_errors_count,
   json_t **json,
   json_context_t *json_context)
 {
+  char *validation_errors_json[] =
+  {
+    "ok",
+    "required",
+    "too-low",
+    "too-high",
+    "too-short",
+    "too-long",
+    "too-few",
+    "too-many",
+    "duplicate"
+  };
+
   json_t *json_return = NULL;
+  char *buffer = NULL;
 
   check(validation_errors != NULL, "validation_errors: NULL");
   check(json != NULL, "json: NULL");
@@ -54,10 +68,17 @@ int new_order_validation_errors_json_format(
 
   for (int i = 0; i < validation_errors_count; i++)
   {
+    buffer = malloc(sizeof(char) * 128);
+
     if (validation_errors[i]->validation_path->property == NEW_ORDER_REQUEST_CUSTOMER_NAME)
     {
-      json_array_add_string(json_return, "customer-name-is-shit", json_context);
+      sprintf(buffer, "customer-name-%s", validation_errors_json[validation_errors[i]->error_code]);
+      json_array_add_string(json_return, buffer, json_context);
     }
+
+    free(buffer);
+
+    buffer = NULL;
   }
 
   *json = json_return;
@@ -67,6 +88,7 @@ int new_order_validation_errors_json_format(
 error:
 
   if (json_return != NULL) { json_free(json_return); }
+  if (buffer != NULL) { free(buffer); }
 
   return -1;
 }
