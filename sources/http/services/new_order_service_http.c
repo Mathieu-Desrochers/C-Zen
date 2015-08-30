@@ -92,14 +92,14 @@ int new_order_service_http(
   }
   else
   {
-    int new_order_validation_errors_json_format_result = new_order_validation_errors_json_format(
+    int new_order_request_json_format_errors_result = new_order_request_json_format_errors(
       validation_errors,
       validation_errors_count,
       &response_json_return,
       response_json_context);
 
-    check(new_order_validation_errors_json_format_result == 0, "new_order_validation_errors_json_format_result: %d",
-      new_order_validation_errors_json_format_result);
+    check(new_order_request_json_format_errors_result == 0, "new_order_request_json_format_errors_result: %d",
+      new_order_request_json_format_errors_result);
   }
 
   new_order_request_free(new_order_request);

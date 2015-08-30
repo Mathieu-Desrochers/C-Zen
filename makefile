@@ -13,7 +13,8 @@ INFRASTRUCTURE = sources/infrastructure/array/array.o \
                  sources/infrastructure/regex/regex.o \
                  sources/infrastructure/sql/sql.o \
                  sources/infrastructure/time/time.o \
-                 sources/infrastructure/validation/validation.o
+                 sources/infrastructure/validation/validation.o \
+                 sources/infrastructure/validation_json/validation_json.o
 
 CORE = sources/core/tables/order_row.o \
        sources/core/tables/orders_table.o \

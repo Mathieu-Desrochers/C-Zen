@@ -7,6 +7,7 @@
 #include "../../infrastructure/array/array.h"
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/json/json.h"
+#include "../../infrastructure/validation_json/validation_json.h"
 
 // parses a new order request from json
 int new_order_request_json_parse(json_t *json, new_order_request_t **new_order_request)
@@ -96,6 +97,86 @@ error:
   {
     new_order_request_order_items_free(new_order_request_order_items, new_order_request_order_items_count);
   }
+
+  return -1;
+}
+
+// formats new order request errors to json
+int new_order_request_json_format_errors(
+  validation_error_t **validation_errors,
+  int validation_errors_count,
+  json_t **json,
+  json_context_t *json_context)
+{
+  json_t *json_return = NULL;
+  char *error_buffer = NULL;
+
+  check(validation_errors != NULL, "validation_errors: NULL");
+  check(json != NULL, "json: NULL");
+  check(json_context != NULL, "json_context: NULL");
+
+  int json_array_malloc_result = json_array_malloc(&json_return);
+  check(json_array_malloc_result == 0, "json_array_malloc_result: %d",
+    json_array_malloc_result);
+
+  error_buffer = malloc(sizeof(char) * 256);
+  check_mem(error_buffer);
+
+  for (int i = 0; i < validation_errors_count; i++)
+  {
+    if (validation_errors[i]->validation_path->property == NEW_ORDER_REQUEST_CUSTOMER_NAME)
+    {
+      int sprintf_result = sprintf(error_buffer, "customer-name-%s",
+        validation_errors_json[validation_errors[i]->error_code]);
+
+      check(sprintf_result > 0, "sprintf_result: %d",
+        sprintf_result);
+    }
+
+    if (validation_errors[i]->validation_path->property == NEW_ORDER_REQUEST_ORDER_ITEMS)
+    {
+      if (validation_errors[i]->validation_path->index == -1)
+      {
+        int sprintf_result = sprintf(error_buffer, "order-items-%s",
+          validation_errors_json[validation_errors[i]->error_code]);
+
+        check(sprintf_result > 0, "sprintf_result: %d",
+          sprintf_result);
+      }
+      else
+      {
+        int order_item_format_error_result = new_order_request_order_item_json_format_error(
+          validation_errors[i], error_buffer);
+
+        check(order_item_format_error_result == 0, "order_item_format_error_result: %d",
+          order_item_format_error_result);
+      }
+    }
+
+    if (validation_errors[i]->validation_path->property == NEW_ORDER_REQUEST_TOTAL)
+    {
+      int sprintf_result = sprintf(error_buffer, "total-%s",
+        validation_errors_json[validation_errors[i]->error_code]);
+
+      check(sprintf_result > 0, "sprintf_result: %d",
+        sprintf_result);
+    }
+
+    int json_array_add_string_result = json_array_add_string(json_return, error_buffer, json_context);
+    check(json_array_add_string_result == 0, "json_array_add_string_result: %d",
+      json_array_add_string_result);
+  }
+
+  free(error_buffer);
+
+  *json = json_return;
+
+  return 0;
+
+error:
+
+  if (json_return != NULL) { json_free(json_return); }
+  if (error_buffer != NULL) { free(error_buffer); }
 
   return -1;
 }
