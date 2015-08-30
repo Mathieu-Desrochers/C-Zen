@@ -5,6 +5,7 @@
 #include "../../http/services/new_order_response_http.h"
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/json/json.h"
+#include "../../infrastructure/validation_json/validation_json.h"
 
 // formats a new order response to json
 int new_order_response_json_format(new_order_response_t *new_order_response, json_t **json, json_context_t *json_context)
@@ -42,19 +43,6 @@ int new_order_validation_errors_json_format(
   json_t **json,
   json_context_t *json_context)
 {
-  char *validation_errors_json[] =
-  {
-    "ok",
-    "required",
-    "too-low",
-    "too-high",
-    "too-short",
-    "too-long",
-    "too-few",
-    "too-many",
-    "duplicate"
-  };
-
   json_t *json_return = NULL;
   char *buffer = NULL;
 
@@ -66,20 +54,39 @@ int new_order_validation_errors_json_format(
   check(json_array_malloc_result == 0, "json_array_malloc_result: %d",
     json_array_malloc_result);
 
+  buffer = malloc(sizeof(char) * 256);
+  check_mem(buffer);
+
   for (int i = 0; i < validation_errors_count; i++)
   {
-    buffer = malloc(sizeof(char) * 128);
 
     if (validation_errors[i]->validation_path->property == NEW_ORDER_REQUEST_CUSTOMER_NAME)
     {
-      sprintf(buffer, "customer-name-%s", validation_errors_json[validation_errors[i]->error_code]);
-      json_array_add_string(json_return, buffer, json_context);
+      int sprintf_result = sprintf(buffer, "customer-name-%s", validation_errors_json[validation_errors[i]->error_code]);
+      check(sprintf_result > 0, "sprintf_result: %d",
+        sprintf_result);
     }
 
-    free(buffer);
+    if (validation_errors[i]->validation_path->property == NEW_ORDER_REQUEST_ORDER_ITEMS)
+    {
+      int sprintf_result = sprintf(buffer, "order-items-%s", validation_errors_json[validation_errors[i]->error_code]);
+      check(sprintf_result > 0, "sprintf_result: %d",
+        sprintf_result);
+    }
 
-    buffer = NULL;
+    if (validation_errors[i]->validation_path->property == NEW_ORDER_REQUEST_TOTAL)
+    {
+      int sprintf_result = sprintf(buffer, "total-%s", validation_errors_json[validation_errors[i]->error_code]);
+      check(sprintf_result > 0, "sprintf_result: %d",
+        sprintf_result);
+    }
+
+    int json_array_add_string_result = json_array_add_string(json_return, buffer, json_context);
+    check(json_array_add_string_result == 0, "json_array_add_string_result: %d",
+      json_array_add_string_result);
   }
+
+  free(buffer);
 
   *json = json_return;
 

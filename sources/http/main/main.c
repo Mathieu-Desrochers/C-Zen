@@ -40,9 +40,18 @@ int main()
   check(http_serve_requests_result == 0, "http_serve_requests_result: %d",
     http_serve_requests_result);
 
+  free(http_routes[0]);
+  free(http_route);
+
   return 0;
 
 error:
+
+  if (http_routes != NULL)
+  {
+    free(http_routes[0]);
+    free(http_routes);
+  }
 
   return -1;
 }
