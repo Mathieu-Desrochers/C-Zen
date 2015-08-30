@@ -15,6 +15,10 @@ update_order_request_order_item_t *update_order_request_order_item_malloc(
   update_order_request_order_item_t *update_order_request_order_item = malloc(sizeof(update_order_request_order_item_t));
   check_mem(update_order_request_order_item);
 
+  update_order_request_order_item->order_item_id = NULL;
+  update_order_request_order_item->name = NULL;
+  update_order_request_order_item->quantity = NULL;
+
   int malloc_memcpy_order_item_id_result = malloc_memcpy_int(&(update_order_request_order_item->order_item_id), order_item_id);
   check(malloc_memcpy_order_item_id_result == 0, "malloc_memcpy_order_item_id_result: %d",
     malloc_memcpy_order_item_id_result);
@@ -48,7 +52,48 @@ int update_order_request_order_item_validate(
   check(allocated_errors_count != NULL, "allocated_errors_count: NULL");
   check(used_errors_count != NULL, "used_errors_count: NULL");
 
-  if (update_order_request_order_item == NULL)
+  if (update_order_request_order_item != NULL)
+  {
+    int validate_order_item_id_result = validate_int(update_order_request_order_item->order_item_id, 0, 1, 999999);
+    if (validate_order_item_id_result != 0)
+    {
+      int validation_errors_add_result = validation_errors_add_level_2(
+        validation_errors, allocated_errors_count, used_errors_count,
+        UPDATE_ORDER_REQUEST_ORDER_ITEMS, index,
+        UPDATE_ORDER_REQUEST_ORDER_ITEM_ID, -1,
+        validate_order_item_id_result);
+
+      check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
+        validation_errors_add_result);
+    }
+
+    int validate_name_result = validate_string(update_order_request_order_item->name, 1, 1, 100);
+    if (validate_name_result != 0)
+    {
+      int validation_errors_add_result = validation_errors_add_level_2(
+        validation_errors, allocated_errors_count, used_errors_count,
+        UPDATE_ORDER_REQUEST_ORDER_ITEMS, index,
+        UPDATE_ORDER_REQUEST_ORDER_ITEM_NAME, -1,
+        validate_name_result);
+
+      check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
+        validation_errors_add_result);
+    }
+
+    int validate_quantity_result = validate_double(update_order_request_order_item->quantity, 1, 1, 999999);
+    if (validate_quantity_result != 0)
+    {
+      int validation_errors_add_result = validation_errors_add_level_2(
+        validation_errors, allocated_errors_count, used_errors_count,
+        UPDATE_ORDER_REQUEST_ORDER_ITEMS, index,
+        UPDATE_ORDER_REQUEST_ORDER_ITEM_QUANTITY, -1,
+        validate_quantity_result);
+
+      check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
+        validation_errors_add_result);
+    }
+  }
+  else
   {
     int validation_errors_add_result = validation_errors_add_level_1(
       validation_errors, allocated_errors_count, used_errors_count,
@@ -57,50 +102,7 @@ int update_order_request_order_item_validate(
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
-
-    goto shortcuit;
   }
-
-  int validate_order_item_id_result = validate_int(update_order_request_order_item->order_item_id, 0, 1, 999999);
-  if (validate_order_item_id_result != 0)
-  {
-    int validation_errors_add_result = validation_errors_add_level_2(
-      validation_errors, allocated_errors_count, used_errors_count,
-      UPDATE_ORDER_REQUEST_ORDER_ITEMS, index,
-      UPDATE_ORDER_REQUEST_ORDER_ITEM_ID, -1,
-      validate_order_item_id_result);
-
-    check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
-      validation_errors_add_result);
-  }
-
-  int validate_name_result = validate_string(update_order_request_order_item->name, 1, 1, 100);
-  if (validate_name_result != 0)
-  {
-    int validation_errors_add_result = validation_errors_add_level_2(
-      validation_errors, allocated_errors_count, used_errors_count,
-      UPDATE_ORDER_REQUEST_ORDER_ITEMS, index,
-      UPDATE_ORDER_REQUEST_ORDER_ITEM_NAME, -1,
-      validate_name_result);
-
-    check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
-      validation_errors_add_result);
-  }
-
-  int validate_quantity_result = validate_double(update_order_request_order_item->quantity, 1, 1, 999999);
-  if (validate_quantity_result != 0)
-  {
-    int validation_errors_add_result = validation_errors_add_level_2(
-      validation_errors, allocated_errors_count, used_errors_count,
-      UPDATE_ORDER_REQUEST_ORDER_ITEMS, index,
-      UPDATE_ORDER_REQUEST_ORDER_ITEM_QUANTITY, -1,
-      validate_quantity_result);
-
-    check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
-      validation_errors_add_result);
-  }
-
-shortcuit:
 
   return 0;
 

@@ -14,6 +14,11 @@ new_order_request_t *new_order_request_malloc(
   new_order_request_t *new_order_request = malloc(sizeof(new_order_request_t));
   check_mem(new_order_request);
 
+  new_order_request->customer_name = NULL;
+  new_order_request->order_items = NULL;
+  new_order_request->order_items_count = 0;
+  new_order_request->total = NULL;
+
   int malloc_memcpy_customer_name_result = malloc_memcpy_string(&(new_order_request->customer_name), customer_name);
   check(malloc_memcpy_customer_name_result == 0, "malloc_memcpy_customer_name_result: %d",
     malloc_memcpy_customer_name_result);
@@ -21,9 +26,6 @@ new_order_request_t *new_order_request_malloc(
   int malloc_memcpy_total_result = malloc_memcpy_int(&(new_order_request->total), total);
   check(malloc_memcpy_total_result == 0, "malloc_memcpy_total_result: %d",
     malloc_memcpy_total_result);
-
-  new_order_request->order_items = NULL;
-  new_order_request->order_items_count = 0;
 
   return new_order_request;
 
@@ -63,7 +65,21 @@ int new_order_request_validate(
     new_order_request->order_items_count,
     1, 1, 100);
 
-  if (validate_order_items_result != 0)
+  if (validate_order_items_result == 0)
+  {
+    for (int i = 0; i < new_order_request->order_items_count; i++)
+    {
+      int new_order_request_order_item_validate_result = new_order_request_order_item_validate(
+        new_order_request->order_items[i], i,
+        validation_errors,
+        allocated_errors_count,
+        used_errors_count);
+
+      check(new_order_request_order_item_validate_result == 0, "new_order_request_order_item_validate_result: %d",
+        new_order_request_order_item_validate_result);
+    }
+  }
+  else
   {
     int validation_errors_add_result = validation_errors_add_level_1(
       validation_errors, allocated_errors_count, used_errors_count,
@@ -72,20 +88,6 @@ int new_order_request_validate(
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
-
-    goto shortcircuit;
-  }
-
-  for (int i = 0; i < new_order_request->order_items_count; i++)
-  {
-    int new_order_request_order_item_validate_result = new_order_request_order_item_validate(
-      new_order_request->order_items[i], i,
-      validation_errors,
-      allocated_errors_count,
-      used_errors_count);
-
-    check(new_order_request_order_item_validate_result == 0, "new_order_request_order_item_validate_result: %d",
-      new_order_request_order_item_validate_result);
   }
 
   int validate_total_result = validate_int(new_order_request->total, 1, 0, 999999);
@@ -99,8 +101,6 @@ int new_order_request_validate(
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
   }
-
-shortcircuit:
 
   return 0;
 

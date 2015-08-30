@@ -16,6 +16,12 @@ update_order_request_t *update_order_request_malloc(
   update_order_request_t *update_order_request = malloc(sizeof(update_order_request_t));
   check_mem(update_order_request);
 
+  update_order_request->order_id = NULL;
+  update_order_request->customer_name = NULL;
+  update_order_request->order_items = NULL;
+  update_order_request->order_items_count = 0;
+  update_order_request->total = NULL;
+
   int malloc_memcpy_order_id_result = malloc_memcpy_int(&(update_order_request->order_id), order_id);
   check(malloc_memcpy_order_id_result == 0, "malloc_memcpy_order_id_result: %d",
     malloc_memcpy_order_id_result);
@@ -27,9 +33,6 @@ update_order_request_t *update_order_request_malloc(
   int malloc_memcpy_total_result = malloc_memcpy_int(&(update_order_request->total), total);
   check(malloc_memcpy_total_result == 0, "malloc_memcpy_total_result: %d",
     malloc_memcpy_total_result);
-
-  update_order_request->order_items = NULL;
-  update_order_request->order_items_count = 0;
 
   return update_order_request;
 
@@ -85,63 +88,61 @@ int update_order_request_validate(
     update_order_request->order_items_count,
     1, 1, 100);
 
-  if (validate_order_items_result != 0)
+  if (validate_order_items_result == 0)
+  {
+    int prior_errors_count = *used_errors_count;
+
+    for (int i = 0; i < update_order_request->order_items_count; i++)
+    {
+      int update_order_request_order_item_validate_result = update_order_request_order_item_validate(
+        update_order_request->order_items[i], i,
+        validation_errors,
+        allocated_errors_count,
+        used_errors_count);
+
+      check(update_order_request_order_item_validate_result == 0, "update_order_request_order_item_validate_result: %d",
+        update_order_request_order_item_validate_result);
+    }
+
+    int all_order_items_valid = (*used_errors_count == prior_errors_count);
+    if (all_order_items_valid)
+    {
+      order_item_ids = malloc(sizeof(int *) * (update_order_request->order_items_count));
+      check_mem(order_item_ids);
+
+      for (int i = 0; i < update_order_request->order_items_count; i++)
+      {
+        order_item_ids[i] = update_order_request->order_items[i]->order_item_id;
+      }
+
+      int array_find_duplicate_order_item_ids_result = array_find_duplicates_int(
+        order_item_ids,
+        update_order_request->order_items_count,
+        &duplicate_indexes,
+        &duplicate_indexes_count);
+
+      check(array_find_duplicate_order_item_ids_result == 0, "array_find_duplicate_order_item_ids_result: %d",
+        array_find_duplicate_order_item_ids_result);
+
+      for (int i = 0; i < duplicate_indexes_count; i++)
+      {
+        int validation_errors_add_result = validation_errors_add_level_2(
+          validation_errors, allocated_errors_count, used_errors_count,
+          UPDATE_ORDER_REQUEST_ORDER_ITEMS, duplicate_indexes[i],
+          UPDATE_ORDER_REQUEST_ORDER_ITEM_ID, -1,
+          VALIDATION_RESULT_DUPLICATE);
+
+        check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
+          validation_errors_add_result);
+      }
+    }
+  }
+  else
   {
     int validation_errors_add_result = validation_errors_add_level_1(
       validation_errors, allocated_errors_count, used_errors_count,
       UPDATE_ORDER_REQUEST_ORDER_ITEMS, -1,
       validate_order_items_result);
-
-    check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
-      validation_errors_add_result);
-
-    goto shortcircuit;
-  }
-
-  int prior_errors_count = *used_errors_count;
-
-  for (int i = 0; i < update_order_request->order_items_count; i++)
-  {
-    int update_order_request_order_item_validate_result = update_order_request_order_item_validate(
-      update_order_request->order_items[i], i,
-      validation_errors,
-      allocated_errors_count,
-      used_errors_count);
-
-    check(update_order_request_order_item_validate_result == 0, "update_order_request_order_item_validate_result: %d",
-      update_order_request_order_item_validate_result);
-  }
-
-  int all_order_items_valid = (*used_errors_count == prior_errors_count);
-  if (all_order_items_valid == 0)
-  {
-    goto shortcircuit;
-  }
-
-  order_item_ids = malloc(sizeof(int *) * (update_order_request->order_items_count));
-  check_mem(order_item_ids);
-
-  for (int i = 0; i < update_order_request->order_items_count; i++)
-  {
-    order_item_ids[i] = update_order_request->order_items[i]->order_item_id;
-  }
-
-  int array_find_duplicate_order_item_ids_result = array_find_duplicates_int(
-    order_item_ids,
-    update_order_request->order_items_count,
-    &duplicate_indexes,
-    &duplicate_indexes_count);
-
-  check(array_find_duplicate_order_item_ids_result == 0, "array_find_duplicate_order_item_ids_result: %d",
-    array_find_duplicate_order_item_ids_result);
-
-  for (int i = 0; i < duplicate_indexes_count; i++)
-  {
-    int validation_errors_add_result = validation_errors_add_level_2(
-      validation_errors, allocated_errors_count, used_errors_count,
-      UPDATE_ORDER_REQUEST_ORDER_ITEMS, duplicate_indexes[i],
-      UPDATE_ORDER_REQUEST_ORDER_ITEM_ID, -1,
-      VALIDATION_RESULT_DUPLICATE);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
@@ -161,8 +162,6 @@ int update_order_request_validate(
 
   free(duplicate_indexes);
   free(order_item_ids);
-
-shortcircuit:
 
   return 0;
 
