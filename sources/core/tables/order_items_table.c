@@ -249,8 +249,8 @@ int order_items_table_select_by_order_id(sqlite3 *sql_connection, int order_id, 
   check(sql_bind_order_id_result == 0, "sql_bind_order_id_result: %d",
     sql_bind_order_id_result);
 
-  int allocated_order_item_rows_count = 0;
-  int read_order_item_rows_count = 0;
+  int order_item_rows_allocated_count = 0;
+  int order_item_rows_used_count = 0;
 
   int is_row_available = 0;
   int sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
@@ -264,7 +264,7 @@ int order_items_table_select_by_order_id(sqlite3 *sql_connection, int order_id, 
       order_items_table_read_result);
 
     int array_add_result = array_add_pointer(
-      (void ***)&order_item_rows_return, &allocated_order_item_rows_count, &read_order_item_rows_count,
+      (void ***)&order_item_rows_return, &order_item_rows_allocated_count, &order_item_rows_used_count,
       (void *)order_item_row);
 
     check(array_add_result == 0, "array_add_result: %d",
@@ -280,13 +280,13 @@ int order_items_table_select_by_order_id(sqlite3 *sql_connection, int order_id, 
   sql_statement_finalize(sql_statement);
 
   *order_item_rows = order_item_rows_return;
-  *count = read_order_item_rows_count;
+  *count = order_item_rows_used_count;
 
   return 0;
 
 error:
 
-  if (order_item_rows_return != NULL) { order_item_rows_free(order_item_rows_return, read_order_item_rows_count); }
+  if (order_item_rows_return != NULL) { order_item_rows_free(order_item_rows_return, order_item_rows_used_count); }
   if (order_item_row != NULL) { order_item_row_free(order_item_row); }
   if (sql_statement != NULL) { sql_statement_finalize(sql_statement); }
 
@@ -319,8 +319,8 @@ int order_items_table_select_all(sqlite3 *sql_connection, order_item_row_t ***or
   check(sql_statement_prepare_result == 0, "sql_statement_prepare_result: %d",
     sql_statement_prepare_result);
 
-  int allocated_order_item_rows_count = 0;
-  int read_order_item_rows_count = 0;
+  int order_item_rows_allocated_count = 0;
+  int order_item_rows_used_count = 0;
 
   int is_row_available = 0;
   int sql_step_select_result = sql_step_select(sql_statement, &is_row_available);
@@ -334,7 +334,7 @@ int order_items_table_select_all(sqlite3 *sql_connection, order_item_row_t ***or
       order_items_table_read_result);
 
     int array_add_result = array_add_pointer(
-      (void ***)&order_item_rows_return, &allocated_order_item_rows_count, &read_order_item_rows_count,
+      (void ***)&order_item_rows_return, &order_item_rows_allocated_count, &order_item_rows_used_count,
       (void *)order_item_row);
 
     check(array_add_result == 0, "array_add_result: %d",
@@ -350,13 +350,13 @@ int order_items_table_select_all(sqlite3 *sql_connection, order_item_row_t ***or
   sql_statement_finalize(sql_statement);
 
   *order_item_rows = order_item_rows_return;
-  *count = read_order_item_rows_count;
+  *count = order_item_rows_used_count;
 
   return 0;
 
 error:
 
-  if (order_item_rows_return != NULL) { order_item_rows_free(order_item_rows_return, read_order_item_rows_count); }
+  if (order_item_rows_return != NULL) { order_item_rows_free(order_item_rows_return, order_item_rows_used_count); }
   if (order_item_row != NULL) { order_item_row_free(order_item_row); }
   if (sql_statement != NULL) { sql_statement_finalize(sql_statement); }
 

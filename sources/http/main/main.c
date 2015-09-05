@@ -9,8 +9,8 @@
 int main()
 {
   http_route_t **http_routes = NULL;
-  int allocated_http_routes = 0;
-  int used_http_routes = 0;
+  int http_routes_allocated_count = 0;
+  int http_routes_used_count = 0;
 
   http_route_t *http_route = NULL;
 
@@ -25,8 +25,8 @@ int main()
 
   int array_add_pointer_result = array_add_pointer(
     (void ***)(&http_routes),
-    &allocated_http_routes,
-    &used_http_routes,
+    &http_routes_allocated_count,
+    &http_routes_used_count,
     http_route);
 
   check(array_add_pointer_result == 0, "array_add_pointer_result: %d",

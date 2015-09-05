@@ -25,8 +25,8 @@ int update_order_service(
   update_order_response_t *update_order_response_return = NULL;
 
   validation_error_t **validation_errors_return = NULL;
-  int allocated_errors_count = 0;
-  int used_errors_count = 0;
+  int validation_errors_allocated_count = 0;
+  int validation_errors_used_count = 0;
 
   order_row_t *order_row = NULL;
   order_item_row_t **order_item_rows = NULL;
@@ -54,8 +54,8 @@ int update_order_service(
   int update_order_request_validate_result = update_order_request_validate(
     update_order_request,
     &validation_errors_return,
-    &allocated_errors_count,
-    &used_errors_count);
+    &validation_errors_allocated_count,
+    &validation_errors_used_count);
 
   check(update_order_request_validate_result == 0, "update_order_request_validate_result: %d",
     update_order_request_validate_result);
@@ -63,7 +63,7 @@ int update_order_service(
   if (validation_errors_return != NULL)
   {
     *validation_errors = validation_errors_return;
-    *validation_errors_count = used_errors_count;
+    *validation_errors_count = validation_errors_used_count;
 
     return 0;
   }
@@ -79,7 +79,7 @@ int update_order_service(
   if (order_row == NULL)
   {
     int validation_errors_add_result = validation_errors_add_level_1(
-      &validation_errors_return, &allocated_errors_count, &used_errors_count,
+      &validation_errors_return, &validation_errors_allocated_count, &validation_errors_used_count,
       UPDATE_ORDER_REQUEST_ORDER_ID, -1,
       UPDATE_ORDER_SERVICE_UNKNOWN_ORDER_ID);
 
@@ -87,7 +87,7 @@ int update_order_service(
       validation_errors_add_result);
 
     *validation_errors = validation_errors_return;
-    *validation_errors_count = used_errors_count;
+    *validation_errors_count = validation_errors_used_count;
 
     return 0;
   }
@@ -131,7 +131,7 @@ int update_order_service(
   for (int i = 0; i < unknown_order_item_id_indexes_count; i++)
   {
     int validation_errors_add_result = validation_errors_add_level_2(
-      &validation_errors_return, &allocated_errors_count, &used_errors_count,
+      &validation_errors_return, &validation_errors_allocated_count, &validation_errors_used_count,
       UPDATE_ORDER_REQUEST_ORDER_ITEMS, unknown_order_item_id_indexes[i],
       UPDATE_ORDER_REQUEST_ORDER_ITEM_ID, -1,
       UPDATE_ORDER_SERVICE_UNKNOWN_ORDER_ITEM_ID);
@@ -150,7 +150,7 @@ int update_order_service(
     free(unknown_order_item_id_indexes);
 
     *validation_errors = validation_errors_return;
-    *validation_errors_count = used_errors_count;
+    *validation_errors_count = validation_errors_used_count;
 
     return 0;
   }
@@ -274,7 +274,7 @@ int update_order_service(
 error:
 
   if (update_order_response_return != NULL) { update_order_response_free(update_order_response_return); }
-  if (validation_errors_return != NULL) { validation_errors_free(validation_errors_return, used_errors_count); }
+  if (validation_errors_return != NULL) { validation_errors_free(validation_errors_return, validation_errors_used_count); }
   if (order_row != NULL) { order_row_free(order_row); }
   if (order_item_rows != NULL) { order_item_rows_free(order_item_rows, order_item_rows_count); }
   if (updated_order_row != NULL) { order_row_free(updated_order_row); }

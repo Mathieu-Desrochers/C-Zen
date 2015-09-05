@@ -15,8 +15,8 @@ int regex_match(char *pattern, char *string, int *matched, char ***tokens, int *
   char *copied_match = NULL;
 
   char **tokens_return = NULL;
-  int allocated_tokens_count = 0;
-  int used_tokens_count = 0;
+  int tokens_allocated_count = 0;
+  int tokens_used_count = 0;
 
   pcre *compiled_pcre = pcre_compile(pattern, 0, &error, &error_offset, NULL);
   check(compiled_pcre != NULL, "compiled_pcre: NULL | error: %s | error_offset: %d",
@@ -51,8 +51,8 @@ int regex_match(char *pattern, char *string, int *matched, char ***tokens, int *
 
     int array_add_string_result = array_add_string(
       &tokens_return,
-      &allocated_tokens_count,
-      &used_tokens_count,
+      &tokens_allocated_count,
+      &tokens_used_count,
       copied_match);
 
     check(array_add_string_result == 0, "array_add_string_result: %d",
@@ -78,7 +78,7 @@ error:
 
   if (tokens_return != NULL)
   {
-    for (int i = 0; i < used_tokens_count; i++)
+    for (int i = 0; i < tokens_used_count; i++)
     {
       free(tokens_return[i]);
     }
