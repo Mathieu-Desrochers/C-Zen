@@ -59,6 +59,7 @@ int new_order_service_http(
   json_t **response_json,
   json_context_t *response_json_context)
 {
+  int return_value = 0;
   json_t *response_json_return = NULL;
 
   new_order_request_t *new_order_request = NULL;
@@ -100,6 +101,8 @@ int new_order_service_http(
 
     check(new_order_request_json_format_errors_result == 0, "new_order_request_json_format_errors_result: %d",
       new_order_request_json_format_errors_result);
+
+    return_value = 1;
   }
 
   new_order_request_free(new_order_request);
@@ -108,7 +111,7 @@ int new_order_service_http(
 
   *response_json = response_json_return;
 
-  return 0;
+  return return_value;
 
 error:
 

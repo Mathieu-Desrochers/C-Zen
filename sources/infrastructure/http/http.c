@@ -181,20 +181,33 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
     &response_json,
     response_json_context);
 
-  check(service_http_result == 0, "service_http_result: %d",
+  check(service_http_result == 0 || service_http_result == 1, "service_http_result: %d",
     service_http_result);
 
   sql_connection_close(sql_connection);
 
   sql_connection = NULL;
 
-  int json_format_string_result = json_format_string(response_json, &response_body);
-  check(json_format_string_result == 0, "json_format_string_result: %d",
-    json_format_string_result);
+  if (service_http_result == 0)
+  {
+    int fastcgi_write_header_result = fastcgi_write_header(request->out, "Status", "200: OK", 0);
+    check(fastcgi_write_header_result == 0, "fastcgi_write_header_result: %d",
+      fastcgi_write_header_result);
+  }
+  else
+  {
+    int fastcgi_write_header_result = fastcgi_write_header(request->out, "Status", "422: Unprocessable Entity", 0);
+    check(fastcgi_write_header_result == 0, "fastcgi_write_header_result: %d",
+      fastcgi_write_header_result);
+  }
 
   int fastcgi_write_header_result = fastcgi_write_header(request->out, "Content-type", "application/json", 1);
   check(fastcgi_write_header_result == 0, "fastcgi_write_header_result: %d",
     fastcgi_write_header_result);
+
+  int json_format_string_result = json_format_string(response_json, &response_body);
+  check(json_format_string_result == 0, "json_format_string_result: %d",
+    json_format_string_result);
 
   int fastcgi_write_body_result = fastcgi_write_body(request->out, response_body);
   check(fastcgi_write_body_result == 0, "fastcgi_write_body_result: %d",
