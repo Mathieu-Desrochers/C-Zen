@@ -165,7 +165,7 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
   response_json_context = json_context_malloc();
   check(response_json_context != NULL, "response_json_context: NULL");
 
-  int sql_connection_open_result = sql_connection_open("/var/main-http/database.db", &sql_connection);
+  int sql_connection_open_result = sql_connection_open("/var/web_api/database.db", &sql_connection);
   check(sql_connection_open_result == 0, "sql_connection_open_result: %d",
     sql_connection_open_result);
 

@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS  = -std=c99 -g -Wall
 
-all : $(INFRASTRUCTURE) $(CORE) $(HTTP) main-core main-http tags
+all : $(INFRASTRUCTURE) $(WEB_API) web_api_main
 
 INFRASTRUCTURE = sources/infrastructure/array/array.o \
                  sources/infrastructure/fastcgi/fastcgi.o \
@@ -16,34 +16,29 @@ INFRASTRUCTURE = sources/infrastructure/array/array.o \
                  sources/infrastructure/validation/validation.o \
                  sources/infrastructure/validation_json/validation_json.o
 
-CORE = sources/core/tables/order_row.o \
-       sources/core/tables/orders_table.o \
-       sources/core/tables/order_item_row.o \
-       sources/core/tables/order_items_table.o \
-       sources/core/services/new_order_request.o \
-       sources/core/services/new_order_request_order_item.o \
-       sources/core/services/new_order_response.o \
-       sources/core/services/new_order_service.o \
-       sources/core/services/update_order_request.o \
-       sources/core/services/update_order_request_order_item.o \
-       sources/core/services/update_order_response.o \
-       sources/core/services/update_order_service.o
-
-HTTP = sources/http/services/new_order_request_http.o \
-       sources/http/services/new_order_request_order_item_http.o \
-       sources/http/services/new_order_response_http.o \
-       sources/http/services/new_order_service_http.o
+WEB_API = sources/web_api/bindings/new_order_request_http.o \
+          sources/web_api/bindings/new_order_request_order_item_http.o \
+          sources/web_api/bindings/new_order_response_http.o \
+          sources/web_api/bindings/new_order_service_http.o \
+          sources/web_api/tables/order_row.o \
+          sources/web_api/tables/orders_table.o \
+          sources/web_api/tables/order_item_row.o \
+          sources/web_api/tables/order_items_table.o \
+          sources/web_api/services/new_order_request.o \
+          sources/web_api/services/new_order_request_order_item.o \
+          sources/web_api/services/new_order_response.o \
+          sources/web_api/services/new_order_service.o \
+          sources/web_api/services/update_order_request.o \
+          sources/web_api/services/update_order_request_order_item.o \
+          sources/web_api/services/update_order_response.o \
+          sources/web_api/services/update_order_service.o
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-main-core : $(INFRASTRUCTURE) $(CORE) $(HTTP) sources/core/main/main.c
-	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(CORE) $(HTTP) \
-	sources/core/main/main.c -lsqlite3 -ljansson -lfcgi -lpcre -o main-core
-
-main-http : $(INFRASTRUCTURE) $(CORE) $(HTTP) sources/http/main/main.c
-	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(CORE) $(HTTP) \
-	sources/http/main/main.c -lsqlite3 -ljansson -lfcgi -lpcre -o main-http
+web_api_main: $(INFRASTRUCTURE) $(WEB_API) sources/web_api/main/main.c
+	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(WEB_API) \
+	sources/web_api/main/main.c -lsqlite3 -ljansson -lfcgi -lpcre -o web_api_main
 
 libraries: fastcgi \
            jansson
@@ -63,37 +58,37 @@ jansson:
 	$(MAKE) -C /tmp/jansson-2.7 install
 
 database:
-	mkdir -p /var/main-http
-	sqlite3 /var/main-http/database.db < sources/database/create_database.sql
-	sqlite3 /var/main-http/database.db "PRAGMA journal_mode=WAL;"
-	chown lighttpd:lighttpd /var/main-http
-	chown lighttpd:lighttpd /var/main-http/database.db
+	mkdir -p /var/web_api
+	sqlite3 /var/web_api/database.db < sources/database/create_database.sql
+	sqlite3 /var/web_api/database.db "PRAGMA journal_mode=WAL;"
+	chown lighttpd:lighttpd /var/web_api
+	chown lighttpd:lighttpd /var/web_api/database.db
 
-http-configuration:
+http_configuration:
 	echo '' >> /etc/lighttpd/lighttpd.conf
 	echo 'fastcgi.server = (' >> /etc/lighttpd/lighttpd.conf
 	echo '  "/api/" =>' >> /etc/lighttpd/lighttpd.conf
-	echo '  ( "main-http" =>' >> /etc/lighttpd/lighttpd.conf
+	echo '  ( "web_api_main" =>' >> /etc/lighttpd/lighttpd.conf
 	echo '    (' >> /etc/lighttpd/lighttpd.conf
-	echo '      "bin-path" => "/usr/local/bin/main-http-wrapper",' >> /etc/lighttpd/lighttpd.conf
+	echo '      "bin-path" => "/usr/local/bin/web_api_main_wrapper",' >> /etc/lighttpd/lighttpd.conf
 	echo '      "check-local" => "disable",' >> /etc/lighttpd/lighttpd.conf
-	echo '      "socket" => "/tmp/main-http.socket",' >> /etc/lighttpd/lighttpd.conf
+	echo '      "socket" => "/tmp/web_api_main.socket",' >> /etc/lighttpd/lighttpd.conf
 	echo '      "strip-request-uri" => "/api/"' >> /etc/lighttpd/lighttpd.conf
 	echo '    )' >> /etc/lighttpd/lighttpd.conf
 	echo '  )' >> /etc/lighttpd/lighttpd.conf
 	echo ')' >> /etc/lighttpd/lighttpd.conf
-	touch /usr/local/bin/main-http-wrapper
-	chmod +x /usr/local/bin/main-http-wrapper
-	echo '#!/bin/bash' >> /usr/local/bin/main-http-wrapper
-	echo 'export LD_LIBRARY_PATH=/usr/local/lib' >> /usr/local/bin/main-http-wrapper
-	echo '/usr/local/bin/main-http 2>>/var/log/lighttpd/main-http.log' >> /usr/local/bin/main-http-wrapper
-	touch /var/log/lighttpd/main-http.log
-	chown lighttpd:lighttpd /var/log/lighttpd/main-http.log
+	touch /usr/local/bin/web_api_main_wrapper
+	chmod +x /usr/local/bin/web_api_main_wrapper
+	echo '#!/bin/bash' >> /usr/local/bin/web_api_main_wrapper
+	echo 'export LD_LIBRARY_PATH=/usr/local/lib' >> /usr/local/bin/web_api_main_wrapper
+	echo '/usr/local/bin/web_api_main 2>>/var/log/lighttpd/web_api_main.log' >> /usr/local/bin/web_api_main_wrapper
+	touch /var/log/lighttpd/web_api_main.log
+	chown lighttpd:lighttpd /var/log/lighttpd/web_api_main.log
 
-http-run:
+http_run:
 	/etc/rc.d/rc.lighttpd stop
-	- pkill main-http
-	cp main-http /usr/local/bin
+	- pkill web_api_main
+	cp web_api_main /usr/local/bin
 	/etc/rc.d/rc.lighttpd start
 
 tags : $(INFRASTRUCTURE) $(CORE) $(HTTP)
@@ -101,6 +96,5 @@ tags : $(INFRASTRUCTURE) $(CORE) $(HTTP)
 
 clean :
 	find . -name *.o | xargs -i /bin/rm {}
-	rm -f main-core
-	rm -f main-http
+	rm -f web_api_main
 	rm -f tags

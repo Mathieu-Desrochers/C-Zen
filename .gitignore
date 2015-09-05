@@ -1,6 +1,5 @@
 *~
 *.o
 *.swp
-/main-core
-/main-http
+/web_api_main
 /tags
