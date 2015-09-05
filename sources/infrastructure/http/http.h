@@ -25,8 +25,7 @@ typedef struct http_route_t
 } http_route_t;
 
 // allocates a route
-int http_route_malloc(
-  http_route_t **http_route,
+http_route_t *http_route_malloc(
   int (*service_parse_url)(
     char *method,
     char *url,

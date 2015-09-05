@@ -4,28 +4,24 @@
 #include "../../infrastructure/hash/hash_values.h"
 
 // allocates hashed values
-int hash_values_malloc(hash_values_t **hash_values)
+hash_values_t *hash_values_malloc()
 {
-  hash_values_t *hash_values_return = NULL;
+  hash_values_t *hash_values = NULL;
 
-  check(hash_values != NULL, "hash_values: NULL");
+  hash_values = malloc(sizeof(hash_values_t));
+  check_mem(hash_values);
 
-  hash_values_return = malloc(sizeof(hash_values_t));
-  check_mem(hash_values_return);
+  hash_values->values = NULL;
+  hash_values->allocated_count = 0;
+  hash_values->used_count = 0;
 
-  hash_values_return->values = NULL;
-  hash_values_return->allocated_count = 0;
-  hash_values_return->used_count = 0;
-
-  *hash_values = hash_values_return;
-
-  return 0;
+  return hash_values;
 
 error:
 
-  if (hash_values_return != NULL) { hash_values_free(hash_values_return); }
+  if (hash_values != NULL) { hash_values_free(hash_values); }
 
-  return -1;
+  return NULL;
 }
 
 // frees hashed values

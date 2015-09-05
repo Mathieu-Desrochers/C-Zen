@@ -10,15 +10,13 @@
 #include "../../infrastructure/mem/mem.h"
 
 // allocates a hash table
-int hash_table_malloc(hash_table_t **hash_table, int maximum_distinct_keys_count)
+hash_table_t *hash_table_malloc(int maximum_distinct_keys_count)
 {
-  hash_table_t *hash_table_return = NULL;
+  hash_table_t *hash_table = NULL;
   hsearch_data *hsearch = NULL;
 
-  check(hash_table != NULL, "hash_table: NULL");
-
-  hash_table_return = malloc(sizeof(hash_table_t));
-  check_mem(hash_table_return);
+  hash_table = malloc(sizeof(hash_table_t));
+  check_mem(hash_table);
 
   hsearch = calloc(1, sizeof(hsearch_data));
   check_mem(hsearch);
@@ -27,19 +25,17 @@ int hash_table_malloc(hash_table_t **hash_table, int maximum_distinct_keys_count
   check(hcreate_result != 0, "hcreate_result: %d",
     hcreate_result);
 
-  hash_table_return->hsearch = hsearch;
+  hash_table->hsearch = hsearch;
 
-  hash_table_return->keys = NULL;
-  hash_table_return->keys_allocated_count = 0;
-  hash_table_return->keys_used_count = 0;
+  hash_table->keys = NULL;
+  hash_table->keys_allocated_count = 0;
+  hash_table->keys_used_count = 0;
 
-  hash_table_return->hash_values = NULL;
-  hash_table_return->hash_values_allocated_count = 0;
-  hash_table_return->hash_values_used_count = 0;
+  hash_table->hash_values = NULL;
+  hash_table->hash_values_allocated_count = 0;
+  hash_table->hash_values_used_count = 0;
 
-  *hash_table = hash_table_return;
-
-  return 0;
+  return hash_table;
 
 error:
 
@@ -49,9 +45,9 @@ error:
     free(hsearch);
   }
 
-  if (hash_table_return != NULL) { free(hash_table_return); }
+  if (hash_table != NULL) { free(hash_table); }
 
-  return -1;
+  return NULL;
 }
 
 // gets the hash values for a given key
@@ -111,9 +107,8 @@ int hash_get_or_create_hash_values(hash_table_t *hash_table, char *key, hash_val
   check(malloc_memcpy_result == 0, "malloc_memcpy_result: %d",
     malloc_memcpy_result);
 
-  int hash_values_malloc_result = hash_values_malloc(&hash_values_return);
-  check(hash_values_malloc_result == 0, "hash_values_malloc_result: %d",
-    hash_values_malloc_result);
+  hash_values_return = hash_values_malloc();
+  check(hash_values_return != NULL, "hash_values_return: NULL");
 
   ENTRY new_entry;
   new_entry.key = key_copied;

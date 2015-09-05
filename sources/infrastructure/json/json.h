@@ -31,11 +31,11 @@ int json_array_get_object(json_t *array, int index, json_t **value);
 int json_array_get_string(json_t *array, int index, char **value);
 
 // allocates a json context
-int json_context_malloc(json_context_t **json_context);
+json_context_t *json_context_malloc();
 
 // allocates a json object
-int json_object_malloc(json_t **json);
-int json_array_malloc(json_t **json);
+json_t *json_object_malloc();
+json_t *json_array_malloc();
 
 // sets a json value for a key
 int json_object_set_array(json_t *object, char *key, json_t *value, json_context_t *context);

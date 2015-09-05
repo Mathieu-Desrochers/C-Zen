@@ -22,7 +22,7 @@ typedef struct hash_table_t
 } hash_table_t;
 
 // allocates a hash table
-int hash_table_malloc(hash_table_t **hash_table, int maximum_distinct_keys_count);
+hash_table_t *hash_table_malloc(int maximum_distinct_keys_count);
 
 // adds a value for a given key
 int hash_table_add_int_int(hash_table_t *hash_table, int key, int value);

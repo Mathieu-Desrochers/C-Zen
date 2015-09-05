@@ -10,7 +10,7 @@ typedef struct hash_values_t
 } hash_values_t;
 
 // allocates hashed values
-int hash_values_malloc(hash_values_t **hash_values);
+hash_values_t *hash_values_malloc();
 
 // frees hashed values
 void hash_values_free(hash_values_t *hash_values);

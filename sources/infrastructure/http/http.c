@@ -10,8 +10,7 @@
 #include "../../infrastructure/sql/sql.h"
 
 // allocates a route
-int http_route_malloc(
-  http_route_t **http_route,
+http_route_t *http_route_malloc(
   int (*service_parse_url)(
     char *method,
     char *url,
@@ -26,26 +25,24 @@ int http_route_malloc(
     json_t **response_json,
     json_context_t *response_json_context))
 {
-  http_route_t *http_route_return = NULL;
+  http_route_t *http_route = NULL;
 
   check(service_parse_url != NULL, "service_parse_url: NULL");
   check(service_http != NULL, "service_http: NULL");
 
-  http_route_return = malloc(sizeof(http_route_t));
-  check_mem(http_route_return);
+  http_route = malloc(sizeof(http_route_t));
+  check_mem(http_route);
 
-  http_route_return->service_parse_url = service_parse_url;
-  http_route_return->service_http = service_http;
+  http_route->service_parse_url = service_parse_url;
+  http_route->service_http = service_http;
 
-  *http_route = http_route_return;
-
-  return 0;
+  return http_route;
 
 error:
 
-  if (http_route_return != NULL) { free(http_route_return); }
+  if (http_route != NULL) { free(http_route); }
 
-  return -1;
+  return NULL;
 }
 
 // searches for the route matching a request
@@ -165,9 +162,8 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
     return 0;
   }
 
-  int json_context_malloc_result = json_context_malloc(&response_json_context);
-  check(json_context_malloc_result == 0, "json_context_malloc_result: %d",
-    json_context_malloc_result);
+  response_json_context = json_context_malloc();
+  check(response_json_context != NULL, "response_json_context: NULL");
 
   int sql_connection_open_result = sql_connection_open("/var/main-http/database.db", &sql_connection);
   check(sql_connection_open_result == 0, "sql_connection_open_result: %d",

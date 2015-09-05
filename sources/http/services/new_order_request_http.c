@@ -115,9 +115,8 @@ int new_order_request_json_format_errors(
   check(json != NULL, "json: NULL");
   check(json_context != NULL, "json_context: NULL");
 
-  int json_array_malloc_result = json_array_malloc(&json_return);
-  check(json_array_malloc_result == 0, "json_array_malloc_result: %d",
-    json_array_malloc_result);
+  json_return = json_array_malloc();
+  check(json_return != NULL, "json_return: NULL");
 
   error_buffer = malloc(sizeof(char) * 256);
   check_mem(error_buffer);

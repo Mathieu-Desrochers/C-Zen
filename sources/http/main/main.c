@@ -17,13 +17,11 @@ int main()
   http_routes = malloc(sizeof(http_route_t *) * 1);
   check_mem(http_routes);
 
-  int http_route_malloc_result = http_route_malloc(
-    &http_route,
+  http_route = http_route_malloc(
     new_order_service_parse_url,
     new_order_service_http);
 
-  check(http_route_malloc_result == 0, "http_route_malloc_result: %d",
-    http_route_malloc_result);
+  check(http_route != NULL, "http_route: NULL");
 
   int array_add_pointer_result = array_add_pointer(
     (void ***)(&http_routes),

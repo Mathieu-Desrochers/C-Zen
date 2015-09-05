@@ -476,70 +476,52 @@ error:
 }
 
 // allocates a json context
-int json_context_malloc(json_context_t **json_context)
+json_context_t *json_context_malloc()
 {
-  json_context_t *json_context_return = NULL;
+  json_context_t *json_context = malloc(sizeof(json_context_t));
+  check_mem(json_context);
 
-  check(json_context != NULL, "json_context: NULL");
+  json_context->strings = NULL;
+  json_context->strings_allocated_count = 0;
+  json_context->strings_used_count = 0;
 
-  json_context_return = malloc(sizeof(json_context_t));
-  check_mem(json_context_return);
-
-  json_context_return->strings = NULL;
-  json_context_return->strings_allocated_count = 0;
-  json_context_return->strings_used_count = 0;
-
-  *json_context = json_context_return;
-
-  return 0;
+  return json_context;
 
 error:
 
-  if (json_context_return != NULL) { free(json_context_return); }
+  if (json_context != NULL) { free(json_context); }
 
-  return -1;
+  return NULL;
 }
 
 // allocates a json object
-int json_object_malloc(json_t **json)
+json_t *json_object_malloc()
 {
-  json_t *json_return = NULL;
-
+  json_t *json = json_object();
   check(json != NULL, "json: NULL");
 
-  json_return = json_object();
-  check(json_return != NULL, "json_return: NULL");
-
-  *json = json_return;
-
-  return 0;
+  return json;
 
 error:
 
-  if (json_return != NULL) { json_free(json_return); }
+  if (json != NULL) { json_free(json); }
 
-  return -1;
+  return NULL;
 }
 
 // allocates a json array
-int json_array_malloc(json_t **json)
+json_t *json_array_malloc()
 {
-  json_t *json_result = NULL;
-
+  json_t *json = json_array();
   check(json != NULL, "json: NULL");
 
-  json_result = json_array();
-  check(json_result != NULL, "json_result: NULL");
-
-  *json = json_result;
-
-  return 0;
+  return json;
 
 error:
 
-  if (json_result != NULL) { json_free(json_result); }
+  if (json != NULL) { json_free(json); }
 
-  return -1;
+  return NULL;
 }
 
 // sets a json value for a key

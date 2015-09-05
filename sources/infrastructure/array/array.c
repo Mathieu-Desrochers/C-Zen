@@ -98,9 +98,8 @@ int array_find_duplicates_int(int **array, int array_count, int **duplicate_inde
   check(duplicate_indexes != NULL, "duplicate_indexes: NULL");
   check(duplicate_indexes_count != NULL, "duplicate_indexes_count: NULL");
 
-  int hash_table_malloc_result = hash_table_malloc(&hash_table, array_count);
-  check(hash_table_malloc_result == 0, "hash_table_malloc_result: %d",
-    hash_table_malloc_result);
+  hash_table = hash_table_malloc(array_count);
+  check(hash_table != NULL, "hash_table: NULL");
 
   for (int i = 0; i < array_count; i++)
   {
@@ -170,9 +169,8 @@ int array_find_unknowns_int(int **array, int array_count, int** known_array, int
   check(unknown_indexes != NULL, "unknown_indexes: NULL");
   check(unknown_indexes_count != NULL, "unknown_indexes_count: NULL");
 
-  int hash_table_malloc_result = hash_table_malloc(&hash_table, known_array_count);
-  check(hash_table_malloc_result == 0, "hash_table_malloc_result: %d",
-    hash_table_malloc_result);
+  hash_table = hash_table_malloc(known_array_count);
+  check(hash_table != NULL, "hash_table: NULL");
 
   for (int i = 0; i < known_array_count; i++)
   {

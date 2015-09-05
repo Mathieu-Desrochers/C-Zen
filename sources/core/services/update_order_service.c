@@ -167,9 +167,8 @@ int update_order_service(
   check(orders_table_update_result == 0, "orders_table_update_result: %d",
     orders_table_update_result);
 
-  int order_item_rows_hash_table_malloc_result = hash_table_malloc(&order_item_rows_hash_table, order_item_rows_count);
-  check(order_item_rows_hash_table_malloc_result == 0, "order_item_rows_hash_table_malloc_result: %d",
-    order_item_rows_hash_table_malloc_result);
+  order_item_rows_hash_table = hash_table_malloc(order_item_rows_count);
+  check(order_item_rows_hash_table != NULL, "order_item_rows_hash_table: NULL");
 
   for (int i = 0; i < order_item_rows_count; i++)
   {
