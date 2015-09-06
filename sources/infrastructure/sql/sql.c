@@ -30,6 +30,32 @@ error:
   return -1;
 }
 
+// begins a sql transaction
+int sql_transaction_begin(sqlite3 *sql_connection)
+{
+  sqlite3_stmt *sql_statement = NULL;
+
+  check(sql_connection != NULL, "sql_connection: NULL");
+
+  int sqlite3_prepare_result = sqlite3_prepare_v2(sql_connection, "BEGIN TRANSACTION;", -1, &sql_statement, NULL);
+  check(sqlite3_prepare_result == SQLITE_OK, "sqlite3_prepare_result: %d",
+    sqlite3_prepare_result);
+
+  int sqlite3_step_result = sqlite3_step(sql_statement);
+  check(sqlite3_step_result == SQLITE_DONE, "sqlite3_step_result: %d",
+    sqlite3_step_result);
+
+  sql_statement_finalize(sql_statement);
+
+  return 0;
+
+error:
+
+  if (sql_statement != NULL) { sql_statement_finalize(sql_statement); }
+
+  return -1;
+}
+
 // prepares a sql statement
 int sql_statement_prepare(sqlite3 *sql_connection, char *sql, sqlite3_stmt **sql_statement)
 {
@@ -547,6 +573,58 @@ int sql_last_generated_id(sqlite3 *sql_connection, int **last_insert_row_id)
 error:
 
   if (last_insert_row_id_return != NULL) { free(last_insert_row_id_return); }
+  if (sql_statement != NULL) { sql_statement_finalize(sql_statement); }
+
+  return -1;
+}
+
+// ends a sql transaction
+int sql_transaction_commit(sqlite3 *sql_connection)
+{
+  sqlite3_stmt *sql_statement = NULL;
+
+  check(sql_connection != NULL, "sql_connection: NULL");
+
+  int sqlite3_prepare_result = sqlite3_prepare_v2(sql_connection, "COMMIT TRANSACTION;", -1, &sql_statement, NULL);
+  check(sqlite3_prepare_result == SQLITE_OK, "sqlite3_prepare_result: %d",
+    sqlite3_prepare_result);
+
+  int sqlite3_step_result = sqlite3_step(sql_statement);
+  check(sqlite3_step_result == SQLITE_DONE, "sqlite3_step_result: %d",
+    sqlite3_step_result);
+
+  sql_statement_finalize(sql_statement);
+
+  return 0;
+
+error:
+
+  if (sql_statement != NULL) { sql_statement_finalize(sql_statement); }
+
+  return -1;
+}
+
+// ends a sql transaction
+int sql_transaction_rollback(sqlite3 *sql_connection)
+{
+  sqlite3_stmt *sql_statement = NULL;
+
+  check(sql_connection != NULL, "sql_connection: NULL");
+
+  int sqlite3_prepare_result = sqlite3_prepare_v2(sql_connection, "ROLLBACK TRANSACTION;", -1, &sql_statement, NULL);
+  check(sqlite3_prepare_result == SQLITE_OK, "sqlite3_prepare_result: %d",
+    sqlite3_prepare_result);
+
+  int sqlite3_step_result = sqlite3_step(sql_statement);
+  check(sqlite3_step_result == SQLITE_DONE, "sqlite3_step_result: %d",
+    sqlite3_step_result);
+
+  sql_statement_finalize(sql_statement);
+
+  return 0;
+
+error:
+
   if (sql_statement != NULL) { sql_statement_finalize(sql_statement); }
 
   return -1;

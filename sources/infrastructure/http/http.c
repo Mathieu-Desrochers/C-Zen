@@ -186,6 +186,10 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
   check(sql_connection_open_result == 0, "sql_connection_open_result: %d",
     sql_connection_open_result);
 
+  int sql_transaction_begin_result = sql_transaction_begin(sql_connection);
+  check(sql_transaction_begin_result == 0, "sql_transaction_begin_result: %d",
+    sql_transaction_begin_result);
+
   int service_http_result = http_route->service_http(
     sql_connection,
     url_tokens,
@@ -196,6 +200,10 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
 
   check(service_http_result == 0 || service_http_result == 1, "service_http_result: %d",
     service_http_result);
+
+  int sql_transaction_commit_result = sql_transaction_commit(sql_connection);
+  check(sql_transaction_commit_result == 0, "sql_transaction_commit_result: %d",
+    sql_transaction_commit_result);
 
   sql_connection_close(sql_connection);
 
@@ -257,7 +265,12 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
 
 error:
 
-  if (sql_connection != NULL) { sql_connection_close(sql_connection); }
+  if (sql_connection != NULL)
+  {
+    sql_transaction_rollback(sql_connection);
+    sql_connection_close(sql_connection);
+  }
+
   if (response_json_context != NULL) { json_context_free(response_json_context); }
   if (response_json != NULL) { json_free(response_json); }
   if (request_json != NULL) { json_free(request_json); }
