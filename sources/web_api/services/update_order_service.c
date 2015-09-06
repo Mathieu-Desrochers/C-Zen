@@ -81,7 +81,7 @@ int update_order_service(
     int validation_errors_add_result = validation_errors_add_level_1(
       &validation_errors_return, &validation_errors_allocated_count, &validation_errors_used_count,
       UPDATE_ORDER_REQUEST_ORDER_ID, -1,
-      UPDATE_ORDER_SERVICE_UNKNOWN_ORDER_ID);
+      VALIDATION_RESULT_UNKNOWN);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
@@ -134,7 +134,7 @@ int update_order_service(
       &validation_errors_return, &validation_errors_allocated_count, &validation_errors_used_count,
       UPDATE_ORDER_REQUEST_ORDER_ITEMS, unknown_order_item_id_indexes[i],
       UPDATE_ORDER_REQUEST_ORDER_ITEM_ID, -1,
-      UPDATE_ORDER_SERVICE_UNKNOWN_ORDER_ITEM_ID);
+      VALIDATION_RESULT_UNKNOWN);
 
     check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
       validation_errors_add_result);
@@ -255,6 +255,9 @@ int update_order_service(
     check(order_items_table_delete_result == 0, "order_items_table_delete_result: %d",
       order_items_table_delete_result);
   }
+
+  update_order_response_return = update_order_response_malloc();
+  check(update_order_response != NULL, "update_order_response: NULL");
 
   order_row_free(order_row);
   order_item_rows_free(order_item_rows, order_item_rows_count);

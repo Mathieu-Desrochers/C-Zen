@@ -6,9 +6,6 @@
 #include "../../web_api/services/update_order_request.h"
 #include "../../web_api/services/update_order_response.h"
 
-#define UPDATE_ORDER_SERVICE_UNKNOWN_ORDER_ID 100
-#define UPDATE_ORDER_SERVICE_UNKNOWN_ORDER_ITEM_ID 101
-
 // executes the update order service
 int update_order_service(
   sqlite3 *sql_connection,

@@ -9,8 +9,8 @@
 #include "../../infrastructure/json/json.h"
 #include "../../infrastructure/sql/sql.h"
 
-// allocates a route
-http_route_t *http_route_malloc(
+// registers a route
+int http_route_register(
   int (*service_parse_url)(
     char *method,
     char *url,
@@ -23,12 +23,18 @@ http_route_t *http_route_malloc(
     int url_tokens_count,
     json_t *request_json,
     json_t **response_json,
-    json_context_t *response_json_context))
+    json_context_t *response_json_context),
+  http_route_t ***http_routes,
+  int *http_routes_allocated_count,
+  int *http_routes_used_count)
 {
   http_route_t *http_route = NULL;
 
   check(service_parse_url != NULL, "service_parse_url: NULL");
   check(service_http != NULL, "service_http: NULL");
+  check(http_routes != NULL, "http_routes: NULL");
+  check(http_routes_allocated_count != NULL, "http_routes_allocated_count: NULL");
+  check(http_routes_used_count != NULL, "http_routes_used_count: NULL");
 
   http_route = malloc(sizeof(http_route_t));
   check_mem(http_route);
@@ -36,13 +42,24 @@ http_route_t *http_route_malloc(
   http_route->service_parse_url = service_parse_url;
   http_route->service_http = service_http;
 
-  return http_route;
+  int array_add_pointer_result = array_add_pointer(
+    (void ***)(http_routes),
+    http_routes_allocated_count,
+    http_routes_used_count,
+    http_route);
+
+  check(array_add_pointer_result == 0, "array_add_pointer_result: %d",
+    array_add_pointer_result);
+
+  http_route = NULL;
+
+  return 0;
 
 error:
 
   if (http_route != NULL) { free(http_route); }
 
-  return NULL;
+  return -1;
 }
 
 // searches for the route matching a request
@@ -184,30 +201,48 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
 
   sql_connection = NULL;
 
-  if (service_http_result == 0)
-  {
-    int fastcgi_write_header_result = fastcgi_write_header(request->out, "Status", "200: OK", 0);
-    check(fastcgi_write_header_result == 0, "fastcgi_write_header_result: %d",
-      fastcgi_write_header_result);
-  }
-  else
-  {
-    int fastcgi_write_header_result = fastcgi_write_header(request->out, "Status", "422: Unprocessable Entity", 0);
-    check(fastcgi_write_header_result == 0, "fastcgi_write_header_result: %d",
-      fastcgi_write_header_result);
-  }
-
-  int fastcgi_write_header_result = fastcgi_write_header(request->out, "Content-type", "application/json", 1);
-  check(fastcgi_write_header_result == 0, "fastcgi_write_header_result: %d",
-    fastcgi_write_header_result);
-
   int json_format_string_result = json_format_string(response_json, &response_body);
   check(json_format_string_result == 0, "json_format_string_result: %d",
     json_format_string_result);
 
-  int fastcgi_write_body_result = fastcgi_write_body(request->out, response_body);
-  check(fastcgi_write_body_result == 0, "fastcgi_write_body_result: %d",
-    fastcgi_write_body_result);
+  if (service_http_result == 0)
+  {
+    if (strcmp(response_body, "{}") != 0)
+    {
+      int fastcgi_write_status_result = fastcgi_write_header(request->out, "Status", "200: OK", 0);
+      check(fastcgi_write_status_result == 0, "fastcgi_write_status_result: %d",
+        fastcgi_write_status_result);
+
+      int fastcgi_write_content_type_result = fastcgi_write_header(request->out, "Content-type", "application/json", 1);
+      check(fastcgi_write_content_type_result == 0, "fastcgi_write_content_type_result: %d",
+        fastcgi_write_content_type_result);
+
+      int fastcgi_write_body_result = fastcgi_write_body(request->out, response_body);
+      check(fastcgi_write_body_result == 0, "fastcgi_write_body_result: %d",
+        fastcgi_write_body_result);
+    }
+    else
+    {
+      int fastcgi_write_status_result = fastcgi_write_header(request->out, "Status", "204: No Content", 1);
+      check(fastcgi_write_status_result == 0, "fastcgi_write_status_result: %d",
+        fastcgi_write_status_result);
+    }
+  }
+
+  if (service_http_result == 1)
+  {
+    int fastcgi_write_status_result = fastcgi_write_header(request->out, "Status", "422: Unprocessable Entity", 0);
+    check(fastcgi_write_status_result == 0, "fastcgi_write_status_result: %d",
+      fastcgi_write_status_result);
+
+    int fastcgi_write_content_type_result = fastcgi_write_header(request->out, "Content-type", "application/json", 1);
+    check(fastcgi_write_content_type_result == 0, "fastcgi_write_content_type_result: %d",
+      fastcgi_write_content_type_result);
+
+    int fastcgi_write_body_result = fastcgi_write_body(request->out, response_body);
+    check(fastcgi_write_body_result == 0, "fastcgi_write_body_result: %d",
+      fastcgi_write_body_result);
+  }
 
   json_context_free(response_json_context);
   json_free(response_json);
@@ -274,4 +309,20 @@ error:
   }
 
   return -1;
+}
+
+// frees an array of routes
+void http_routes_free(http_route_t **http_routes, int count)
+{
+  if (http_routes == NULL)
+  {
+    return;
+  }
+
+  for (int i = 0; i < count; i++)
+  {
+    free(http_routes[i]);
+  }
+
+  free(http_routes);
 }

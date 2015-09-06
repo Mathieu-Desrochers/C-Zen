@@ -11,5 +11,6 @@ char *validation_errors_json[] =
   "too-long",
   "too-few",
   "too-many",
-  "duplicate"
+  "duplicate",
+  "unknown"
 };

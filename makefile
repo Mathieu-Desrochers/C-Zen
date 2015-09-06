@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS  = -std=c99 -g -Wall
 
-all : $(INFRASTRUCTURE) $(WEB_API) web_api_main
+all : $(INFRASTRUCTURE) $(WEB_API) web_api_main tags
 
 INFRASTRUCTURE = sources/infrastructure/array/array.o \
                  sources/infrastructure/fastcgi/fastcgi.o \
@@ -20,6 +20,10 @@ WEB_API = sources/web_api/bindings/new_order_request_http.o \
           sources/web_api/bindings/new_order_request_order_item_http.o \
           sources/web_api/bindings/new_order_response_http.o \
           sources/web_api/bindings/new_order_service_http.o \
+          sources/web_api/bindings/update_order_request_http.o \
+          sources/web_api/bindings/update_order_request_order_item_http.o \
+          sources/web_api/bindings/update_order_response_http.o \
+          sources/web_api/bindings/update_order_service_http.o \
           sources/web_api/tables/order_row.o \
           sources/web_api/tables/orders_table.o \
           sources/web_api/tables/order_item_row.o \

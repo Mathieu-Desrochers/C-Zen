@@ -24,8 +24,8 @@ typedef struct http_route_t
     json_context_t *response_json_context);
 } http_route_t;
 
-// allocates a route
-http_route_t *http_route_malloc(
+// registers a route
+int http_route_register(
   int (*service_parse_url)(
     char *method,
     char *url,
@@ -38,9 +38,15 @@ http_route_t *http_route_malloc(
     int url_tokens_count,
     json_t *request_json,
     json_t **response_json,
-    json_context_t *response_json_context));
+    json_context_t *response_json_context),
+  http_route_t ***http_routes,
+  int *http_routes_allocated_count,
+  int *http_routes_used_count);
 
 // starts serving requests
 int http_serve_requests(http_route_t **http_routes, int http_routes_count);
+
+// frees an array of routes
+void http_routes_free(http_route_t **http_routes, int count);
 
 #endif
