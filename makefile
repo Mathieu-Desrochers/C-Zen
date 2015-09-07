@@ -28,6 +28,9 @@ WEB_API = sources/web_api/bindings/new_order_request_http.o \
           sources/web_api/tables/orders_table.o \
           sources/web_api/tables/order_item_row.o \
           sources/web_api/tables/order_items_table.o \
+          sources/web_api/services/get_order_request.o \
+          sources/web_api/services/get_order_response.o \
+          sources/web_api/services/get_order_service.o \
           sources/web_api/services/new_order_request.o \
           sources/web_api/services/new_order_request_order_item.o \
           sources/web_api/services/new_order_response.o \
