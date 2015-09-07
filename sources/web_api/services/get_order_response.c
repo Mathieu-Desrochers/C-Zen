@@ -3,6 +3,7 @@
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/mem/mem.h"
 #include "../../web_api/services/get_order_response.h"
+#include "../../web_api/services/get_order_response_order_item.h"
 
 // allocates a get order response
 get_order_response_t *get_order_response_malloc(
@@ -13,6 +14,13 @@ get_order_response_t *get_order_response_malloc(
 {
   get_order_response_t *get_order_response = malloc(sizeof(get_order_response_t));
   check_mem(get_order_response);
+
+  get_order_response->order_id = NULL;
+  get_order_response->customer_name = NULL;
+  get_order_response->placed_on_date_time = NULL;
+  get_order_response->order_items = NULL;
+  get_order_response->order_items_count = 0;
+  get_order_response->total = NULL;
 
   int malloc_memcpy_order_id_result = malloc_memcpy_int(&(get_order_response->order_id), order_id);
   check(malloc_memcpy_order_id_result == 0, "malloc_memcpy_order_id_result: %d",
@@ -51,6 +59,13 @@ void get_order_response_free(get_order_response_t *get_order_response)
   if (get_order_response->customer_name != NULL) { free(get_order_response->customer_name); }
   if (get_order_response->placed_on_date_time != NULL) { free(get_order_response->placed_on_date_time); }
   if (get_order_response->total != NULL) { free(get_order_response->total); }
+
+  if (get_order_response->order_items != NULL)
+  {
+    get_order_response_order_items_free(
+      get_order_response->order_items,
+      get_order_response->order_items_count);
+  }
 
   free(get_order_response);
 }
