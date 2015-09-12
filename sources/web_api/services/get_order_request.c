@@ -31,19 +31,19 @@ error:
 int get_order_request_validate(
   get_order_request_t *get_order_request,
   validation_error_t ***validation_errors,
-  int *allocated_errors_count,
-  int *used_errors_count)
+  int *validation_errors_allocated_count,
+  int *validation_errors_used_count)
 {
   check(get_order_request != NULL, "get_order_request: NULL");
   check(validation_errors != NULL, "validation_errors: NULL");
-  check(allocated_errors_count != NULL, "allocated_errors_count: NULL");
-  check(used_errors_count != NULL, "used_errors_count: NULL");
+  check(validation_errors_allocated_count != NULL, "validation_errors_allocated_count: NULL");
+  check(validation_errors_used_count != NULL, "validation_errors_used_count: NULL");
 
   int validate_order_id_result = validate_int(get_order_request->order_id, 1, 1, 999999);
   if (validate_order_id_result != 0)
   {
     int validation_errors_add_result = validation_errors_add_level_1(
-      validation_errors, allocated_errors_count, used_errors_count,
+      validation_errors, validation_errors_allocated_count, validation_errors_used_count,
       GET_ORDER_REQUEST_ORDER_ID, -1,
       validate_order_id_result);
 

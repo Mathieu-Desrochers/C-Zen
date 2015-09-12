@@ -26,8 +26,8 @@ new_order_request_t *new_order_request_malloc(
 int new_order_request_validate(
   new_order_request_t *new_order_request,
   validation_error_t ***validation_errors,
-  int *allocated_errors_count,
-  int *used_errors_count);
+  int *validation_errors_allocated_count,
+  int *validation_errors_used_count);
 
 // frees a new order request
 void new_order_request_free(new_order_request_t *new_order_request);

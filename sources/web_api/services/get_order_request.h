@@ -19,8 +19,8 @@ get_order_request_t *get_order_request_malloc(
 int get_order_request_validate(
   get_order_request_t *get_order_request,
   validation_error_t ***validation_errors,
-  int *allocated_errors_count,
-  int *used_errors_count);
+  int *validation_errors_allocated_count,
+  int *validation_errors_used_count);
 
 // frees a get order request
 void get_order_request_free(get_order_request_t *get_order_request);
