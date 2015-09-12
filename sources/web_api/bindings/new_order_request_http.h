@@ -4,8 +4,12 @@
 #include "../../infrastructure/json/json.h"
 #include "../../web_api/services/new_order_request.h"
 
-// parses a new order request from json
-int new_order_request_json_parse(json_t *json, new_order_request_t **new_order_request);
+// parses a new order request
+int new_order_request_http_parse(
+  char **url_tokens,
+  int url_tokens_count,
+  json_t *json,
+  new_order_request_t **new_order_request);
 
 // formats new order request errors to json
 int new_order_request_json_format_errors(

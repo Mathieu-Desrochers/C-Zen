@@ -14,9 +14,6 @@ int update_order_response_json_format(update_order_response_t *update_order_resp
   check(json != NULL, "json: NULL");
   check(json_context != NULL, "json_context: NULL");
 
-  json_return = json_object_malloc();
-  check(json_return != NULL, "json_return: NULL");
-
   *json = json_return;
 
   return 0;

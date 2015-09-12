@@ -10,19 +10,33 @@
 #include "../../web_api/services/update_order_request_order_item.h"
 #include "../../web_api/services/update_order_service.h"
 
-// parses an update order request from json
-int update_order_request_json_parse(json_t *json, update_order_request_t **update_order_request)
+// parses an update order request
+int update_order_request_http_parse(
+  char **url_tokens,
+  int url_tokens_count,
+  json_t *json,
+  update_order_request_t **update_order_request)
 {
   update_order_request_t *update_order_request_return = NULL;
 
   int *order_id = NULL;
   char *customer_name = NULL;
+  update_order_request_order_item_t *update_order_request_order_item = NULL;
   update_order_request_order_item_t **update_order_request_order_items = NULL;
   int update_order_request_order_items_count = 0;
   int *total = NULL;
 
-  check(json != NULL, "json: NULL");
   check(update_order_request != NULL, "update_order_request: NULL");
+
+  if (json == NULL)
+  {
+    update_order_request_return = update_order_request_malloc(NULL, NULL, NULL);
+    check(update_order_request_return != NULL, "update_order_request_return: NULL");
+
+    *update_order_request = update_order_request_return;
+
+    return 0;
+  }
 
   int json_object_get_order_id_result = json_object_get_int(json, "order-id", &order_id);
   check(json_object_get_order_id_result == 0, "json_object_get_order_id_result: %d",
@@ -31,6 +45,17 @@ int update_order_request_json_parse(json_t *json, update_order_request_t **updat
   int json_object_get_customer_name_result = json_object_get_string(json, "customer-name", &customer_name);
   check(json_object_get_customer_name_result == 0, "json_object_get_customer_name_result: %d",
     json_object_get_customer_name_result);
+
+  int json_object_get_total_result = json_object_get_int(json, "total", &total);
+  check(json_object_get_total_result == 0, "json_object_get_total_result: %d",
+    json_object_get_total_result);
+
+  update_order_request_return = update_order_request_malloc(
+    order_id,
+    customer_name,
+    total);
+
+  check(update_order_request_return != NULL, "update_order_request_return: NULL");
 
   json_t *order_items_json = NULL;
   int order_items_json_count = 0;
@@ -46,10 +71,8 @@ int update_order_request_json_parse(json_t *json, update_order_request_t **updat
 
   if (order_items_json != NULL)
   {
-    update_order_request_order_items = calloc(order_items_json_count, sizeof(update_order_request_order_item_t *));
+    update_order_request_order_items = malloc(sizeof(update_order_request_order_item_t *) * order_items_json_count);
     check_mem(update_order_request_order_items);
-
-    update_order_request_order_items_count = order_items_json_count;
 
     for (int i = 0; i < order_items_json_count; i++)
     {
@@ -61,28 +84,25 @@ int update_order_request_json_parse(json_t *json, update_order_request_t **updat
 
       if (order_item_json != NULL)
       {
-        update_order_request_order_item_t **update_order_request_order_item = &(update_order_request_order_items[i]);
-
         int update_order_request_order_item_json_parse_result = update_order_request_order_item_json_parse(
           order_item_json,
-          update_order_request_order_item);
+          &update_order_request_order_item);
 
         check(update_order_request_order_item_json_parse_result == 0, "update_order_request_order_item_json_parse_result: %d",
           update_order_request_order_item_json_parse_result);
+
+        update_order_request_order_items[i] = update_order_request_order_item;
+        update_order_request_order_items_count++;
+
+        update_order_request_order_item = NULL;
+      }
+      else
+      {
+        update_order_request_order_items[i] = NULL;
+        update_order_request_order_items_count++;
       }
     }
   }
-
-  int json_object_get_total_result = json_object_get_int(json, "total", &total);
-  check(json_object_get_total_result == 0, "json_object_get_total_result: %d",
-    json_object_get_total_result);
-
-  update_order_request_return = update_order_request_malloc(
-    order_id,
-    customer_name,
-    total);
-
-  check(update_order_request_return != NULL, "update_order_request_return: NULL");
 
   update_order_request_return->order_items = update_order_request_order_items;
   update_order_request_return->order_items_count = update_order_request_order_items_count;
@@ -100,6 +120,7 @@ error:
   if (update_order_request_return != NULL) { update_order_request_free(update_order_request_return); }
   if (order_id != NULL) { free(order_id); }
   if (customer_name != NULL) { free(customer_name); }
+  if (update_order_request_order_item != NULL) { update_order_request_order_item_free(update_order_request_order_item); }
   if (total != NULL) { free(total); }
 
   if (update_order_request_order_items != NULL)

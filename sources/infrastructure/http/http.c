@@ -162,21 +162,24 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
   check(fastcgi_read_stream_result == 0, "fastcgi_read_stream_result: %d",
     fastcgi_read_stream_result);
 
-  int json_parse_string_result = json_parse_string(request_body, &request_json);
-  check(json_parse_string_result == 0, "json_parse_string_result: %d",
-    json_parse_string_result);
-
-  if (request_json == NULL)
+  if (request_body != NULL)
   {
-    int fastcgi_write_header_status_result = fastcgi_write_header(request->out, "Status", "400 Bad Request", 1);
-    check(fastcgi_write_header_status_result == 0, "fastcgi_write_header_status_result: %d",
-      fastcgi_write_header_status_result);
+    int json_parse_string_result = json_parse_string(request_body, &request_json);
+    check(json_parse_string_result == 0, "json_parse_string_result: %d",
+      json_parse_string_result);
 
-    array_free_string(url_tokens, url_tokens_count);
+    if (request_json == NULL)
+    {
+      int fastcgi_write_header_status_result = fastcgi_write_header(request->out, "Status", "400 Bad Request", 1);
+      check(fastcgi_write_header_status_result == 0, "fastcgi_write_header_status_result: %d",
+        fastcgi_write_header_status_result);
 
-    free(request_body);
+      array_free_string(url_tokens, url_tokens_count);
 
-    return 0;
+      free(request_body);
+
+      return 0;
+    }
   }
 
   response_json_context = json_context_malloc();
@@ -201,21 +204,26 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
   check(service_http_result == 0 || service_http_result == 1, "service_http_result: %d",
     service_http_result);
 
-  int sql_transaction_commit_result = sql_transaction_commit(sql_connection);
-  check(sql_transaction_commit_result == 0, "sql_transaction_commit_result: %d",
-    sql_transaction_commit_result);
+  if (service_http_result == 0)
+  {
+    int sql_transaction_commit_result = sql_transaction_commit(sql_connection);
+    check(sql_transaction_commit_result == 0, "sql_transaction_commit_result: %d",
+      sql_transaction_commit_result);
+  }
+  else
+  {
+    int sql_transaction_rollback_result = sql_transaction_rollback(sql_connection);
+    check(sql_transaction_rollback_result == 0, "sql_transaction_rollback_result: %d",
+      sql_transaction_rollback_result);
+  }
 
   sql_connection_close(sql_connection);
 
   sql_connection = NULL;
 
-  int json_format_string_result = json_format_string(response_json, &response_body);
-  check(json_format_string_result == 0, "json_format_string_result: %d",
-    json_format_string_result);
-
   if (service_http_result == 0)
   {
-    if (strcmp(response_body, "{}") != 0)
+    if (response_json != NULL)
     {
       int fastcgi_write_status_result = fastcgi_write_header(request->out, "Status", "200: OK", 0);
       check(fastcgi_write_status_result == 0, "fastcgi_write_status_result: %d",
@@ -224,6 +232,10 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
       int fastcgi_write_content_type_result = fastcgi_write_header(request->out, "Content-type", "application/json", 1);
       check(fastcgi_write_content_type_result == 0, "fastcgi_write_content_type_result: %d",
         fastcgi_write_content_type_result);
+
+      int json_format_string_result = json_format_string(response_json, &response_body);
+      check(json_format_string_result == 0, "json_format_string_result: %d",
+        json_format_string_result);
 
       int fastcgi_write_body_result = fastcgi_write_body(request->out, response_body);
       check(fastcgi_write_body_result == 0, "fastcgi_write_body_result: %d",
@@ -236,8 +248,7 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
         fastcgi_write_status_result);
     }
   }
-
-  if (service_http_result == 1)
+  else
   {
     int fastcgi_write_status_result = fastcgi_write_header(request->out, "Status", "422: Unprocessable Entity", 0);
     check(fastcgi_write_status_result == 0, "fastcgi_write_status_result: %d",
@@ -246,6 +257,10 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
     int fastcgi_write_content_type_result = fastcgi_write_header(request->out, "Content-type", "application/json", 1);
     check(fastcgi_write_content_type_result == 0, "fastcgi_write_content_type_result: %d",
       fastcgi_write_content_type_result);
+
+    int json_format_string_result = json_format_string(response_json, &response_body);
+    check(json_format_string_result == 0, "json_format_string_result: %d",
+      json_format_string_result);
 
     int fastcgi_write_body_result = fastcgi_write_body(request->out, response_body);
     check(fastcgi_write_body_result == 0, "fastcgi_write_body_result: %d",

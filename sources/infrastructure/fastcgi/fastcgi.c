@@ -42,6 +42,13 @@ int fastcgi_read_stream(FCGX_Stream *stream, char **string)
     string_return_temp = NULL;
   }
 
+  if (strlen(string_return) == 0)
+  {
+    free(string_return);
+
+    string_return = NULL;
+  }
+
   *string = string_return;
 
   return 0;

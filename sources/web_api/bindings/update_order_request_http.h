@@ -4,8 +4,12 @@
 #include "../../infrastructure/json/json.h"
 #include "../../web_api/services/update_order_request.h"
 
-// parses an update order request from json
-int update_order_request_json_parse(json_t *json, update_order_request_t **update_order_request);
+// parses an update order request
+int update_order_request_http_parse(
+  char **url_tokens,
+  int url_tokens_count,
+  json_t *json,
+  update_order_request_t **update_order_request);
 
 // formats update order request errors to json
 int update_order_request_json_format_errors(

@@ -16,7 +16,10 @@ INFRASTRUCTURE = sources/infrastructure/array/array.o \
                  sources/infrastructure/validation/validation.o \
                  sources/infrastructure/validation_json/validation_json.o
 
-WEB_API = sources/web_api/bindings/new_order_request_http.o \
+WEB_API = sources/web_api/bindings/get_order_request_http.o \
+          sources/web_api/bindings/get_order_response_http.o \
+          sources/web_api/bindings/get_order_service_http.o \
+          sources/web_api/bindings/new_order_request_http.o \
           sources/web_api/bindings/new_order_request_order_item_http.o \
           sources/web_api/bindings/new_order_response_http.o \
           sources/web_api/bindings/new_order_service_http.o \

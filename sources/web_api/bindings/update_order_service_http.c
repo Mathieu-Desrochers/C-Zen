@@ -23,7 +23,7 @@ int update_order_service_parse_url(char *method, char *url, int *matched, char *
   if (strcmp(method, "PUT") == 0)
   {
     int regex_match_result = regex_match(
-      "^/update-order$",
+      "^/orders$",
       url,
       &matched_return,
       &url_tokens_return,
@@ -67,9 +67,14 @@ int update_order_service_http(
   validation_error_t **validation_errors = NULL;
   int validation_errors_count = 0;
 
-  int update_order_request_json_parse_result = update_order_request_json_parse(request_json, &update_order_request);
-  check(update_order_request_json_parse_result == 0, "update_order_request_json_parse_result: %d",
-    update_order_request_json_parse_result);
+  int update_order_request_http_parse_result = update_order_request_http_parse(
+    url_tokens,
+    url_tokens_count,
+    request_json,
+    &update_order_request);
+
+  check(update_order_request_http_parse_result == 0, "update_order_request_http_parse_result: %d",
+    update_order_request_http_parse_result);
 
   int update_order_service_result = update_order_service(
     sql_connection,
