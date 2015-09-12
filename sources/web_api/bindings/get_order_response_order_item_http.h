@@ -5,8 +5,8 @@
 #include "../../infrastructure/validation/validation.h"
 #include "../../web_api/services/get_order_response_order_item.h"
 
-// formats a get order response order item to json
-int get_order_response_order_item_json_format(
+// formats a get order response order item
+int get_order_response_order_item_http_format(
   get_order_response_order_item_t *get_order_response_order_item,
   json_t **json,
   json_context_t *json_context);

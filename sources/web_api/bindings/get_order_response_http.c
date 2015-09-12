@@ -8,8 +8,8 @@
 #include "../../web_api/services/get_order_response.h"
 #include "../../web_api/services/get_order_response_order_item.h"
 
-// formats a get order response to json
-int get_order_response_json_format(get_order_response_t *get_order_response, json_t **json, json_context_t *json_context)
+// formats a get order response
+int get_order_response_http_format(get_order_response_t *get_order_response, json_t **json, json_context_t *json_context)
 {
   json_t *json_return = NULL;
 
@@ -51,13 +51,13 @@ int get_order_response_json_format(get_order_response_t *get_order_response, jso
 
   for (int i = 0; i < get_order_response->order_items_count; i++)
   {
-    int get_order_response_order_item_json_format_result = get_order_response_order_item_json_format(
+    int get_order_response_order_item_http_format_result = get_order_response_order_item_http_format(
       get_order_response->order_items[i],
       &order_item_json,
       json_context);
 
-    check(get_order_response_order_item_json_format_result == 0, "get_order_response_order_item_json_format_result: %d",
-      get_order_response_order_item_json_format_result);
+    check(get_order_response_order_item_http_format_result == 0, "get_order_response_order_item_http_format_result: %d",
+      get_order_response_order_item_http_format_result);
 
     int json_array_add_order_item_result = json_array_add_object(order_items_json, order_item_json, json_context);
     check(json_array_add_order_item_result == 0, "json_array_add_order_item_result: %d",

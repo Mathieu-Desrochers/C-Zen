@@ -11,8 +11,8 @@ int update_order_request_http_parse(
   json_t *json,
   update_order_request_t **update_order_request);
 
-// formats update order request errors to json
-int update_order_request_json_format_errors(
+// formats update order request errors
+int update_order_request_http_format_errors(
   validation_error_t **validation_errors,
   int validation_errors_count,
   json_t **json,

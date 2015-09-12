@@ -88,24 +88,24 @@ int update_order_service_http(
 
   if (validation_errors == NULL)
   {
-    int update_order_response_json_format_result = update_order_response_json_format(
+    int update_order_response_http_format_result = update_order_response_http_format(
       update_order_response,
       &response_json_return,
       response_json_context);
 
-    check(update_order_response_json_format_result == 0, "update_order_response_json_format_result: %d",
-      update_order_response_json_format_result);
+    check(update_order_response_http_format_result == 0, "update_order_response_http_format_result: %d",
+      update_order_response_http_format_result);
   }
   else
   {
-    int update_order_request_json_format_errors_result = update_order_request_json_format_errors(
+    int update_order_request_http_format_errors_result = update_order_request_http_format_errors(
       validation_errors,
       validation_errors_count,
       &response_json_return,
       response_json_context);
 
-    check(update_order_request_json_format_errors_result == 0, "update_order_request_json_format_errors_result: %d",
-      update_order_request_json_format_errors_result);
+    check(update_order_request_http_format_errors_result == 0, "update_order_request_http_format_errors_result: %d",
+      update_order_request_http_format_errors_result);
 
     return_value = 1;
   }

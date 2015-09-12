@@ -77,12 +77,12 @@ int new_order_request_http_parse(
 
       if (order_item_json != NULL)
       {
-        int new_order_request_order_item_json_parse_result = new_order_request_order_item_json_parse(
+        int new_order_request_order_item_http_parse_result = new_order_request_order_item_http_parse(
           order_item_json,
           &new_order_request_order_item);
 
-        check(new_order_request_order_item_json_parse_result == 0, "new_order_request_order_item_json_parse_result: %d",
-          new_order_request_order_item_json_parse_result);
+        check(new_order_request_order_item_http_parse_result == 0, "new_order_request_order_item_http_parse_result: %d",
+          new_order_request_order_item_http_parse_result);
 
         new_order_request_order_items[i] = new_order_request_order_item;
         new_order_request_order_items_count++;
@@ -122,8 +122,8 @@ error:
   return -1;
 }
 
-// formats new order request errors to json
-int new_order_request_json_format_errors(
+// formats new order request errors
+int new_order_request_http_format_errors(
   validation_error_t **validation_errors,
   int validation_errors_count,
   json_t **json,
@@ -165,11 +165,12 @@ int new_order_request_json_format_errors(
       }
       else
       {
-        int order_item_format_error_result = new_order_request_order_item_json_format_error(
+        int new_order_request_order_item_http_format_error_result = new_order_request_order_item_http_format_error(
           validation_errors[i], error_buffer);
 
-        check(order_item_format_error_result == 0, "order_item_format_error_result: %d",
-          order_item_format_error_result);
+        check(new_order_request_order_item_http_format_error_result == 0,
+          "new_order_request_order_item_http_format_error_result: %d",
+          new_order_request_order_item_http_format_error_result);
       }
     }
 

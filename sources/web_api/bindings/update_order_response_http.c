@@ -5,8 +5,8 @@
 #include "../../web_api/bindings/update_order_response_http.h"
 #include "../../web_api/services/update_order_response.h"
 
-// formats an update order response to json
-int update_order_response_json_format(update_order_response_t *update_order_response, json_t **json, json_context_t *json_context)
+// formats an update order response
+int update_order_response_http_format(update_order_response_t *update_order_response, json_t **json, json_context_t *json_context)
 {
   json_t *json_return = NULL;
 

@@ -6,8 +6,8 @@
 #include "../../web_api/bindings/update_order_request_order_item_http.h"
 #include "../../web_api/services/update_order_request_order_item.h"
 
-// parses an update order request order item from json
-int update_order_request_order_item_json_parse(json_t *json, update_order_request_order_item_t **update_order_request_order_item)
+// parses an update order request order item
+int update_order_request_order_item_http_parse(json_t *json, update_order_request_order_item_t **update_order_request_order_item)
 {
   update_order_request_order_item_t *update_order_request_order_item_return = NULL;
 
@@ -59,8 +59,8 @@ error:
   return -1;
 }
 
-// formats an update order request order item error to json
-int update_order_request_order_item_json_format_error(
+// formats an update order request order item error
+int update_order_request_order_item_http_format_error(
   validation_error_t *validation_error,
   char *error_buffer)
 {
