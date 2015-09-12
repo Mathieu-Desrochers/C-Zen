@@ -2,6 +2,7 @@
 
 #include "../../infrastructure/dbg/dbg.h"
 #include "../../infrastructure/json/json.h"
+#include "../../infrastructure/string/string.h"
 #include "../../infrastructure/validation_json/validation_json.h"
 #include "../../web_api/bindings/get_order_request_http.h"
 #include "../../web_api/services/get_order_request.h"
@@ -24,7 +25,9 @@ int get_order_request_http_parse(
   order_id = malloc(sizeof(int));
   check_mem(order_id);
 
-  *order_id = atoi(url_tokens[0]);
+  int string_parse_int_result = string_parse_int(url_tokens[0], order_id);
+  check(string_parse_int_result == 0, "string_parse_int_result: %d",
+    string_parse_int_result);
 
   get_order_request_return = get_order_request_malloc(order_id);
   check(get_order_request_return != NULL, "get_order_request_return: NULL");

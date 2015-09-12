@@ -12,6 +12,7 @@ INFRASTRUCTURE = sources/infrastructure/array/array.o \
                  sources/infrastructure/mem/mem.o \
                  sources/infrastructure/regex/regex.o \
                  sources/infrastructure/sql/sql.o \
+                 sources/infrastructure/string/string.o \
                  sources/infrastructure/time/time.o \
                  sources/infrastructure/validation/validation.o \
                  sources/infrastructure/validation_json/validation_json.o
