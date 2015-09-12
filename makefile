@@ -18,6 +18,7 @@ INFRASTRUCTURE = sources/infrastructure/array/array.o \
 
 WEB_API = sources/web_api/bindings/get_order_request_http.o \
           sources/web_api/bindings/get_order_response_http.o \
+          sources/web_api/bindings/get_order_response_order_item_http.o \
           sources/web_api/bindings/get_order_service_http.o \
           sources/web_api/bindings/new_order_request_http.o \
           sources/web_api/bindings/new_order_request_order_item_http.o \
