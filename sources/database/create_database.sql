@@ -11,10 +11,7 @@ CREATE TABLE "order-items"
   "order-item-id" INTEGER PRIMARY KEY AUTOINCREMENT,
   "order-id" INTEGER INTEGER REFERENCES "orders" ("order-id"),
   "name" TEXT,
-  "quantity" REAL,
-  "shipping-date" TEXT,
-  "shipping-time-before" TEXT,
-  "shipping-time-after" TEXT
+  "quantity" REAL
 );
 
 CREATE INDEX "order-items-order-id" ON "order-items" ("order-id");

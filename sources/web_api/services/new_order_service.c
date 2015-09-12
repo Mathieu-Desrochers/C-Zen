@@ -74,10 +74,7 @@ int new_order_service(
       NULL,
       order_row->order_id,
       new_order_request->order_items[i]->name,
-      new_order_request->order_items[i]->quantity,
-      NULL,
-      NULL,
-      NULL);
+      new_order_request->order_items[i]->quantity);
 
     check(inserted_order_item_row != NULL, "inserted_order_item_row: NULL");
 

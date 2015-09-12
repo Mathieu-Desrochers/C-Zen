@@ -189,10 +189,7 @@ int update_order_service(
         NULL,
         update_order_request->order_id,
         update_order_request->order_items[i]->name,
-        update_order_request->order_items[i]->quantity,
-        NULL,
-        NULL,
-        NULL);
+        update_order_request->order_items[i]->quantity);
 
       check(inserted_order_item_row != NULL, "inserted_order_item_row: NULL");
 
@@ -222,10 +219,7 @@ int update_order_service(
         existing_order_item_row->order_item_id,
         existing_order_item_row->order_id,
         update_order_request->order_items[i]->name,
-        update_order_request->order_items[i]->quantity,
-        NULL,
-        NULL,
-        NULL);
+        update_order_request->order_items[i]->quantity);
 
       check(updated_order_item_row != NULL, "updated_order_item_row: NULL");
 

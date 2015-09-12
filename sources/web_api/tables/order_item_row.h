@@ -10,9 +10,6 @@ typedef struct order_item_row_t
   int *order_id;
   char *name;
   double *quantity;
-  time_t *shipping_date;
-  time_t *shipping_time_before;
-  time_t *shipping_time_after;
 } order_item_row_t;
 
 // allocates an order item row
@@ -20,10 +17,7 @@ order_item_row_t *order_item_row_malloc(
   int *order_item_id,
   int *order_id,
   char *name,
-  double *quantity,
-  time_t *shipping_date,
-  time_t *shipping_time_before,
-  time_t *shipping_time_after);
+  double *quantity);
 
 // frees an order item row
 void order_item_row_free(order_item_row_t *order_item_row);

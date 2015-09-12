@@ -16,9 +16,6 @@ int order_items_table_read(sqlite3_stmt *sql_statement, order_item_row_t **order
   int *order_id = NULL;
   char *name = NULL;
   double *quantity = NULL;
-  time_t *shipping_date = NULL;
-  time_t *shipping_time_before = NULL;
-  time_t *shipping_time_after = NULL;
 
   order_item_row_t *order_item_row_return = NULL;
 
@@ -41,26 +38,11 @@ int order_items_table_read(sqlite3_stmt *sql_statement, order_item_row_t **order
   check(sql_read_quantity_result == 0, "sql_read_quantity_result: %d",
     sql_read_quantity_result);
 
-  int sql_read_shipping_date_result = sql_read_date(sql_statement, 4, &shipping_date);
-  check(sql_read_shipping_date_result == 0, "sql_read_shipping_date_result: %d",
-    sql_read_shipping_date_result);
-
-  int sql_read_shipping_time_before_result = sql_read_time(sql_statement, 5, &shipping_time_before);
-  check(sql_read_shipping_time_before_result == 0, "sql_read_shipping_time_before_result: %d",
-    sql_read_shipping_time_before_result);
-
-  int sql_read_shipping_time_after_result = sql_read_time(sql_statement, 6, &shipping_time_after);
-  check(sql_read_shipping_time_after_result == 0, "sql_read_shipping_time_after_result: %d",
-    sql_read_shipping_time_after_result);
-
   order_item_row_return = order_item_row_malloc(
     order_item_id,
     order_id,
     name,
-    quantity,
-    shipping_date,
-    shipping_time_before,
-    shipping_time_after);
+    quantity);
 
   check(order_item_row_return != NULL, "order_item_row_return: NULL");
 
@@ -68,9 +50,6 @@ int order_items_table_read(sqlite3_stmt *sql_statement, order_item_row_t **order
   free(order_id);
   free(name);
   free(quantity);
-  free(shipping_date);
-  free(shipping_time_before);
-  free(shipping_time_after);
 
   *order_item_row = order_item_row_return;
 
@@ -82,9 +61,6 @@ error:
   if (order_id != NULL) { free(order_id); }
   if (name != NULL) { free(name); }
   if (quantity != NULL) { free(quantity); }
-  if (shipping_date != NULL) { free(shipping_date); }
-  if (shipping_time_before != NULL) { free(shipping_time_before); }
-  if (shipping_time_after != NULL) { free(shipping_time_after); }
 
   if (order_item_row_return != NULL) { order_item_row_free(order_item_row_return); }
 
@@ -105,11 +81,8 @@ int order_items_table_insert(sqlite3 *sql_connection, order_item_row_t *order_it
     "INSERT INTO \"order-items\" ("
       "\"order-id\", "
       "\"name\", "
-      "\"quantity\", "
-      "\"shipping-date\", "
-      "\"shipping-time-before\", "
-      "\"shipping-time-after\") "
-    "VALUES (?1, ?2, ?3, ?4, ?5, ?6);",
+      "\"quantity\") "
+    "VALUES (?1, ?2, ?3);",
     &sql_statement);
 
   check(sql_statement_prepare_result == 0, "sql_statement_prepare_result: %d",
@@ -126,18 +99,6 @@ int order_items_table_insert(sqlite3 *sql_connection, order_item_row_t *order_it
   int sql_bind_quantity_result = sql_bind_double(sql_statement, 3, order_item_row->quantity);
   check(sql_bind_quantity_result == 0, "sql_bind_quantity_result: %d",
     sql_bind_quantity_result);
-
-  int sql_bind_shipping_date_result = sql_bind_date(sql_statement, 4, order_item_row->shipping_date);
-  check(sql_bind_shipping_date_result == 0, "sql_bind_shipping_date_result: %d",
-    sql_bind_shipping_date_result);
-
-  int sql_bind_shipping_time_before_result = sql_bind_time(sql_statement, 5, order_item_row->shipping_time_before);
-  check(sql_bind_shipping_time_before_result == 0, "sql_bind_shipping_time_before_result: %d",
-    sql_bind_shipping_time_before_result);
-
-  int sql_bind_shipping_time_after_result = sql_bind_time(sql_statement, 6, order_item_row->shipping_time_after);
-  check(sql_bind_shipping_time_after_result == 0, "sql_bind_shipping_time_after_result: %d",
-    sql_bind_shipping_time_after_result);
 
   int sql_step_execute_result = sql_step_execute(sql_statement);
   check(sql_step_execute_result == 0, "sql_step_execute_result: %d",
@@ -177,10 +138,7 @@ int order_items_table_select_by_order_item_id(sqlite3 *sql_connection, int order
       "\"order-item-id\", "
       "\"order-id\", "
       "\"name\", "
-      "\"quantity\", "
-      "\"shipping-date\", "
-      "\"shipping-time-before\", "
-      "\"shipping-time-after\" "
+      "\"quantity\" "
     "FROM \"order-items\" "
     "WHERE \"order-item-id\" = ?1;",
     &sql_statement);
@@ -234,10 +192,7 @@ int order_items_table_select_by_order_id(sqlite3 *sql_connection, int order_id, 
       "\"order-item-id\", "
       "\"order-id\", "
       "\"name\", "
-      "\"quantity\", "
-      "\"shipping-date\", "
-      "\"shipping-time-before\", "
-      "\"shipping-time-after\" "
+      "\"quantity\" "
     "FROM \"order-items\" "
     "WHERE \"order-id\" = ?1;",
     &sql_statement);
@@ -309,10 +264,7 @@ int order_items_table_select_all(sqlite3 *sql_connection, order_item_row_t ***or
       "\"order-item-id\", "
       "\"order-id\", "
       "\"name\", "
-      "\"quantity\", "
-      "\"shipping-date\", "
-      "\"shipping-time-before\", "
-      "\"shipping-time-after\" "
+      "\"quantity\" "
     "FROM \"order-items\";",
     &sql_statement);
 
@@ -376,11 +328,8 @@ int order_items_table_update(sqlite3 *sql_connection, order_item_row_t *order_it
     "UPDATE \"order-items\" SET "
       "\"order-id\" = ?1, "
       "\"name\" = ?2, "
-      "\"quantity\" = ?3, "
-      "\"shipping-date\" = ?4, "
-      "\"shipping-time-before\" = ?5, "
-      "\"shipping-time-after\" = ?6 "
-    "WHERE \"order-item-id\" = ?7;",
+      "\"quantity\" = ?3 "
+    "WHERE \"order-item-id\" = ?4;",
     &sql_statement);
 
   check(sql_statement_prepare_result == 0, "sql_statement_prepare_result: %d",
@@ -398,19 +347,7 @@ int order_items_table_update(sqlite3 *sql_connection, order_item_row_t *order_it
   check(sql_bind_quantity_result == 0, "sql_bind_quantity_result: %d",
     sql_bind_quantity_result);
 
-  int sql_bind_shipping_date_result = sql_bind_date(sql_statement, 4, order_item_row->shipping_date);
-  check(sql_bind_shipping_date_result == 0, "sql_bind_shipping_date_result: %d",
-    sql_bind_shipping_date_result);
-
-  int sql_bind_shipping_time_before_result = sql_bind_time(sql_statement, 5, order_item_row->shipping_time_before);
-  check(sql_bind_shipping_time_before_result == 0, "sql_bind_shipping_time_before_result: %d",
-    sql_bind_shipping_time_before_result);
-
-  int sql_bind_shipping_time_after_result = sql_bind_time(sql_statement, 6, order_item_row->shipping_time_after);
-  check(sql_bind_shipping_time_after_result == 0, "sql_bind_shipping_time_after_result: %d",
-    sql_bind_shipping_time_after_result);
-
-  int sql_bind_order_item_id_result = sql_bind_int(sql_statement, 7, order_item_row->order_item_id);
+  int sql_bind_order_item_id_result = sql_bind_int(sql_statement, 4, order_item_row->order_item_id);
   check(sql_bind_order_item_id_result == 0, "sql_bind_order_item_id_result: %d",
     sql_bind_order_item_id_result);
 

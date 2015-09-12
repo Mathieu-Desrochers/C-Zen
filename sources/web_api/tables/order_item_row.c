@@ -11,10 +11,7 @@ order_item_row_t *order_item_row_malloc(
   int *order_item_id,
   int *order_id,
   char *name,
-  double *quantity,
-  time_t *shipping_date,
-  time_t *shipping_time_before,
-  time_t *shipping_time_after)
+  double *quantity)
 {
   order_item_row_t *order_item_row = malloc(sizeof(order_item_row_t));
   check_mem(order_item_row);
@@ -34,18 +31,6 @@ order_item_row_t *order_item_row_malloc(
   int malloc_memcpy_quantity_result = malloc_memcpy_double(&(order_item_row->quantity), quantity);
   check(malloc_memcpy_quantity_result == 0, "malloc_memcpy_quantity_result: %d",
     malloc_memcpy_quantity_result);
-
-  int malloc_memcpy_shipping_date_result = malloc_memcpy_time(&(order_item_row->shipping_date), shipping_date);
-  check(malloc_memcpy_shipping_date_result == 0, "malloc_memcpy_shipping_date_result: %d",
-    malloc_memcpy_shipping_date_result);
-
-  int malloc_memcpy_shipping_time_before_result = malloc_memcpy_time(&(order_item_row->shipping_time_before), shipping_time_before);
-  check(malloc_memcpy_shipping_time_before_result == 0, "malloc_memcpy_shipping_time_before_result: %d",
-    malloc_memcpy_shipping_time_before_result);
-
-  int malloc_memcpy_shipping_time_after_result = malloc_memcpy_time(&(order_item_row->shipping_time_after), shipping_time_after);
-  check(malloc_memcpy_shipping_time_after_result == 0, "malloc_memcpy_shipping_time_after_result: %d",
-    malloc_memcpy_shipping_time_after_result);
 
   return order_item_row;
 
@@ -68,9 +53,6 @@ void order_item_row_free(order_item_row_t *order_item_row)
   if (order_item_row->order_id != NULL) { free(order_item_row->order_id); }
   if (order_item_row->name != NULL) { free(order_item_row->name); }
   if (order_item_row->quantity != NULL) { free(order_item_row->quantity); }
-  if (order_item_row->shipping_date != NULL) { free(order_item_row->shipping_date); }
-  if (order_item_row->shipping_time_before != NULL) { free(order_item_row->shipping_time_before); }
-  if (order_item_row->shipping_time_after != NULL) { free(order_item_row->shipping_time_after); }
 
   free(order_item_row);
 }
