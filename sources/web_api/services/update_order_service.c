@@ -158,8 +158,8 @@ int update_order_service(
   updated_order_row = order_row_malloc(
     update_order_request->order_id,
     update_order_request->customer_name,
-    NULL,
-    NULL);
+    order_row->placed_on_date_time,
+    update_order_request->total);
 
   check(updated_order_row != NULL, "updated_order_row: NULL");
 

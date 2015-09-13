@@ -61,12 +61,15 @@ int get_orders_service(
   get_orders_response_return = get_orders_response_malloc();
   check(get_orders_response_return != NULL, "get_orders_response_return: NULL");
 
-  int order_rows_sort_by_order_id_result = order_rows_sort_by_order_id(
-    order_rows,
-    order_rows_count);
+  if (order_rows != NULL)
+  {
+    int order_rows_sort_by_order_id_result = order_rows_sort_by_order_id(
+      order_rows,
+      order_rows_count);
 
-  check(order_rows_sort_by_order_id_result == 0, "order_rows_sort_by_order_id_result: %d",
-    order_rows_sort_by_order_id_result);
+    check(order_rows_sort_by_order_id_result == 0, "order_rows_sort_by_order_id_result: %d",
+      order_rows_sort_by_order_id_result);
+  }
 
   get_orders_response_return->orders = malloc(sizeof(get_orders_response_order_t) * order_rows_count);
   check_mem(get_orders_response_return->orders);
