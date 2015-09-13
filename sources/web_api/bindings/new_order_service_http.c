@@ -67,6 +67,11 @@ int new_order_service_http(
   validation_error_t **validation_errors = NULL;
   int validation_errors_count = 0;
 
+  check(sql_connection != NULL, "sql_connection: NULL");
+  check(request_json != NULL, "request_json: NULL");
+  check(response_json != NULL, "response_json: NULL");
+  check(response_json_context != NULL, "response_json_context: NULL");
+
   int new_order_request_http_parse_result = new_order_request_http_parse(
     url_tokens,
     url_tokens_count,
