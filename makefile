@@ -21,6 +21,10 @@ WEB_API = sources/web_api/bindings/get_order_request_http.o \
           sources/web_api/bindings/get_order_response_http.o \
           sources/web_api/bindings/get_order_response_order_item_http.o \
           sources/web_api/bindings/get_order_service_http.o \
+          sources/web_api/bindings/get_orders_request_http.o \
+          sources/web_api/bindings/get_orders_response_http.o \
+          sources/web_api/bindings/get_orders_response_order_http.o \
+          sources/web_api/bindings/get_orders_service_http.o \
           sources/web_api/bindings/new_order_request_http.o \
           sources/web_api/bindings/new_order_request_order_item_http.o \
           sources/web_api/bindings/new_order_response_http.o \
@@ -37,6 +41,10 @@ WEB_API = sources/web_api/bindings/get_order_request_http.o \
           sources/web_api/services/get_order_response.o \
           sources/web_api/services/get_order_response_order_item.o \
           sources/web_api/services/get_order_service.o \
+          sources/web_api/services/get_orders_request.o \
+          sources/web_api/services/get_orders_response.o \
+          sources/web_api/services/get_orders_response_order.o \
+          sources/web_api/services/get_orders_service.o \
           sources/web_api/services/new_order_request.o \
           sources/web_api/services/new_order_request_order_item.o \
           sources/web_api/services/new_order_response.o \

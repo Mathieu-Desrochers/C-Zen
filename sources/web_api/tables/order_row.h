@@ -19,6 +19,9 @@ order_row_t *order_row_malloc(
   time_t *placed_on_date_time,
   int *total);
 
+// sorts an array of order rows
+int order_rows_sort_by_order_id(order_row_t **order_rows, int count);
+
 // frees an order row
 void order_row_free(order_row_t *order_row);
 

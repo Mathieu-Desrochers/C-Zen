@@ -42,6 +42,32 @@ error:
   return NULL;
 }
 
+// compares two order rows
+int order_rows_compare_order_id(const void *x, const void *y)
+{
+  order_row_t *order_row_x = (order_row_t *)x;
+  order_row_t *order_row_y = (order_row_t *)y;
+
+  int order_id_x = *(order_row_x->order_id);
+  int order_id_y = *(order_row_y->order_id);
+
+  return order_id_x - order_id_y;
+}
+
+// sorts an array of order rows
+int order_rows_sort_by_order_id(order_row_t **order_rows, int count)
+{
+  check(order_rows != NULL, "order_rows: NULL");
+
+  qsort(order_rows, count, sizeof(order_row_t *), order_rows_compare_order_id);
+
+  return 0;
+
+error:
+
+  return -1;
+}
+
 // frees an order row
 void order_row_free(order_row_t *order_row)
 {
