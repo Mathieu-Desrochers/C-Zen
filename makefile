@@ -72,7 +72,7 @@ jansson:
 
 database:
 	mkdir -p /var/web_api
-	sqlite3 /var/web_api/database.db < sources/database/create_database.sql
+	sqlite3 /var/web_api/database.db < sources/web_api/database/create_database.sql
 	sqlite3 /var/web_api/database.db "PRAGMA journal_mode=WAL;"
 	chown lighttpd:lighttpd /var/web_api
 	chown lighttpd:lighttpd /var/web_api/database.db
