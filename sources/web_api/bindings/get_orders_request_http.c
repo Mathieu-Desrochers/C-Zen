@@ -40,7 +40,7 @@ int get_orders_request_http_format_errors(
   json_context_t *json_context)
 {
   json_t *json_return = NULL;
-  char *error_buffer = NULL;
+  char *validation_error_code = NULL;
 
   check(validation_errors != NULL, "validation_errors: NULL");
   check(json != NULL, "json: NULL");
@@ -49,17 +49,22 @@ int get_orders_request_http_format_errors(
   json_return = json_array_malloc();
   check(json_return != NULL, "json_return: NULL");
 
-  error_buffer = malloc(sizeof(char) * 256);
-  check_mem(error_buffer);
+  validation_error_code = calloc(1024, sizeof(char));
+  check_mem(validation_error_code);
 
   for (int i = 0; i < validation_errors_count; i++)
   {
-    int json_array_add_string_result = json_array_add_string(json_return, error_buffer, json_context);
+    check(validation_error_code[0] != '\0', "validation_error_code: '%s'",
+      validation_error_code);
+
+    int json_array_add_string_result = json_array_add_string(json_return, validation_error_code, json_context);
     check(json_array_add_string_result == 0, "json_array_add_string_result: %d",
       json_array_add_string_result);
+
+    validation_error_code[0] = '\0';
   }
 
-  free(error_buffer);
+  free(validation_error_code);
 
   *json = json_return;
 
@@ -68,7 +73,7 @@ int get_orders_request_http_format_errors(
 error:
 
   if (json_return != NULL) { json_free(json_return); }
-  if (error_buffer != NULL) { free(error_buffer); }
+  if (validation_error_code != NULL) { free(validation_error_code); }
 
   return -1;
 }

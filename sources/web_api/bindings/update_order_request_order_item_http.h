@@ -10,6 +10,6 @@ int update_order_request_order_item_http_parse(json_t *json, update_order_reques
 // formats an update order request order item error
 int update_order_request_order_item_http_format_error(
   validation_error_t *validation_error,
-  char *error_buffer);
+  char *validation_error_code);
 
 #endif

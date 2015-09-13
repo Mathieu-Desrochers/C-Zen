@@ -62,14 +62,14 @@ error:
 // formats an update order request order item error
 int update_order_request_order_item_http_format_error(
   validation_error_t *validation_error,
-  char *error_buffer)
+  char *validation_error_code)
 {
   check(validation_error != NULL, "validation_error: NULL");
-  check(error_buffer != NULL, "error_buffer: NULL");
+  check(validation_error_code != NULL, "validation_error_code: NULL");
 
   if (validation_error->validation_path->next->property == UPDATE_ORDER_REQUEST_ORDER_ITEM_ID)
   {
-    int sprintf_result = sprintf(error_buffer, "order-items-%d-order-item-id-%s",
+    int sprintf_result = sprintf(validation_error_code, "order-items-%d-order-item-id-%s",
       validation_error->validation_path->index,
       validation_errors_json[validation_error->error_code]);
 
@@ -79,7 +79,7 @@ int update_order_request_order_item_http_format_error(
 
   if (validation_error->validation_path->next->property == UPDATE_ORDER_REQUEST_ORDER_ITEM_NAME)
   {
-    int sprintf_result = sprintf(error_buffer, "order-items-%d-name-%s",
+    int sprintf_result = sprintf(validation_error_code, "order-items-%d-name-%s",
       validation_error->validation_path->index,
       validation_errors_json[validation_error->error_code]);
 
@@ -89,7 +89,7 @@ int update_order_request_order_item_http_format_error(
 
   if (validation_error->validation_path->next->property == UPDATE_ORDER_REQUEST_ORDER_ITEM_QUANTITY)
   {
-    int sprintf_result = sprintf(error_buffer, "order-items-%d-quantity-%s",
+    int sprintf_result = sprintf(validation_error_code, "order-items-%d-quantity-%s",
       validation_error->validation_path->index,
       validation_errors_json[validation_error->error_code]);
 

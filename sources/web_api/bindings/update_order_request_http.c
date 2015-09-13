@@ -139,7 +139,7 @@ int update_order_request_http_format_errors(
   json_context_t *json_context)
 {
   json_t *json_return = NULL;
-  char *error_buffer = NULL;
+  char *validation_error_code = NULL;
 
   check(validation_errors != NULL, "validation_errors: NULL");
   check(json != NULL, "json: NULL");
@@ -148,14 +148,14 @@ int update_order_request_http_format_errors(
   json_return = json_array_malloc();
   check(json_return != NULL, "json_return: NULL");
 
-  error_buffer = malloc(sizeof(char) * 256);
-  check_mem(error_buffer);
+  validation_error_code = calloc(1024, sizeof(char));
+  check_mem(validation_error_code);
 
   for (int i = 0; i < validation_errors_count; i++)
   {
     if (validation_errors[i]->validation_path->property == UPDATE_ORDER_REQUEST_ORDER_ID)
     {
-      int sprintf_result = sprintf(error_buffer, "order-id-%s",
+      int sprintf_result = sprintf(validation_error_code, "order-id-%s",
         validation_errors_json[validation_errors[i]->error_code]);
 
       check(sprintf_result > 0, "sprintf_result: %d",
@@ -164,7 +164,7 @@ int update_order_request_http_format_errors(
 
     if (validation_errors[i]->validation_path->property == UPDATE_ORDER_REQUEST_CUSTOMER_NAME)
     {
-      int sprintf_result = sprintf(error_buffer, "customer-name-%s",
+      int sprintf_result = sprintf(validation_error_code, "customer-name-%s",
         validation_errors_json[validation_errors[i]->error_code]);
 
       check(sprintf_result > 0, "sprintf_result: %d",
@@ -175,7 +175,7 @@ int update_order_request_http_format_errors(
     {
       if (validation_errors[i]->validation_path->index == -1)
       {
-        int sprintf_result = sprintf(error_buffer, "order-items-%s",
+        int sprintf_result = sprintf(validation_error_code, "order-items-%s",
           validation_errors_json[validation_errors[i]->error_code]);
 
         check(sprintf_result > 0, "sprintf_result: %d",
@@ -184,7 +184,7 @@ int update_order_request_http_format_errors(
       else
       {
         int update_order_request_order_item_http_format_error_result = update_order_request_order_item_http_format_error(
-          validation_errors[i], error_buffer);
+          validation_errors[i], validation_error_code);
 
         check(update_order_request_order_item_http_format_error_result == 0,
           "update_order_request_order_item_http_format_error_result: %d",
@@ -194,19 +194,24 @@ int update_order_request_http_format_errors(
 
     if (validation_errors[i]->validation_path->property == UPDATE_ORDER_REQUEST_TOTAL)
     {
-      int sprintf_result = sprintf(error_buffer, "total-%s",
+      int sprintf_result = sprintf(validation_error_code, "total-%s",
         validation_errors_json[validation_errors[i]->error_code]);
 
       check(sprintf_result > 0, "sprintf_result: %d",
         sprintf_result);
     }
 
-    int json_array_add_string_result = json_array_add_string(json_return, error_buffer, json_context);
+    check(validation_error_code[0] != '\0', "validation_error_code: '%s'",
+      validation_error_code);
+
+    int json_array_add_string_result = json_array_add_string(json_return, validation_error_code, json_context);
     check(json_array_add_string_result == 0, "json_array_add_string_result: %d",
       json_array_add_string_result);
+
+    validation_error_code[0] = '\0';
   }
 
-  free(error_buffer);
+  free(validation_error_code);
 
   *json = json_return;
 
@@ -215,7 +220,7 @@ int update_order_request_http_format_errors(
 error:
 
   if (json_return != NULL) { json_free(json_return); }
-  if (error_buffer != NULL) { free(error_buffer); }
+  if (validation_error_code != NULL) { free(validation_error_code); }
 
   return -1;
 }
