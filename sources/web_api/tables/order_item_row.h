@@ -19,6 +19,9 @@ order_item_row_t *order_item_row_malloc(
   char *name,
   double *quantity);
 
+// sorts an array of order item rows
+int order_item_rows_sort_by_order_item_id(order_item_row_t **order_item_rows, int count);
+
 // frees an order item row
 void order_item_row_free(order_item_row_t *order_item_row);
 

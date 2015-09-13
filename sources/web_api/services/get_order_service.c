@@ -94,6 +94,13 @@ int get_order_service(
 
   check(get_order_response_return != NULL, "get_order_response_return: NULL");
 
+  int order_item_rows_sort_by_order_item_id_result = order_item_rows_sort_by_order_item_id(
+    order_item_rows,
+    order_item_rows_count);
+
+  check(order_item_rows_sort_by_order_item_id_result == 0, "order_item_rows_sort_by_order_item_id_result: %d",
+    order_item_rows_sort_by_order_item_id_result);
+
   get_order_response_return->order_items = malloc(sizeof(get_order_response_order_item_t) * order_item_rows_count);
   check_mem(get_order_response_return->order_items);
 
