@@ -12,15 +12,8 @@ get_order_response_t *get_order_response_malloc(
   time_t *placed_on_date_time,
   int *total)
 {
-  get_order_response_t *get_order_response = malloc(sizeof(get_order_response_t));
+  get_order_response_t *get_order_response = calloc(1, sizeof(get_order_response_t));
   check_mem(get_order_response);
-
-  get_order_response->order_id = NULL;
-  get_order_response->customer_name = NULL;
-  get_order_response->placed_on_date_time = NULL;
-  get_order_response->order_items = NULL;
-  get_order_response->order_items_count = 0;
-  get_order_response->total = NULL;
 
   int malloc_memcpy_order_id_result = malloc_memcpy_int(&(get_order_response->order_id), order_id);
   check(malloc_memcpy_order_id_result == 0, "malloc_memcpy_order_id_result: %d",

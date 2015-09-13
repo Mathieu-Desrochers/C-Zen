@@ -7,7 +7,7 @@
 // allocates an update order response
 update_order_response_t *update_order_response_malloc()
 {
-  update_order_response_t *update_order_response = malloc(sizeof(update_order_response_t));
+  update_order_response_t *update_order_response = calloc(1, sizeof(update_order_response_t));
   check_mem(update_order_response);
 
   return update_order_response;

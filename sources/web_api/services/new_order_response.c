@@ -8,7 +8,7 @@
 new_order_response_t *new_order_response_malloc(
   int *order_id)
 {
-  new_order_response_t *new_order_response = malloc(sizeof(new_order_response_t));
+  new_order_response_t *new_order_response = calloc(1, sizeof(new_order_response_t));
   check_mem(new_order_response);
 
   int malloc_memcpy_order_id_result = malloc_memcpy_int(&(new_order_response->order_id), order_id);

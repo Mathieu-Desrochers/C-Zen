@@ -10,12 +10,8 @@ get_order_response_order_item_t *get_order_response_order_item_malloc(
   char *name,
   double *quantity)
 {
-  get_order_response_order_item_t *get_order_response_order_item = malloc(sizeof(get_order_response_order_item_t));
+  get_order_response_order_item_t *get_order_response_order_item = calloc(1, sizeof(get_order_response_order_item_t));
   check_mem(get_order_response_order_item);
-
-  get_order_response_order_item->order_item_id = NULL;
-  get_order_response_order_item->name = NULL;
-  get_order_response_order_item->quantity = NULL;
 
   int malloc_memcpy_order_item_id_result = malloc_memcpy_int(&(get_order_response_order_item->order_item_id), order_item_id);
   check(malloc_memcpy_order_item_id_result == 0, "malloc_memcpy_order_item_id_result: %d",

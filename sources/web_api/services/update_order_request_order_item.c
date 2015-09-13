@@ -12,12 +12,8 @@ update_order_request_order_item_t *update_order_request_order_item_malloc(
   char *name,
   double *quantity)
 {
-  update_order_request_order_item_t *update_order_request_order_item = malloc(sizeof(update_order_request_order_item_t));
+  update_order_request_order_item_t *update_order_request_order_item = calloc(1, sizeof(update_order_request_order_item_t));
   check_mem(update_order_request_order_item);
-
-  update_order_request_order_item->order_item_id = NULL;
-  update_order_request_order_item->name = NULL;
-  update_order_request_order_item->quantity = NULL;
 
   int malloc_memcpy_order_item_id_result = malloc_memcpy_int(&(update_order_request_order_item->order_item_id), order_item_id);
   check(malloc_memcpy_order_item_id_result == 0, "malloc_memcpy_order_item_id_result: %d",

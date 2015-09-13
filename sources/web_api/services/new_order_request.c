@@ -11,13 +11,8 @@ new_order_request_t *new_order_request_malloc(
   char *customer_name,
   int *total)
 {
-  new_order_request_t *new_order_request = malloc(sizeof(new_order_request_t));
+  new_order_request_t *new_order_request = calloc(1, sizeof(new_order_request_t));
   check_mem(new_order_request);
-
-  new_order_request->customer_name = NULL;
-  new_order_request->order_items = NULL;
-  new_order_request->order_items_count = 0;
-  new_order_request->total = NULL;
 
   int malloc_memcpy_customer_name_result = malloc_memcpy_string(&(new_order_request->customer_name), customer_name);
   check(malloc_memcpy_customer_name_result == 0, "malloc_memcpy_customer_name_result: %d",

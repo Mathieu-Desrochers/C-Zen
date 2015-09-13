@@ -9,10 +9,8 @@
 get_order_request_t *get_order_request_malloc(
   int *order_id)
 {
-  get_order_request_t *get_order_request = malloc(sizeof(get_order_request_t));
+  get_order_request_t *get_order_request = calloc(1, sizeof(get_order_request_t));
   check_mem(get_order_request);
-
-  get_order_request->order_id = NULL;
 
   int malloc_memcpy_order_id_result = malloc_memcpy_int(&(get_order_request->order_id), order_id);
   check(malloc_memcpy_order_id_result == 0, "malloc_memcpy_order_id_result: %d",

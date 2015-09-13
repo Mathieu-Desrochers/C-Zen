@@ -13,7 +13,7 @@ order_item_row_t *order_item_row_malloc(
   char *name,
   double *quantity)
 {
-  order_item_row_t *order_item_row = malloc(sizeof(order_item_row_t));
+  order_item_row_t *order_item_row = calloc(1, sizeof(order_item_row_t));
   check_mem(order_item_row);
 
   int malloc_memcpy_order_item_id_result = malloc_memcpy_int(&(order_item_row->order_item_id), order_item_id);

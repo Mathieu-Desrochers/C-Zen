@@ -14,7 +14,7 @@ order_row_t *order_row_malloc(
   time_t *placed_on_date_time,
   int *total)
 {
-  order_row_t *order_row = malloc(sizeof(order_row_t));
+  order_row_t *order_row = calloc(1, sizeof(order_row_t));
   check_mem(order_row);
 
   int malloc_memcpy_order_id_result = malloc_memcpy_int(&(order_row->order_id), order_id);

@@ -13,14 +13,8 @@ update_order_request_t *update_order_request_malloc(
   char *customer_name,
   int *total)
 {
-  update_order_request_t *update_order_request = malloc(sizeof(update_order_request_t));
+  update_order_request_t *update_order_request = calloc(1, sizeof(update_order_request_t));
   check_mem(update_order_request);
-
-  update_order_request->order_id = NULL;
-  update_order_request->customer_name = NULL;
-  update_order_request->order_items = NULL;
-  update_order_request->order_items_count = 0;
-  update_order_request->total = NULL;
 
   int malloc_memcpy_order_id_result = malloc_memcpy_int(&(update_order_request->order_id), order_id);
   check(malloc_memcpy_order_id_result == 0, "malloc_memcpy_order_id_result: %d",
