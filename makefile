@@ -10,6 +10,7 @@ INFRASTRUCTURE = sources/infrastructure/array/array.o \
                  sources/infrastructure/http/http.o \
                  sources/infrastructure/json/json.o \
                  sources/infrastructure/mem/mem.o \
+                 sources/infrastructure/print/print.o \
                  sources/infrastructure/regex/regex.o \
                  sources/infrastructure/sql/sql.o \
                  sources/infrastructure/string/string.o \
