@@ -55,7 +55,7 @@ WEB_API = sources/web_api/bindings/get_order_request_http.o \
           sources/web_api/services/update_order_service.o
 
 %.o : %.c
-	@m4 sources/infrastructure/call/call.m4 $< > $<~
+	m4 sources/infrastructure/call/call.m4 --synclines $< > $<~
 	$(CC) $(CFLAGS) -xc -c $<~ -o $@
 	@rm $<~
 
