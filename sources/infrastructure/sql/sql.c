@@ -473,7 +473,7 @@ int sql_last_generated_id(sqlite3 *sql_connection, int **last_insert_row_id)
   sqlite3_stmt *sql_statement = NULL;
   int *last_insert_row_id_return = NULL;
 
-  check_not_null(sql_statement);
+  check_not_null(sql_connection);
   check_not_null(last_insert_row_id);
 
   check_result(sql_statement_prepare(sql_connection, "SELECT last_insert_rowid();", &sql_statement), 0);

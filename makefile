@@ -55,8 +55,9 @@ WEB_API = sources/web_api/bindings/get_order_request_http.o \
           sources/web_api/services/update_order_service.o
 
 %.o : %.c
-	m4 sources/infrastructure/call/call.m4 $< | \
-	$(CC) $(CFLAGS) -I$(dir $@) -xc -o $@ -c -
+	@m4 sources/infrastructure/call/call.m4 $< > $<~
+	$(CC) $(CFLAGS) -xc -c $<~ -o $@
+	@rm $<~
 
 web_api_main: $(INFRASTRUCTURE) $(WEB_API) sources/web_api/main/main.c
 	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(WEB_API) \
