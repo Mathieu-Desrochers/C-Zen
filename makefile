@@ -10,7 +10,6 @@ INFRASTRUCTURE = sources/infrastructure/array/array.o \
                  sources/infrastructure/http/http.o \
                  sources/infrastructure/json/json.o \
                  sources/infrastructure/mem/mem.o \
-                 sources/infrastructure/print/print.o \
                  sources/infrastructure/regex/regex.o \
                  sources/infrastructure/sql/sql.o \
                  sources/infrastructure/string/string.o \
@@ -56,7 +55,8 @@ WEB_API = sources/web_api/bindings/get_order_request_http.o \
           sources/web_api/services/update_order_service.o
 
 %.o : %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	m4 sources/infrastructure/call/call.m4 $< | \
+	$(CC) $(CFLAGS) -I$(dir $@) -xc -o $@ -c -
 
 web_api_main: $(INFRASTRUCTURE) $(WEB_API) sources/web_api/main/main.c
 	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(WEB_API) \
