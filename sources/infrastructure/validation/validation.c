@@ -62,7 +62,7 @@ validation_error_t *validation_error_malloc_level_1(
   validation_error->error_code = error_code;
 
   validation_path = validation_path_malloc(property, index);
-  check_mem(validation_path);
+  check_not_null(validation_path);
 
   validation_error->validation_path = validation_path;
 
@@ -95,10 +95,10 @@ validation_error_t *validation_error_malloc_level_2(
   validation_error->error_code = error_code;
 
   validation_path = validation_path_malloc(property, index);
-  check_mem(validation_path);
+  check_not_null(validation_path);
 
   validation_path_level_2 = validation_path_malloc(property_level_2, index_level_2);
-  check_mem(validation_path_level_2);
+  check_not_null(validation_path_level_2);
 
   validation_error->validation_path = validation_path;
   validation_error->validation_path->next = validation_path_level_2;
@@ -124,14 +124,15 @@ int validation_errors_add(
   validation_error_t *validation_error = NULL;
 
   validation_error = validation_error_malloc(error_code);
-  check(validation_error != NULL, "validation_error: NULL");
+  check_not_null(validation_error);
 
-  int array_add_result = array_add_pointer(
-    (void ***)validation_errors, allocated_count, used_count,
-    (void *)validation_error);
-
-  check(array_add_result == 0, "array_add_result: %d",
-    array_add_result);
+  check_result(
+    array_add_pointer(
+      (void ***)validation_errors,
+      allocated_count,
+      used_count,
+      (void *)validation_error),
+    0);
 
   validation_error = NULL;
 
@@ -155,15 +156,20 @@ int validation_errors_add_level_1(
 {
   validation_error_t *validation_error = NULL;
 
+  check_not_null(validation_errors);
+  check_not_null(allocated_count);
+  check_not_null(used_count);
+
   validation_error = validation_error_malloc_level_1(property, index, error_code);
-  check(validation_error != NULL, "validation_error: NULL");
+  check_not_null(validation_error);
 
-  int array_add_result = array_add_pointer(
-    (void ***)validation_errors, allocated_count, used_count,
-    (void *)validation_error);
-
-  check(array_add_result == 0, "array_add_result: %d",
-    array_add_result);
+  check_result(
+    array_add_pointer(
+      (void ***)validation_errors,
+      allocated_count,
+      used_count,
+      (void *)validation_error),
+    0);
 
   validation_error = NULL;
 
@@ -189,15 +195,20 @@ int validation_errors_add_level_2(
 {
   validation_error_t *validation_error = NULL;
 
+  check_not_null(validation_errors);
+  check_not_null(allocated_count);
+  check_not_null(used_count);
+
   validation_error = validation_error_malloc_level_2(property, index, property_level_2, index_level_2, error_code);
-  check(validation_error != NULL, "validation_error: NULL");
+  check_not_null(validation_error);
 
-  int array_add_result = array_add_pointer(
-    (void ***)validation_errors, allocated_count, used_count,
-    (void *)validation_error);
-
-  check(array_add_result == 0, "array_add_result: %d",
-    array_add_result);
+  check_result(
+    array_add_pointer(
+      (void ***)validation_errors,
+      allocated_count,
+      used_count,
+      (void *)validation_error),
+    0);
 
   validation_error = NULL;
 

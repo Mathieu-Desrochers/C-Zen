@@ -21,9 +21,7 @@ hash_table_t *hash_table_malloc(int maximum_distinct_keys_count)
   hsearch = calloc(1, sizeof(hsearch_data));
   check_mem(hsearch);
 
-  int hcreate_result = hcreate_r(maximum_distinct_keys_count * 1.5, hsearch);
-  check(hcreate_result != 0, "hcreate_result: %d",
-    hcreate_result);
+  check_result_not(hcreate_r(maximum_distinct_keys_count * 1.5, hsearch), 0);
 
   hash_table->hsearch = hsearch;
 
@@ -53,9 +51,9 @@ error:
 // gets the hash values for a given key
 int hash_get_hash_values(hash_table_t *hash_table, char *key, hash_values_t **hash_values)
 {
-  check(hash_table != NULL, "hash_table: NULL");
-  check(key != NULL, "key: NULL");
-  check(hash_values != NULL, "hash_values: NULL");
+  check_not_null(hash_table);
+  check_not_null(key);
+  check_not_null(hash_values);
 
   ENTRY find_entry;
   find_entry.key = key;
@@ -88,13 +86,11 @@ int hash_get_or_create_hash_values(hash_table_t *hash_table, char *key, hash_val
   hash_values_t *hash_values_return = NULL;
   char *key_copied = NULL;
 
-  check(hash_table != NULL, "hash_table: NULL");
-  check(key != NULL, "key: NULL");
-  check(hash_values != NULL, "hash_values: NULL");
+  check_not_null(hash_table);
+  check_not_null(key);
+  check_not_null(hash_values);
 
-  int hash_get_hash_values_result = hash_get_hash_values(hash_table, key, &hash_values_return);
-  check(hash_get_hash_values_result == 0, "hash_get_hash_values_result: %d",
-    hash_get_hash_values_result);
+  check_result(hash_get_hash_values(hash_table, key, &hash_values_return), 0);
 
   if (hash_values_return != NULL)
   {
@@ -103,44 +99,36 @@ int hash_get_or_create_hash_values(hash_table_t *hash_table, char *key, hash_val
     return 0;
   }
 
-  int malloc_memcpy_result = malloc_memcpy_string(&key_copied, key);
-  check(malloc_memcpy_result == 0, "malloc_memcpy_result: %d",
-    malloc_memcpy_result);
+  check_result(malloc_memcpy_string(&key_copied, key), 0);
 
   hash_values_return = hash_values_malloc();
-  check(hash_values_return != NULL, "hash_values_return: NULL");
+  check_not_null(hash_values_return);
 
   ENTRY new_entry;
   new_entry.key = key_copied;
   new_entry.data = hash_values_return;
 
   ENTRY *enter_entry = NULL;
+  check_result_not(hsearch_r(new_entry, ENTER, &enter_entry, hash_table->hsearch), 0);
+  check_not_null(enter_entry);
 
-  int hsearch_enter_result = hsearch_r(new_entry, ENTER, &enter_entry, hash_table->hsearch);
-  check(hsearch_enter_result != 0, "hsearch_enter_result: %d",
-    hsearch_enter_result);
-
-  check(enter_entry != NULL, "enter_entry: NULL");
-
-  int array_add_key_result = array_add_string(
-    &(hash_table->keys),
-    &(hash_table->keys_allocated_count),
-    &(hash_table->keys_used_count),
-    key_copied);
-
-  check(array_add_key_result == 0, "array_add_key_result: %d",
-    array_add_key_result);
+  check_result(
+    array_add_string(
+      &(hash_table->keys),
+      &(hash_table->keys_allocated_count),
+      &(hash_table->keys_used_count),
+      key_copied),
+    0);
 
   key_copied = NULL;
 
-  int array_add_values_result = array_add_pointer(
-    (void ***)&(hash_table->hash_values),
-    &(hash_table->hash_values_allocated_count),
-    &(hash_table->hash_values_used_count),
-    hash_values_return);
-
-  check(array_add_values_result == 0, "array_add_values_result: %d",
-    array_add_values_result);
+  check_result(
+    array_add_pointer(
+      (void ***)&(hash_table->hash_values),
+      &(hash_table->hash_values_allocated_count),
+      &(hash_table->hash_values_used_count),
+      hash_values_return),
+    0);
 
   *hash_values = hash_values_return;
 
@@ -160,27 +148,22 @@ int hash_table_add_int_int(hash_table_t *hash_table, int key, int value)
   char *key_string = NULL;
   hash_values_t *hash_values = NULL;
 
-  check(hash_table != NULL, "hash_table: NULL");
+  check_not_null(hash_table);
 
   key_string = malloc(sizeof(char) * (sizeof(int) + 1));
   check_mem(key_string);
 
-  int sprintf_result = sprintf(key_string, "%d", key);
-  check(sprintf_result > 0, "sprintf_result: %d",
-    sprintf_result);
+  check_result_greater(sprintf(key_string, "%d", key), 0);
 
-  int hash_get_hash_values_result = hash_get_or_create_hash_values(hash_table, key_string, &hash_values);
-  check(hash_get_hash_values_result == 0, "hash_get_hash_values_result: %d",
-    hash_get_hash_values_result);
+  check_result(hash_get_or_create_hash_values(hash_table, key_string, &hash_values), 0);
 
-  int array_add_value_result = array_add_int(
-    (int **)&(hash_values->values),
-    &(hash_values->allocated_count),
-    &(hash_values->used_count),
-    value);
-
-  check(array_add_value_result == 0, "array_add_value_result: %d",
-    array_add_value_result);
+  check_result(
+    array_add_int(
+      (int **)&(hash_values->values),
+      &(hash_values->allocated_count),
+      &(hash_values->used_count),
+      value),
+    0);
 
   free(key_string);
 
@@ -199,27 +182,22 @@ int hash_table_add_int_pointer(hash_table_t *hash_table, int key, void *value)
   char *key_string = NULL;
   hash_values_t *hash_values = NULL;
 
-  check(hash_table != NULL, "hash_table: NULL");
+  check_not_null(hash_table);
 
   key_string = malloc(sizeof(char) * (sizeof(int) + 1));
   check_mem(key_string);
 
-  int sprintf_result = sprintf(key_string, "%d", key);
-  check(sprintf_result > 0, "sprintf_result: %d",
-    sprintf_result);
+  check_result_greater(sprintf(key_string, "%d", key), 0);
 
-  int hash_get_hash_values_result = hash_get_or_create_hash_values(hash_table, key_string, &hash_values);
-  check(hash_get_hash_values_result == 0, "hash_get_hash_values_result: %d",
-    hash_get_hash_values_result);
+  check_result(hash_get_or_create_hash_values(hash_table, key_string, &hash_values), 0);
 
-  int array_add_value_result = array_add_pointer(
-    (void ***)&(hash_values->values),
-    &(hash_values->allocated_count),
-    &(hash_values->used_count),
-    value);
-
-  check(array_add_value_result == 0, "array_add_value_result: %d",
-    array_add_value_result);
+  check_result(
+    array_add_pointer(
+      (void ***)&(hash_values->values),
+      &(hash_values->allocated_count),
+      &(hash_values->used_count),
+      value),
+    0);
 
   free(key_string);
 
@@ -238,20 +216,16 @@ int hash_table_get_int_int(hash_table_t *hash_table, int key, int **values, int 
   char *key_string = NULL;
   hash_values_t *hash_values = NULL;
 
-  check(hash_table != NULL, "hash_table: NULL");
-  check(values != NULL, "values: NULL");
-  check(values_count != NULL, "values_count: NULL");
+  check_not_null(hash_table);
+  check_not_null(values);
+  check_not_null(values_count);
 
   key_string = malloc(sizeof(char) * (sizeof(int) + 1));
   check_mem(key_string);
 
-  int sprintf_result = sprintf(key_string, "%d", key);
-  check(sprintf_result > 0, "sprintf_result: %d",
-    sprintf_result);
+  check_result_greater(sprintf(key_string, "%d", key), 0);
 
-  int hash_get_hash_values_result = hash_get_hash_values(hash_table, key_string, &hash_values);
-  check(hash_get_hash_values_result == 0, "hash_get_hash_values_result: %d",
-    hash_get_hash_values_result);
+  check_result(hash_get_hash_values(hash_table, key_string, &hash_values), 0);
 
   if (hash_values == NULL)
   {
@@ -281,20 +255,16 @@ int hash_table_get_int_pointer(hash_table_t *hash_table, int key, void ***values
   char *key_string = NULL;
   hash_values_t *hash_values = NULL;
 
-  check(hash_table != NULL, "hash_table: NULL");
-  check(values != NULL, "values: NULL");
-  check(values_count != NULL, "values_count: NULL");
+  check_not_null(hash_table);
+  check_not_null(values);
+  check_not_null(values_count);
 
   key_string = malloc(sizeof(char) * (sizeof(int) + 1));
   check_mem(key_string);
 
-  int sprintf_result = sprintf(key_string, "%d", key);
-  check(sprintf_result > 0, "sprintf_result: %d",
-    sprintf_result);
+  check_result_greater(sprintf(key_string, "%d", key), 0);
 
-  int hash_get_hash_values_result = hash_get_hash_values(hash_table, key_string, &hash_values);
-  check(hash_get_hash_values_result == 0, "hash_get_hash_values_result: %d",
-    hash_get_hash_values_result);
+  check_result(hash_get_hash_values(hash_table, key_string, &hash_values), 0);
 
   if (hash_values == NULL)
   {

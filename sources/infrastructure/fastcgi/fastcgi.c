@@ -10,8 +10,8 @@ int fastcgi_read_stream(FCGX_Stream *stream, char **string)
   char *string_return = NULL;
   char *string_return_temp = NULL;
 
-  check(stream != NULL, "stream: NULL");
-  check(string != NULL, "string: NULL");
+  check_not_null(stream);
+  check_not_null(string);
 
   int buffer_size = 32;
   int buffer_offset = 0;
@@ -63,33 +63,18 @@ error:
 // writes a header
 int fastcgi_write_header(FCGX_Stream *stream, char *name, char *value, int is_last)
 {
-  int puts_result = 0;
+  check_not_null(stream);
+  check_not_null(name);
+  check_not_null(value);
 
-  check(stream != NULL, "stream: NULL");
-  check(name != NULL, "name: NULL");
-  check(value != NULL, "value: NULL");
-
-  puts_result = FCGX_PutS(name, stream);
-  check(puts_result != -1, "puts_result: %d",
-    puts_result);
-
-  puts_result = FCGX_PutS(": ", stream);
-  check(puts_result != -1, "puts_result: %d",
-    puts_result);
-
-  puts_result = FCGX_PutS(value, stream);
-  check(puts_result != -1, "puts_result: %d",
-    puts_result);
-
-  puts_result = FCGX_PutS("\r\n", stream);
-  check(puts_result != -1, "puts_result: %d",
-    puts_result);
+  check_result_not(FCGX_PutS(name, stream), -1);
+  check_result_not(FCGX_PutS(": ", stream), -1);
+  check_result_not(FCGX_PutS(value, stream), -1);
+  check_result_not(FCGX_PutS("\r\n", stream), -1);
 
   if (is_last == 1)
   {
-    puts_result = FCGX_PutS("\r\n", stream);
-    check(puts_result != -1, "puts_result: %d",
-      puts_result);
+    check_result_not(FCGX_PutS("\r\n", stream), -1);
   }
 
   return 0;
@@ -102,18 +87,11 @@ error:
 // writes a body
 int fastcgi_write_body(FCGX_Stream *stream, char *content)
 {
-  int puts_result = 0;
+  check_not_null(stream);
+  check_not_null(content);
 
-  check(stream != NULL, "stream: NULL");
-  check(content != NULL, "content: NULL");
-
-  puts_result = FCGX_PutS(content, stream);
-  check(puts_result != -1, "puts_result: %d",
-    puts_result);
-
-  puts_result = FCGX_PutS("\r\n", stream);
-  check(puts_result != -1, "puts_result: %d",
-    puts_result);
+  check_result_not(FCGX_PutS(content, stream), -1);
+  check_result_not(FCGX_PutS("\r\n", stream), -1);
 
   return 0;
 

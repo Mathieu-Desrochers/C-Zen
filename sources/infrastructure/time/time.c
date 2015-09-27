@@ -11,6 +11,8 @@
 // gets current utc time
 int utc_now(time_t *now)
 {
+  check_not_null(now);
+
   time_t time_result = time(NULL);
   check((int)time_result != -1, "time_result: %d",
     (int)time_result);
@@ -27,8 +29,8 @@ error:
 // parses utc time
 int parse_utc_date(char *string, time_t *time)
 {
-  check(string != NULL, "string: NULL");
-  check(time != NULL, "time: NULL");
+  check_not_null(string);
+  check_not_null(time);
 
   struct tm tm;
 
@@ -57,8 +59,8 @@ error:
 // parses utc time
 int parse_utc_date_time(char *string, time_t *time)
 {
-  check(string != NULL, "string: NULL");
-  check(time != NULL, "time: NULL");
+  check_not_null(string);
+  check_not_null(time);
 
   struct tm tm;
 
@@ -83,8 +85,8 @@ error:
 // parses utc time
 int parse_utc_time(char *string, time_t *time)
 {
-  check(string != NULL, "string: NULL");
-  check(time != NULL, "time: NULL");
+  check_not_null(string);
+  check_not_null(time);
 
   struct tm tm;
 
@@ -116,14 +118,12 @@ char *format_utc_date(time_t time)
   struct tm tm;
 
   struct tm *gm_time_result = gmtime_r(&time, &tm);
-  check(gm_time_result != NULL, "gm_time_result: NULL");
+  check_not_null(gm_time_result);
 
   char *formatted_time = malloc(sizeof(char) * 100);
   check_mem(formatted_time);
 
-  size_t strftime_result = strftime(formatted_time, 100, "%Y-%m-%d", &tm);
-  check(strftime_result != 0, "strftime_result: %d",
-    (int)strftime_result);
+  check_result_not(strftime(formatted_time, 100, "%Y-%m-%d", &tm), 0);
 
   return formatted_time;
 
@@ -140,14 +140,12 @@ char *format_utc_date_time(time_t time)
   struct tm tm;
 
   struct tm *gm_time_result = gmtime_r(&time, &tm);
-  check(gm_time_result != NULL, "gm_time_result: NULL");
+  check_not_null(gm_time_result);
 
   char *formatted_time = malloc(sizeof(char) * 100);
   check_mem(formatted_time);
 
-  size_t strftime_result = strftime(formatted_time, 100, "%Y-%m-%dT%H:%M:%SZ", &tm);
-  check(strftime_result != 0, "strftime_result: %d",
-    (int)strftime_result);
+  check_result_not(strftime(formatted_time, 100, "%Y-%m-%dT%H:%M:%SZ", &tm), 0);
 
   return formatted_time;
 
@@ -164,14 +162,12 @@ char *format_utc_time(time_t time)
   struct tm tm;
 
   struct tm *gm_time_result = gmtime_r(&time, &tm);
-  check(gm_time_result != NULL, "gm_time_result: NULL");
+  check_not_null(gm_time_result);
 
   char *formatted_time = malloc(sizeof(char) * 100);
   check_mem(formatted_time);
 
-  size_t strftime_result = strftime(formatted_time, 100, "%H:%M:%S", &tm);
-  check(strftime_result != 0, "strftime_result: %d",
-    (int)strftime_result);
+  check_result_not(strftime(formatted_time, 100, "%H:%M:%S", &tm), 0);
 
   return formatted_time;
 

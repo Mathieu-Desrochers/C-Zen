@@ -18,6 +18,12 @@ int regex_match(char *pattern, char *string, int *matched, char ***tokens, int *
   int tokens_allocated_count = 0;
   int tokens_used_count = 0;
 
+  check_not_null(pattern);
+  check_not_null(string);
+  check_not_null(matched);
+  check_not_null(tokens);
+  check_not_null(tokens_count);
+
   pcre *compiled_pcre = pcre_compile(pattern, 0, &error, &error_offset, NULL);
   check(compiled_pcre != NULL, "compiled_pcre: NULL | error: %s | error_offset: %d",
     error, error_offset);
@@ -41,22 +47,17 @@ int regex_match(char *pattern, char *string, int *matched, char ***tokens, int *
 
   for (int i = 1; i < pcre_exec_result; i++)
   {
-    int pcre_get_substring_result = pcre_get_substring(string, match_indexes, pcre_exec_result, i, &match);
-    check(pcre_get_substring_result >= 0, "pcre_get_substring_result: %d",
-      pcre_get_substring_result);
+    check_result_greater(pcre_get_substring(string, match_indexes, pcre_exec_result, i, &match), 0);
 
-    int malloc_memcpy_string_result = malloc_memcpy_string(&copied_match, (char *)match);
-    check(malloc_memcpy_string_result == 0, "malloc_memcpy_string_result: %d",
-      malloc_memcpy_string_result);
+    check_result(malloc_memcpy_string(&copied_match, (char *)match), 0);
 
-    int array_add_string_result = array_add_string(
-      &tokens_return,
-      &tokens_allocated_count,
-      &tokens_used_count,
-      copied_match);
-
-    check(array_add_string_result == 0, "array_add_string_result: %d",
-      array_add_string_result);
+    check_result(
+      array_add_string(
+        &tokens_return,
+        &tokens_allocated_count,
+        &tokens_used_count,
+        copied_match),
+      0);
 
     copied_match = NULL;
 

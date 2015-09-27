@@ -9,14 +9,15 @@ int array_add_int(int **array, int *allocated_count, int *used_count, int value)
 {
   int *reallocated_array = NULL;
 
-  check(allocated_count != NULL, "allocated_count: NULL");
-  check(used_count != NULL, "used_count: NULL");
+  check_not_null(allocated_count);
+  check_not_null(used_count);
 
   if (*allocated_count == *used_count)
   {
     int reallocated_count = (*allocated_count) == 0 ? 4 : ((*allocated_count) * 2);
     reallocated_array = realloc(*array, sizeof(int) * reallocated_count);
     check_mem(reallocated_array);
+
     *array = reallocated_array;
     *allocated_count = reallocated_count;
   }
@@ -36,14 +37,15 @@ int array_add_pointer(void ***array, int *allocated_count, int *used_count, void
 {
   void **reallocated_array = NULL;
 
-  check(allocated_count != NULL, "allocated_count: NULL");
-  check(used_count != NULL, "used_count: NULL");
+  check_not_null(allocated_count);
+  check_not_null(used_count);
 
   if (*allocated_count == *used_count)
   {
     int reallocated_count = (*allocated_count) == 0 ? 4 : ((*allocated_count) * 2);
     reallocated_array = realloc(*array, sizeof(void *) * reallocated_count);
     check_mem(reallocated_array);
+
     *array = reallocated_array;
     *allocated_count = reallocated_count;
   }
@@ -63,14 +65,15 @@ int array_add_string(char ***array, int *allocated_count, int *used_count, char 
 {
   char **reallocated_array = NULL;
 
-  check(allocated_count != NULL, "allocated_count: NULL");
-  check(used_count != NULL, "used_count: NULL");
+  check_not_null(allocated_count);
+  check_not_null(used_count);
 
   if (*allocated_count == *used_count)
   {
     int reallocated_count = (*allocated_count) == 0 ? 4 : ((*allocated_count) * 2);
     reallocated_array = realloc(*array, sizeof(char *) * reallocated_count);
     check_mem(reallocated_array);
+
     *array = reallocated_array;
     *allocated_count = reallocated_count;
   }
@@ -94,12 +97,12 @@ int array_find_duplicates_int(int **array, int array_count, int **duplicate_inde
 
   hash_table_t *hash_table = NULL;
 
-  check(array != NULL, "array: NULL");
-  check(duplicate_indexes != NULL, "duplicate_indexes: NULL");
-  check(duplicate_indexes_count != NULL, "duplicate_indexes_count: NULL");
+  check_not_null(array);
+  check_not_null(duplicate_indexes);
+  check_not_null(duplicate_indexes_count);
 
   hash_table = hash_table_malloc(array_count);
-  check(hash_table != NULL, "hash_table: NULL");
+  check_not_null(hash_table);
 
   for (int i = 0; i < array_count; i++)
   {
@@ -108,9 +111,7 @@ int array_find_duplicates_int(int **array, int array_count, int **duplicate_inde
       continue;
     }
 
-    int hash_table_add_result = hash_table_add_int_int(hash_table, *(array[i]), i);
-    check(hash_table_add_result == 0, "hash_table_add_result: %d",
-      hash_table_add_result);
+    check_result(hash_table_add_int_int(hash_table, *(array[i]), i), 0);
   }
 
   int *values = NULL;
@@ -123,20 +124,17 @@ int array_find_duplicates_int(int **array, int array_count, int **duplicate_inde
       continue;
     }
 
-    int hash_table_get_result = hash_table_get_int_int(hash_table, *(array[i]), &values, &values_count);
-    check(hash_table_get_result == 0, "hash_table_get_result: %d",
-      hash_table_get_result);
+    check_result(hash_table_get_int_int(hash_table, *(array[i]), &values, &values_count), 0);
 
     if (values_count > 1)
     {
-      int array_add_result = array_add_int(
-        &duplicate_indexes_return,
-        &duplicate_indexes_allocated_count,
-        &duplicate_indexes_used_count,
-        i);
-
-      check(array_add_result == 0, "array_add_result: %d",
-        array_add_result);
+      check_result(
+        array_add_int(
+          &duplicate_indexes_return,
+          &duplicate_indexes_allocated_count,
+          &duplicate_indexes_used_count,
+          i),
+        0);
     }
   }
 
@@ -164,13 +162,13 @@ int array_find_unknowns_int(int **array, int array_count, int** known_array, int
 
   hash_table_t *hash_table = NULL;
 
-  check(array != NULL, "array: NULL");
-  check(known_array != NULL, "known_array: NULL");
-  check(unknown_indexes != NULL, "unknown_indexes: NULL");
-  check(unknown_indexes_count != NULL, "unknown_indexes_count: NULL");
+  check_not_null(array);
+  check_not_null(known_array);
+  check_not_null(unknown_indexes);
+  check_not_null(unknown_indexes_count);
 
   hash_table = hash_table_malloc(known_array_count);
-  check(hash_table != NULL, "hash_table: NULL");
+  check_not_null(hash_table);
 
   for (int i = 0; i < known_array_count; i++)
   {
@@ -179,9 +177,7 @@ int array_find_unknowns_int(int **array, int array_count, int** known_array, int
       continue;
     }
 
-    int hash_table_add_result = hash_table_add_int_int(hash_table, *(known_array[i]), i);
-    check(hash_table_add_result == 0, "hash_table_add_result: %d",
-      hash_table_add_result);
+    check_result(hash_table_add_int_int(hash_table, *(known_array[i]), i), 0);
   }
 
   int *values = NULL;
@@ -194,20 +190,17 @@ int array_find_unknowns_int(int **array, int array_count, int** known_array, int
       continue;
     }
 
-    int hash_table_get_result = hash_table_get_int_int(hash_table, *(array[i]), &values, &values_count);
-    check(hash_table_get_result == 0, "hash_table_get_result: %d",
-      hash_table_get_result);
+    check_result(hash_table_get_int_int(hash_table, *(array[i]), &values, &values_count), 0);
 
     if (values_count == 0)
     {
-      int array_add_result = array_add_int(
-        &unknown_indexes_return,
-        &unknown_indexes_allocated_count,
-        &unknown_indexes_used_count,
-        i);
-
-      check(array_add_result == 0, "array_add_result: %d",
-        array_add_result);
+      check_result(
+        array_add_int(
+          &unknown_indexes_return,
+          &unknown_indexes_allocated_count,
+          &unknown_indexes_used_count,
+          i),
+        0);
     }
   }
 

@@ -11,30 +11,19 @@
 
 // registers a route
 int http_route_register(
-  int (*service_parse_url)(
-    char *method,
-    char *url,
-    int *matched,
-    char ***url_tokens,
-    int *url_tokens_count),
-  int (*service_http)(
-    sqlite3 *sql_connection,
-    char **url_tokens,
-    int url_tokens_count,
-    json_t *request_json,
-    json_t **response_json,
-    json_context_t *response_json_context),
+  http_service_parse_url_t service_parse_url,
+  http_service_http_t service_http,
   http_route_t ***http_routes,
   int *http_routes_allocated_count,
   int *http_routes_used_count)
 {
   http_route_t *http_route = NULL;
 
-  check(service_parse_url != NULL, "service_parse_url: NULL");
-  check(service_http != NULL, "service_http: NULL");
-  check(http_routes != NULL, "http_routes: NULL");
-  check(http_routes_allocated_count != NULL, "http_routes_allocated_count: NULL");
-  check(http_routes_used_count != NULL, "http_routes_used_count: NULL");
+  check_not_null(service_parse_url);
+  check_not_null(service_http);
+  check_not_null(http_routes);
+  check_not_null(http_routes_allocated_count);
+  check_not_null(http_routes_used_count);
 
   http_route = malloc(sizeof(http_route_t));
   check_mem(http_route);
@@ -42,14 +31,13 @@ int http_route_register(
   http_route->service_parse_url = service_parse_url;
   http_route->service_http = service_http;
 
-  int array_add_pointer_result = array_add_pointer(
-    (void ***)(http_routes),
-    http_routes_allocated_count,
-    http_routes_used_count,
-    http_route);
-
-  check(array_add_pointer_result == 0, "array_add_pointer_result: %d",
-    array_add_pointer_result);
+  check_result(
+    array_add_pointer(
+      (void ***)(http_routes),
+      http_routes_allocated_count,
+      http_routes_used_count,
+      http_route),
+    0);
 
   http_route = NULL;
 
@@ -75,33 +63,36 @@ int http_match_route(
   char **url_tokens_return = NULL;
   int url_tokens_count_return = 0;
 
-  check(request != NULL, "request: NULL");
-  check(http_routes != NULL, "http_routes: NULL");
-  check(http_route != NULL, "http_route: NULL");
-  check(url_tokens != NULL, "url_tokens: NULL");
-  check(url_tokens_count != NULL, "url_tokens_count: NULL");
+  check_not_null(request);
+  check_not_null(http_routes);
+  check_not_null(http_route);
+  check_not_null(url_tokens);
+  check_not_null(url_tokens_count);
 
   char *method = FCGX_GetParam("REQUEST_METHOD", request->envp);
   char *url = FCGX_GetParam("REQUEST_URI", request->envp);
+
+  check_not_null(method);
+  check_not_null(url);
 
   for (int i = 0; i < http_routes_count; i++)
   {
     int matched = 0;
 
-    int service_parse_url_result = http_routes[i]->service_parse_url(
-      method,
-      url,
-      &matched,
-      &url_tokens_return,
-      &url_tokens_count_return);
+    http_service_parse_url_t service_parse_url = http_routes[i]->service_parse_url;
 
-    check(service_parse_url_result == 0, "service_parse_url_result: %d",
-      service_parse_url_result);
+    check_result(
+      service_parse_url(
+        method,
+        url,
+        &matched,
+        &url_tokens_return,
+        &url_tokens_count_return),
+      0);
 
     if (matched == 1)
     {
       http_route_return = http_routes[i];
-
       break;
     }
   }
@@ -135,47 +126,35 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
 
   sqlite3 *sql_connection = NULL;
 
-  check(request != NULL, "request: NULL");
-  check(http_routes != NULL, "http_routes: NULL");
+  check_not_null(request);
+  check_not_null(http_routes);
 
-  int http_match_route_result = http_match_route(
-    request,
-    http_routes,
-    http_routes_count,
-    &http_route,
-    &url_tokens,
-    &url_tokens_count);
-
-  check(http_match_route_result == 0, "http_match_route_result: %d",
-    http_match_route_result);
+  check_result(
+    http_match_route(
+      request,
+      http_routes,
+      http_routes_count,
+      &http_route,
+      &url_tokens,
+      &url_tokens_count),
+    0);
 
   if (http_route == NULL)
   {
-    int fastcgi_write_header_status_result = fastcgi_write_header(request->out, "Status", "404 Not Found", 1);
-    check(fastcgi_write_header_status_result == 0, "fastcgi_write_header_status_result: %d",
-      fastcgi_write_header_status_result);
-
+    check_result(fastcgi_write_header(request->out, "Status", "404 Not Found", 1), 0);
     return 0;
   }
 
-  int fastcgi_read_stream_result = fastcgi_read_stream(request->in, &request_body);
-  check(fastcgi_read_stream_result == 0, "fastcgi_read_stream_result: %d",
-    fastcgi_read_stream_result);
+  check_result(fastcgi_read_stream(request->in, &request_body), 0);
 
   if (request_body != NULL)
   {
-    int json_parse_string_result = json_parse_string(request_body, &request_json);
-    check(json_parse_string_result == 0, "json_parse_string_result: %d",
-      json_parse_string_result);
+    check_result(json_parse_string(request_body, &request_json), 0);
 
     if (request_json == NULL)
     {
-      int fastcgi_write_header_status_result = fastcgi_write_header(request->out, "Status", "400 Bad Request", 1);
-      check(fastcgi_write_header_status_result == 0, "fastcgi_write_header_status_result: %d",
-        fastcgi_write_header_status_result);
-
+      check_result(fastcgi_write_header(request->out, "Status", "400 Bad Request", 1), 0);
       array_free_string(url_tokens, url_tokens_count);
-
       free(request_body);
 
       return 0;
@@ -183,17 +162,14 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
   }
 
   response_json_context = json_context_malloc();
-  check(response_json_context != NULL, "response_json_context: NULL");
+  check_not_null(response_json_context);
 
-  int sql_connection_open_result = sql_connection_open("/var/web_api/database.db", &sql_connection);
-  check(sql_connection_open_result == 0, "sql_connection_open_result: %d",
-    sql_connection_open_result);
+  check_result(sql_connection_open("/var/web_api/database.db", &sql_connection), 0);
+  check_result(sql_transaction_begin(sql_connection), 0);
 
-  int sql_transaction_begin_result = sql_transaction_begin(sql_connection);
-  check(sql_transaction_begin_result == 0, "sql_transaction_begin_result: %d",
-    sql_transaction_begin_result);
+  http_service_http_t service_http = http_route->service_http;
 
-  int service_http_result = http_route->service_http(
+  int service_http_result = service_http(
     sql_connection,
     url_tokens,
     url_tokens_count,
@@ -201,70 +177,38 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
     &response_json,
     response_json_context);
 
-  check(service_http_result == 0 || service_http_result == 1, "service_http_result: %d",
-    service_http_result);
-
   if (service_http_result == 0)
   {
-    int sql_transaction_commit_result = sql_transaction_commit(sql_connection);
-    check(sql_transaction_commit_result == 0, "sql_transaction_commit_result: %d",
-      sql_transaction_commit_result);
+    check_result(sql_transaction_commit(sql_connection), 0);
   }
   else
   {
-    int sql_transaction_rollback_result = sql_transaction_rollback(sql_connection);
-    check(sql_transaction_rollback_result == 0, "sql_transaction_rollback_result: %d",
-      sql_transaction_rollback_result);
+    check_result(sql_transaction_rollback(sql_connection), 0);
   }
 
   sql_connection_close(sql_connection);
-
   sql_connection = NULL;
 
   if (service_http_result == 0)
   {
     if (response_json != NULL)
     {
-      int fastcgi_write_status_result = fastcgi_write_header(request->out, "Status", "200: OK", 0);
-      check(fastcgi_write_status_result == 0, "fastcgi_write_status_result: %d",
-        fastcgi_write_status_result);
-
-      int fastcgi_write_content_type_result = fastcgi_write_header(request->out, "Content-type", "application/json", 1);
-      check(fastcgi_write_content_type_result == 0, "fastcgi_write_content_type_result: %d",
-        fastcgi_write_content_type_result);
-
-      int json_format_string_result = json_format_string(response_json, &response_body);
-      check(json_format_string_result == 0, "json_format_string_result: %d",
-        json_format_string_result);
-
-      int fastcgi_write_body_result = fastcgi_write_body(request->out, response_body);
-      check(fastcgi_write_body_result == 0, "fastcgi_write_body_result: %d",
-        fastcgi_write_body_result);
+      check_result(fastcgi_write_header(request->out, "Status", "200: OK", 0), 0);
+      check_result(fastcgi_write_header(request->out, "Content-type", "application/json", 1), 0);
+      check_result(json_format_string(response_json, &response_body), 0);
+      check_result(fastcgi_write_body(request->out, response_body), 0);
     }
     else
     {
-      int fastcgi_write_status_result = fastcgi_write_header(request->out, "Status", "204: No Content", 1);
-      check(fastcgi_write_status_result == 0, "fastcgi_write_status_result: %d",
-        fastcgi_write_status_result);
+      check_result(fastcgi_write_header(request->out, "Status", "204: No Content", 1), 0);
     }
   }
   else
   {
-    int fastcgi_write_status_result = fastcgi_write_header(request->out, "Status", "422: Unprocessable Entity", 0);
-    check(fastcgi_write_status_result == 0, "fastcgi_write_status_result: %d",
-      fastcgi_write_status_result);
-
-    int fastcgi_write_content_type_result = fastcgi_write_header(request->out, "Content-type", "application/json", 1);
-    check(fastcgi_write_content_type_result == 0, "fastcgi_write_content_type_result: %d",
-      fastcgi_write_content_type_result);
-
-    int json_format_string_result = json_format_string(response_json, &response_body);
-    check(json_format_string_result == 0, "json_format_string_result: %d",
-      json_format_string_result);
-
-    int fastcgi_write_body_result = fastcgi_write_body(request->out, response_body);
-    check(fastcgi_write_body_result == 0, "fastcgi_write_body_result: %d",
-      fastcgi_write_body_result);
+    check_result(fastcgi_write_header(request->out, "Status", "422: Unprocessable Entity", 0), 0);
+    check_result(fastcgi_write_header(request->out, "Content-type", "application/json", 1), 0);
+    check_result(json_format_string(response_json, &response_body), 0);
+    check_result(fastcgi_write_body(request->out, response_body), 0);
   }
 
   json_context_free(response_json_context);
@@ -301,25 +245,18 @@ int http_serve_requests(http_route_t **http_routes, int http_routes_count)
 {
   FCGX_Request* request = NULL;
 
-  check(http_routes != NULL, "http_routes: NULL");
+  check_not_null(http_routes);
 
-  int init_result = FCGX_Init();
-  check(init_result == 0, "init_result: %d",
-    init_result);
+  check_result(FCGX_Init(), 0);
 
   request = malloc(sizeof(FCGX_Request));
   check_mem(request);
 
-  int init_request_result = FCGX_InitRequest(request, 0, 0);
-  check(init_request_result == 0, "init_request_result: %d",
-    init_request_result);
+  check_result(FCGX_InitRequest(request, 0, 0), 0);
 
   while (FCGX_Accept_r(request) == 0)
   {
-    int http_serve_request_result = http_serve_request(request, http_routes, http_routes_count);
-    check(http_serve_request_result == 0, "http_serve_request_result: %d",
-      http_serve_request_result);
-
+    check_result(http_serve_request(request, http_routes, http_routes_count), 0);
     FCGX_Finish_r(request);
   }
 

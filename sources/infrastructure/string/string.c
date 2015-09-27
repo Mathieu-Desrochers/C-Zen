@@ -9,8 +9,8 @@ int string_parse_int(char *string, int *value)
 {
   int value_return = 0;
 
-  check(string != NULL, "string: NULL");
-  check(value != NULL, "value: NULL");
+  check_not_null(string);
+  check_not_null(value);
 
   errno = 0;
 

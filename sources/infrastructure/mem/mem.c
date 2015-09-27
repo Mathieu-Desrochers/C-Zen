@@ -9,7 +9,7 @@ int malloc_memcpy_double(double **destination, double *source)
 {
   double *destination_return = NULL;
 
-  check(destination != NULL, "destination: NULL");
+  check_not_null(destination);
 
   if (source == NULL)
   {
@@ -38,7 +38,7 @@ int malloc_memcpy_int(int **destination, int *source)
 {
   int *destination_return = NULL;
 
-  check(destination != NULL, "destination: NULL");
+  check_not_null(destination);
 
   if (source == NULL)
   {
@@ -67,7 +67,7 @@ int malloc_memcpy_string(char **destination, char *source)
 {
   char *destination_return = NULL;
 
-  check(destination != NULL, "destination: NULL");
+  check_not_null(destination);
 
   if (source == NULL)
   {
@@ -96,7 +96,7 @@ int malloc_memcpy_time(time_t **destination, time_t *source)
 {
   time_t *destination_return = NULL;
 
-  check(destination != NULL, "destination: NULL");
+  check_not_null(destination);
 
   if (source == NULL)
   {
