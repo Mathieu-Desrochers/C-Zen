@@ -17,65 +17,50 @@ int get_order_response_http_format(get_order_response_t *get_order_response, jso
   json_t *order_item_json = NULL;
   json_t *order_items_json = NULL;
 
-  check(get_order_response != NULL, "get_order_response: NULL");
-  check(json != NULL, "json: NULL");
-  check(json_context != NULL, "json_context: NULL");
+  check_not_null(get_order_response);
+  check_not_null(json);
+  check_not_null(json_context);
 
   json_return = json_object_malloc();
-  check(json_return != NULL, "json_return: NULL");
+  check_not_null(json_return);
 
   int *order_id = get_order_response->order_id;
-  int json_object_set_order_id_result = json_object_set_int(json_return, "order-id", order_id, json_context);
-  check(json_object_set_order_id_result == 0, "json_object_set_order_id_result: %d",
-    json_object_set_order_id_result);
+  check_result(json_object_set_int(json_return, "order-id", order_id, json_context), 0);
 
   char *customer_name = get_order_response->customer_name;
-  int json_object_set_customer_name_result = json_object_set_string(json_return, "customer-name", customer_name, json_context);
-  check(json_object_set_customer_name_result == 0, "json_object_set_customer_name_result: %d",
-    json_object_set_customer_name_result);
+  check_result(json_object_set_string(json_return, "customer-name", customer_name, json_context), 0);
 
-  placed_on_date_time_string = format_utc_date_time(*(get_order_response->placed_on_date_time));
-  check(placed_on_date_time_string != NULL, "placed_on_date_time_string: NULL");
-
-  int json_object_set_placed_on_date_time_result = json_object_set_string(
-    json_return,
-    "placed-on-date-time",
-    placed_on_date_time_string,
-    json_context);
-
-  check(json_object_set_placed_on_date_time_result == 0, "json_object_set_placed_on_date_time_result: %d",
-    json_object_set_placed_on_date_time_result);
+  time_t *placed_on_date_time = get_order_response->placed_on_date_time;
+  placed_on_date_time_string = format_utc_date_time(*placed_on_date_time);
+  check_not_null(placed_on_date_time_string);
+  check_result(json_object_set_string(json_return, "placed-on-date-time", placed_on_date_time_string, json_context), 0);
 
   order_items_json = json_array_malloc();
-  check(order_items_json != NULL, "order_items_json: NULL");
+  check_not_null(order_items_json);
 
   for (int i = 0; i < get_order_response->order_items_count; i++)
   {
-    int get_order_response_order_item_http_format_result = get_order_response_order_item_http_format(
-      get_order_response->order_items[i],
-      &order_item_json,
-      json_context);
+    check_result(
+      get_order_response_order_item_http_format(
+        get_order_response->order_items[i],
+        &order_item_json,
+        json_context),
+      0);
 
-    check(get_order_response_order_item_http_format_result == 0, "get_order_response_order_item_http_format_result: %d",
-      get_order_response_order_item_http_format_result);
-
-    int json_array_add_order_item_result = json_array_add_object(order_items_json, order_item_json, json_context);
-    check(json_array_add_order_item_result == 0, "json_array_add_order_item_result: %d",
-      json_array_add_order_item_result);
-
-    json_free(order_item_json);
+    check_result(
+      json_array_add_object(
+        order_items_json,
+        order_item_json,
+        json_context),
+      0);
 
     order_item_json = NULL;
   }
 
-  int json_object_set_order_items_result = json_object_set_array(json_return, "order-items", order_items_json, json_context);
-  check(json_object_set_order_items_result == 0, "json_object_set_order_items_result: %d",
-    json_object_set_order_items_result);
+  check_result(json_object_set_array(json_return, "order-items", order_items_json, json_context), 0);
 
   int *total = get_order_response->total;
-  int json_object_set_total_result = json_object_set_int(json_return, "total", total, json_context);
-  check(json_object_set_total_result == 0, "json_object_set_total_result: %d",
-    json_object_set_total_result);
+  check_result(json_object_set_int(json_return, "total", total, json_context), 0);
 
   free(placed_on_date_time_string);
 

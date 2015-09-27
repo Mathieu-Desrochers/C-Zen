@@ -18,19 +18,18 @@ int get_order_request_http_parse(
 
   int *order_id = NULL;
 
-  check(url_tokens != NULL, "url_tokens: NULL");
-  check(url_tokens_count == 1, "url_tokens_count: %d", url_tokens_count);
-  check(get_order_request != NULL, "get_order_request: NULL");
+  check_not_null(url_tokens);
+  check_not_null(get_order_request);
+
+  check_int(url_tokens_count, 1);
 
   order_id = malloc(sizeof(int));
   check_mem(order_id);
 
-  int string_parse_int_result = string_parse_int(url_tokens[0], order_id);
-  check(string_parse_int_result == 0, "string_parse_int_result: %d",
-    string_parse_int_result);
+  check_result(string_parse_int(url_tokens[0], order_id), 0);
 
   get_order_request_return = get_order_request_malloc(order_id);
-  check(get_order_request_return != NULL, "get_order_request_return: NULL");
+  check_not_null(get_order_request_return);
 
   free(order_id);
 
@@ -56,35 +55,35 @@ int get_order_request_http_format_errors(
   json_t *json_return = NULL;
   char *validation_error_code = NULL;
 
-  check(validation_errors != NULL, "validation_errors: NULL");
-  check(json != NULL, "json: NULL");
-  check(json_context != NULL, "json_context: NULL");
+  check_not_null(validation_errors);
+  check_not_null(json);
+  check_not_null(json_context);
 
   json_return = json_array_malloc();
-  check(json_return != NULL, "json_return: NULL");
+  check_not_null(json_return);
 
   validation_error_code = calloc(1024, sizeof(char));
   check_mem(validation_error_code);
 
   for (int i = 0; i < validation_errors_count; i++)
   {
+    char *validation_error_json = validation_errors_json[validation_errors[i]->error_code];
+
     if (validation_errors[i]->validation_path->property == GET_ORDER_REQUEST_ORDER_ID)
     {
-      int sprintf_result = sprintf(validation_error_code, "order-id-%s",
-        validation_errors_json[validation_errors[i]->error_code]);
-
-      check(sprintf_result > 0, "sprintf_result: %d",
-        sprintf_result);
+      check_result_greater(sprintf(validation_error_code, "order-id-%s", validation_error_json), 0);
+    }
+    else
+    {
+      sentinel("validation_path->property: %d", validation_errors[i]->validation_path->property);
     }
 
-    check(validation_error_code[0] != '\0', "validation_error_code: '%s'",
-      validation_error_code);
-
-    int json_array_add_string_result = json_array_add_string(json_return, validation_error_code, json_context);
-    check(json_array_add_string_result == 0, "json_array_add_string_result: %d",
-      json_array_add_string_result);
-
-    validation_error_code[0] = '\0';
+    check_result(
+      json_array_add_string(
+        json_return,
+        validation_error_code,
+        json_context),
+      0);
   }
 
   free(validation_error_code);

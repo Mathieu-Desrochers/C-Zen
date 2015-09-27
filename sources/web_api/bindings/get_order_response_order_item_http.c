@@ -13,27 +13,21 @@ int get_order_response_order_item_http_format(
 {
   json_t *json_return = NULL;
 
-  check(get_order_response_order_item != NULL, "get_order_response_order_item: NULL");
-  check(json != NULL, "json: NULL");
-  check(json_context != NULL, "json_context: NULL");
+  check_not_null(get_order_response_order_item);
+  check_not_null(json);
+  check_not_null(json_context);
 
   json_return = json_object_malloc();
-  check(json_return != NULL, "json_return: NULL");
+  check_not_null(json_return);
 
   int *order_item_id = get_order_response_order_item->order_item_id;
-  int json_object_set_order_item_id_result = json_object_set_int(json_return, "order-item-id", order_item_id, json_context);
-  check(json_object_set_order_item_id_result == 0, "json_object_set_order_item_id_result: %d",
-    json_object_set_order_item_id_result);
+  check_result(json_object_set_int(json_return, "order-item-id", order_item_id, json_context), 0);
 
   char *name = get_order_response_order_item->name;
-  int json_object_set_name_result = json_object_set_string(json_return, "name", name, json_context);
-  check(json_object_set_name_result == 0, "json_object_set_name_result: %d",
-    json_object_set_name_result);
+  check_result(json_object_set_string(json_return, "name", name, json_context), 0);
 
   double *quantity = get_order_response_order_item->quantity;
-  int json_object_set_quantity_result = json_object_set_double(json_return, "quantity", quantity, json_context);
-  check(json_object_set_quantity_result == 0, "json_object_set_quantity_result: %d",
-    json_object_set_quantity_result);
+  check_result(json_object_set_double(json_return, "quantity", quantity, json_context), 0);
 
   *json = json_return;
 

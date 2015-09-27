@@ -17,20 +17,22 @@ int get_order_service_parse_url(char *method, char *url, int *matched, char ***u
   char **url_tokens_return = NULL;
   int url_tokens_count_return = 0;
 
-  check(method != NULL, "method: NULL");
-  check(url != NULL, "url: NULL");
+  check_not_null(method);
+  check_not_null(url);
+  check_not_null(matched);
+  check_not_null(url_tokens);
+  check_not_null(url_tokens_count);
 
   if (strcmp(method, "GET") == 0)
   {
-    int regex_match_result = regex_match(
-      "^/orders/(\\d+)$",
-      url,
-      &matched_return,
-      &url_tokens_return,
-      &url_tokens_count_return);
-
-    check(regex_match_result == 0, "regex_match_result: %d",
-      regex_match_result);
+    check_result(
+      regex_match(
+        "^/orders/(\\d+)$",
+        url,
+        &matched_return,
+        &url_tokens_return,
+        &url_tokens_count_return),
+      0);
   }
   else
   {
@@ -67,49 +69,45 @@ int get_order_service_http(
   validation_error_t **validation_errors = NULL;
   int validation_errors_count = 0;
 
-  check(sql_connection != NULL, "sql_connection: NULL");
-  check(response_json != NULL, "response_json: NULL");
-  check(response_json_context != NULL, "response_json_context: NULL");
+  check_not_null(sql_connection);
+  check_not_null(response_json);
+  check_not_null(response_json_context);
 
-  int get_order_request_http_parse_result = get_order_request_http_parse(
-    url_tokens,
-    url_tokens_count,
-    request_json,
-    &get_order_request);
+  check_result(
+    get_order_request_http_parse(
+      url_tokens,
+      url_tokens_count,
+      request_json,
+      &get_order_request),
+    0);
 
-  check(get_order_request_http_parse_result == 0, "get_order_request_http_parse_result: %d",
-    get_order_request_http_parse_result);
-
-  int get_order_service_result = get_order_service(
-    sql_connection,
-    get_order_request,
-    &get_order_response,
-    &validation_errors,
-    &validation_errors_count);
-
-  check(get_order_service_result == 0, "get_order_service_result: %d",
-    get_order_service_result);
+  check_result(
+    get_order_service(
+      sql_connection,
+      get_order_request,
+      &get_order_response,
+      &validation_errors,
+      &validation_errors_count),
+    0);
 
   if (validation_errors == NULL)
   {
-    int get_order_response_http_format_result = get_order_response_http_format(
-      get_order_response,
-      &response_json_return,
-      response_json_context);
-
-    check(get_order_response_http_format_result == 0, "get_order_response_http_format_result: %d",
-      get_order_response_http_format_result);
+    check_result(
+      get_order_response_http_format(
+        get_order_response,
+        &response_json_return,
+        response_json_context),
+      0);
   }
   else
   {
-    int get_order_request_http_format_errors_result = get_order_request_http_format_errors(
-      validation_errors,
-      validation_errors_count,
-      &response_json_return,
-      response_json_context);
-
-    check(get_order_request_http_format_errors_result == 0, "get_order_request_http_format_errors_result: %d",
-      get_order_request_http_format_errors_result);
+    check_result(
+      get_order_request_http_format_errors(
+        validation_errors,
+        validation_errors_count,
+        &response_json_return,
+        response_json_context),
+      0);
 
     return_value = 1;
   }

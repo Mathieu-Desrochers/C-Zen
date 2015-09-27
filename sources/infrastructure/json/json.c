@@ -510,7 +510,7 @@ int json_object_set_array(json_t *object, char *key, json_t *value, json_context
 
   if (value != NULL)
   {
-    check_result(json_object_set(object, key, value), 0);
+    check_result(json_object_set_new(object, key, value), 0);
   }
   else
   {
@@ -629,7 +629,7 @@ int json_object_set_object(json_t *object, char *key, json_t *value, json_contex
 
   if (value != NULL)
   {
-    check_result(json_object_set(object, key, value), 0);
+    check_result(json_object_set_new(object, key, value), 0);
   }
   else
   {
@@ -697,7 +697,7 @@ int json_array_add_array(json_t *array, json_t *value, json_context_t *json_cont
 
   if (value != NULL)
   {
-    check_result(json_array_append(array, value), 0);
+    check_result(json_array_append_new(array, value), 0);
   }
   else
   {
@@ -812,7 +812,7 @@ int json_array_add_object(json_t *array, json_t *value, json_context_t *json_con
 
   if (value != NULL)
   {
-    check_result(json_array_append(array, value), 0);
+    check_result(json_array_append_new(array, value), 0);
   }
   else
   {

@@ -16,10 +16,10 @@ int get_orders_request_http_parse(
 {
   get_orders_request_t *get_orders_request_return = NULL;
 
-  check(get_orders_request != NULL, "get_orders_request: NULL");
+  check_not_null(get_orders_request);
 
   get_orders_request_return = get_orders_request_malloc();
-  check(get_orders_request_return != NULL, "get_orders_request_return: NULL");
+  check_not_null(get_orders_request_return);
 
   *get_orders_request = get_orders_request_return;
 
@@ -42,26 +42,19 @@ int get_orders_request_http_format_errors(
   json_t *json_return = NULL;
   char *validation_error_code = NULL;
 
-  check(validation_errors != NULL, "validation_errors: NULL");
-  check(json != NULL, "json: NULL");
-  check(json_context != NULL, "json_context: NULL");
+  check_not_null(validation_errors);
+  check_not_null(json);
+  check_not_null(json_context);
 
   json_return = json_array_malloc();
-  check(json_return != NULL, "json_return: NULL");
+  check_not_null(json_return);
 
   validation_error_code = calloc(1024, sizeof(char));
   check_mem(validation_error_code);
 
   for (int i = 0; i < validation_errors_count; i++)
   {
-    check(validation_error_code[0] != '\0', "validation_error_code: '%s'",
-      validation_error_code);
-
-    int json_array_add_string_result = json_array_add_string(json_return, validation_error_code, json_context);
-    check(json_array_add_string_result == 0, "json_array_add_string_result: %d",
-      json_array_add_string_result);
-
-    validation_error_code[0] = '\0';
+    sentinel("validation_path->property: %d", validation_errors[i]->validation_path->property);
   }
 
   free(validation_error_code);

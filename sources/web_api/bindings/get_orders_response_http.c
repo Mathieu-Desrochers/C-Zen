@@ -15,28 +15,28 @@ int get_orders_response_http_format(get_orders_response_t *get_orders_response, 
 
   json_t *order_json = NULL;
 
-  check(get_orders_response != NULL, "get_orders_response: NULL");
-  check(json != NULL, "json: NULL");
-  check(json_context != NULL, "json_context: NULL");
+  check_not_null(get_orders_response);
+  check_not_null(json);
+  check_not_null(json_context);
 
   json_return = json_array_malloc();
-  check(json_return != NULL, "json_return: NULL");
+  check_not_null(json_return);
 
   for (int i = 0; i < get_orders_response->orders_count; i++)
   {
-    int get_orders_response_order_http_format_result = get_orders_response_order_http_format(
-      get_orders_response->orders[i],
-      &order_json,
-      json_context);
+    check_result(
+      get_orders_response_order_http_format(
+        get_orders_response->orders[i],
+        &order_json,
+        json_context),
+      0);
 
-    check(get_orders_response_order_http_format_result == 0, "get_orders_response_order_http_format_result: %d",
-      get_orders_response_order_http_format_result);
-
-    int json_array_add_order_result = json_array_add_object(json_return, order_json, json_context);
-    check(json_array_add_order_result == 0, "json_array_add_order_result: %d",
-      json_array_add_order_result);
-
-    json_free(order_json);
+    check_result(
+      json_array_add_object(
+        json_return,
+        order_json,
+        json_context),
+      0);
 
     order_json = NULL;
   }
