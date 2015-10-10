@@ -7,6 +7,12 @@
 // parses an update order request order item
 int update_order_request_order_item_http_parse(json_t *json, update_order_request_order_item_t **update_order_request_order_item);
 
+// parses an array of update order request order items
+int update_order_request_order_items_http_parse(
+  json_t *json,
+  update_order_request_order_item_t ***update_order_request_order_items,
+  int *update_order_request_order_items_count);
+
 // formats an update order request order item error
 int update_order_request_order_item_http_format_error(
   validation_error_t *validation_error,

@@ -10,17 +10,15 @@ int new_order_response_http_format(new_order_response_t *new_order_response, jso
 {
   json_t *json_return = NULL;
 
-  check(new_order_response != NULL, "new_order_response: NULL");
-  check(json != NULL, "json: NULL");
-  check(json_context != NULL, "json_context: NULL");
+  check_not_null(new_order_response);
+  check_not_null(json);
+  check_not_null(json_context);
 
   json_return = json_object_malloc();
-  check(json_return != NULL, "json_return: NULL");
+  check_not_null(json_return);
 
   int *order_id = new_order_response->order_id;
-  int json_object_set_order_id_result = json_object_set_int(json_return, "order-id", order_id, json_context);
-  check(json_object_set_order_id_result == 0, "json_object_set_order_id_result: %d",
-    json_object_set_order_id_result);
+  check_result(json_object_set_int(json_return, "order-id", order_id, json_context), 0);
 
   *json = json_return;
 

@@ -10,9 +10,9 @@ int update_order_response_http_format(update_order_response_t *update_order_resp
 {
   json_t *json_return = NULL;
 
-  check(update_order_response != NULL, "update_order_response: NULL");
-  check(json != NULL, "json: NULL");
-  check(json_context != NULL, "json_context: NULL");
+  check_not_null(update_order_response);
+  check_not_null(json);
+  check_not_null(json_context);
 
   *json = json_return;
 

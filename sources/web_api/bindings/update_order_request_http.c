@@ -21,88 +21,39 @@ int update_order_request_http_parse(
 
   int *order_id = NULL;
   char *customer_name = NULL;
-  update_order_request_order_item_t *update_order_request_order_item = NULL;
   update_order_request_order_item_t **update_order_request_order_items = NULL;
   int update_order_request_order_items_count = 0;
   int *total = NULL;
 
-  check(update_order_request != NULL, "update_order_request: NULL");
+  check_not_null(update_order_request);
 
   if (json == NULL)
   {
     update_order_request_return = update_order_request_malloc(NULL, NULL, NULL);
-    check(update_order_request_return != NULL, "update_order_request_return: NULL");
+    check_not_null(update_order_request_return);
 
     *update_order_request = update_order_request_return;
 
     return 0;
   }
 
-  int json_object_get_order_id_result = json_object_get_int(json, "order-id", &order_id);
-  check(json_object_get_order_id_result == 0, "json_object_get_order_id_result: %d",
-    json_object_get_order_id_result);
-
-  int json_object_get_customer_name_result = json_object_get_string(json, "customer-name", &customer_name);
-  check(json_object_get_customer_name_result == 0, "json_object_get_customer_name_result: %d",
-    json_object_get_customer_name_result);
-
-  int json_object_get_total_result = json_object_get_int(json, "total", &total);
-  check(json_object_get_total_result == 0, "json_object_get_total_result: %d",
-    json_object_get_total_result);
+  check_result(json_object_get_int(json, "order-id", &order_id), 0);
+  check_result(json_object_get_string(json, "customer-name", &customer_name), 0);
+  check_result(json_object_get_int(json, "total", &total), 0);
 
   update_order_request_return = update_order_request_malloc(
     order_id,
     customer_name,
     total);
 
-  check(update_order_request_return != NULL, "update_order_request_return: NULL");
+  check_not_null(update_order_request_return);
 
-  json_t *order_items_json = NULL;
-  int order_items_json_count = 0;
-
-  int json_object_get_order_items_result = json_object_get_array(
-    json,
-    "order-items",
-    &order_items_json,
-    &order_items_json_count);
-
-  check(json_object_get_order_items_result == 0, "json_object_get_order_items_result: %d",
-    json_object_get_order_items_result);
-
-  if (order_items_json != NULL)
-  {
-    update_order_request_order_items = malloc(sizeof(update_order_request_order_item_t *) * order_items_json_count);
-    check_mem(update_order_request_order_items);
-
-    for (int i = 0; i < order_items_json_count; i++)
-    {
-      json_t *order_item_json = NULL;
-
-      int json_array_get_order_item_result = json_array_get_object(order_items_json, i, &order_item_json);
-      check(json_array_get_order_item_result == 0, "json_array_get_order_item_result: %d",
-        json_array_get_order_item_result);
-
-      if (order_item_json != NULL)
-      {
-        int update_order_request_order_item_http_parse_result = update_order_request_order_item_http_parse(
-          order_item_json,
-          &update_order_request_order_item);
-
-        check(update_order_request_order_item_http_parse_result == 0, "update_order_request_order_item_http_parse_result: %d",
-          update_order_request_order_item_http_parse_result);
-
-        update_order_request_order_items[i] = update_order_request_order_item;
-        update_order_request_order_items_count++;
-
-        update_order_request_order_item = NULL;
-      }
-      else
-      {
-        update_order_request_order_items[i] = NULL;
-        update_order_request_order_items_count++;
-      }
-    }
-  }
+  check_result(
+    update_order_request_order_items_http_parse(
+      json,
+      &update_order_request_order_items,
+      &update_order_request_order_items_count),
+    0);
 
   update_order_request_return->order_items = update_order_request_order_items;
   update_order_request_return->order_items_count = update_order_request_order_items_count;
@@ -120,7 +71,6 @@ error:
   if (update_order_request_return != NULL) { update_order_request_free(update_order_request_return); }
   if (order_id != NULL) { free(order_id); }
   if (customer_name != NULL) { free(customer_name); }
-  if (update_order_request_order_item != NULL) { update_order_request_order_item_free(update_order_request_order_item); }
   if (total != NULL) { free(total); }
 
   if (update_order_request_order_items != NULL)
@@ -141,74 +91,58 @@ int update_order_request_http_format_errors(
   json_t *json_return = NULL;
   char *validation_error_code = NULL;
 
-  check(validation_errors != NULL, "validation_errors: NULL");
-  check(json != NULL, "json: NULL");
-  check(json_context != NULL, "json_context: NULL");
+  check_not_null(validation_errors);
+  check_not_null(json);
+  check_not_null(json_context);
 
   json_return = json_array_malloc();
-  check(json_return != NULL, "json_return: NULL");
+  check_not_null(json_return);
 
   validation_error_code = calloc(1024, sizeof(char));
   check_mem(validation_error_code);
 
   for (int i = 0; i < validation_errors_count; i++)
   {
+    char *validation_error_json = validation_errors_json[validation_errors[i]->error_code];
+
     if (validation_errors[i]->validation_path->property == UPDATE_ORDER_REQUEST_ORDER_ID)
     {
-      int sprintf_result = sprintf(validation_error_code, "order-id-%s",
-        validation_errors_json[validation_errors[i]->error_code]);
-
-      check(sprintf_result > 0, "sprintf_result: %d",
-        sprintf_result);
+      check_result_greater(sprintf(validation_error_code, "order-id-%s", validation_error_json), 0);
     }
-
-    if (validation_errors[i]->validation_path->property == UPDATE_ORDER_REQUEST_CUSTOMER_NAME)
+    else if (validation_errors[i]->validation_path->property == UPDATE_ORDER_REQUEST_CUSTOMER_NAME)
     {
-      int sprintf_result = sprintf(validation_error_code, "customer-name-%s",
-        validation_errors_json[validation_errors[i]->error_code]);
-
-      check(sprintf_result > 0, "sprintf_result: %d",
-        sprintf_result);
+      check_result_greater(sprintf(validation_error_code, "customer-name-%s", validation_error_json), 0);
     }
-
-    if (validation_errors[i]->validation_path->property == UPDATE_ORDER_REQUEST_ORDER_ITEMS)
+    else if (validation_errors[i]->validation_path->property == UPDATE_ORDER_REQUEST_ORDER_ITEMS)
     {
       if (validation_errors[i]->validation_path->index == -1)
       {
-        int sprintf_result = sprintf(validation_error_code, "order-items-%s",
-          validation_errors_json[validation_errors[i]->error_code]);
-
-        check(sprintf_result > 0, "sprintf_result: %d",
-          sprintf_result);
+        check_result_greater(sprintf(validation_error_code, "order-items-%s", validation_error_json), 0);
       }
       else
       {
-        int update_order_request_order_item_http_format_error_result = update_order_request_order_item_http_format_error(
-          validation_errors[i], validation_error_code);
-
-        check(update_order_request_order_item_http_format_error_result == 0,
-          "update_order_request_order_item_http_format_error_result: %d",
-          update_order_request_order_item_http_format_error_result);
+        check_result(
+          update_order_request_order_item_http_format_error(
+            validation_errors[i],
+            validation_error_code),
+          0);
       }
     }
-
-    if (validation_errors[i]->validation_path->property == UPDATE_ORDER_REQUEST_TOTAL)
+    else if (validation_errors[i]->validation_path->property == UPDATE_ORDER_REQUEST_TOTAL)
     {
-      int sprintf_result = sprintf(validation_error_code, "total-%s",
-        validation_errors_json[validation_errors[i]->error_code]);
-
-      check(sprintf_result > 0, "sprintf_result: %d",
-        sprintf_result);
+      check_result_greater(sprintf(validation_error_code, "total-%s", validation_error_json), 0);
+    }
+    else
+    {
+      sentinel("validation_path->property: %d", validation_errors[i]->validation_path->property);
     }
 
-    check(validation_error_code[0] != '\0', "validation_error_code: '%s'",
-      validation_error_code);
-
-    int json_array_add_string_result = json_array_add_string(json_return, validation_error_code, json_context);
-    check(json_array_add_string_result == 0, "json_array_add_string_result: %d",
-      json_array_add_string_result);
-
-    validation_error_code[0] = '\0';
+    check_result(
+      json_array_add_string(
+        json_return,
+        validation_error_code,
+        json_context),
+      0);
   }
 
   free(validation_error_code);
