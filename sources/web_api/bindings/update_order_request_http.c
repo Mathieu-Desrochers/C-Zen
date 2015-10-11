@@ -8,7 +8,6 @@
 #include "../../web_api/bindings/update_order_request_order_item_http.h"
 #include "../../web_api/services/update_order_request.h"
 #include "../../web_api/services/update_order_request_order_item.h"
-#include "../../web_api/services/update_order_service.h"
 
 // parses an update order request
 int update_order_request_http_parse(
@@ -48,9 +47,21 @@ int update_order_request_http_parse(
 
   check_not_null(update_order_request_return);
 
+  json_t *order_items_json = NULL;
+  int order_items_json_count = 0;
+
+  check_result(
+    json_object_get_array(
+      json,
+      "order-items",
+      &order_items_json,
+      &order_items_json_count),
+    0);
+
   check_result(
     update_order_request_order_items_http_parse(
-      json,
+      order_items_json,
+      order_items_json_count,
       &update_order_request_order_items,
       &update_order_request_order_items_count),
     0);

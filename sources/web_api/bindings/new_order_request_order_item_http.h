@@ -9,7 +9,8 @@ int new_order_request_order_item_http_parse(json_t *json, new_order_request_orde
 
 // parses an array of new order request order items
 int new_order_request_order_items_http_parse(
-  json_t *json,
+  json_t *order_items_json,
+  int order_items_json_count,
   new_order_request_order_item_t ***new_order_request_order_items,
   int *new_order_request_order_items_count);
 

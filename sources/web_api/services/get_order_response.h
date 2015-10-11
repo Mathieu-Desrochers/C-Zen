@@ -1,6 +1,7 @@
 #ifndef GET_ORDER_RESPONSE_H
 #define GET_ORDER_RESPONSE_H
 
+#include "../../infrastructure/time/time.h"
 #include "../../web_api/services/get_order_response_order_item.h"
 
 // represents a get order response

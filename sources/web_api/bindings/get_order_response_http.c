@@ -14,7 +14,6 @@ int get_order_response_http_format(get_order_response_t *get_order_response, jso
   json_t *json_return = NULL;
 
   char *placed_on_date_time_string = NULL;
-  json_t *order_item_json = NULL;
   json_t *order_items_json = NULL;
 
   check_not_null(get_order_response);
@@ -35,32 +34,26 @@ int get_order_response_http_format(get_order_response_t *get_order_response, jso
   check_not_null(placed_on_date_time_string);
   check_result(json_object_set_string(json_return, "placed-on-date-time", placed_on_date_time_string, json_context), 0);
 
-  order_items_json = json_array_malloc();
-  check_not_null(order_items_json);
-
-  for (int i = 0; i < get_order_response->order_items_count; i++)
-  {
-    check_result(
-      get_order_response_order_item_http_format(
-        get_order_response->order_items[i],
-        &order_item_json,
-        json_context),
-      0);
-
-    check_result(
-      json_array_add_object(
-        order_items_json,
-        order_item_json,
-        json_context),
-      0);
-
-    order_item_json = NULL;
-  }
-
-  check_result(json_object_set_array(json_return, "order-items", order_items_json, json_context), 0);
-
   int *total = get_order_response->total;
   check_result(json_object_set_int(json_return, "total", total, json_context), 0);
+
+  check_result(
+    get_order_response_order_items_http_format(
+      get_order_response->order_items,
+      get_order_response->order_items_count,
+      &order_items_json,
+      json_context),
+    0);
+
+  check_result(
+    json_object_set_array(
+      json_return,
+      "order-items",
+      order_items_json,
+      json_context),
+    0);
+
+  order_items_json = NULL;
 
   free(placed_on_date_time_string);
 
@@ -72,7 +65,6 @@ error:
 
   if (json_return != NULL) { json_free(json_return); }
   if (placed_on_date_time_string != NULL) { free(placed_on_date_time_string); }
-  if (order_item_json != NULL) { json_free(order_item_json); }
   if (order_items_json != NULL) { json_free(order_items_json); }
 
   return -1;

@@ -13,33 +13,17 @@ int get_orders_response_http_format(get_orders_response_t *get_orders_response, 
 {
   json_t *json_return = NULL;
 
-  json_t *order_json = NULL;
-
   check_not_null(get_orders_response);
   check_not_null(json);
   check_not_null(json_context);
 
-  json_return = json_array_malloc();
-  check_not_null(json_return);
-
-  for (int i = 0; i < get_orders_response->orders_count; i++)
-  {
-    check_result(
-      get_orders_response_order_http_format(
-        get_orders_response->orders[i],
-        &order_json,
-        json_context),
-      0);
-
-    check_result(
-      json_array_add_object(
-        json_return,
-        order_json,
-        json_context),
-      0);
-
-    order_json = NULL;
-  }
+  check_result(
+    get_orders_response_orders_http_format(
+      get_orders_response->orders,
+      get_orders_response->orders_count,
+      &json_return,
+      json_context),
+    0);
 
   *json = json_return;
 
@@ -48,7 +32,6 @@ int get_orders_response_http_format(get_orders_response_t *get_orders_response, 
 error:
 
   if (json_return != NULL) { json_free(json_return); }
-  if (order_json != NULL) { json_free(order_json); }
 
   return -1;
 }

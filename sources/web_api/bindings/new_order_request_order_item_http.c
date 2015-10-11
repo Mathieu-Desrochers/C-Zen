@@ -48,7 +48,8 @@ error:
 
 // parses an array of new order request order items
 int new_order_request_order_items_http_parse(
-  json_t *json,
+  json_t *order_items_json,
+  int order_items_json_count,
   new_order_request_order_item_t ***new_order_request_order_items,
   int *new_order_request_order_items_count)
 {
@@ -57,16 +58,9 @@ int new_order_request_order_items_http_parse(
 
   new_order_request_order_item_t *new_order_request_order_item = NULL;
 
-  json_t *order_items_json = NULL;
-  int order_items_json_count = 0;
-
-  check_result(
-    json_object_get_array(
-      json,
-      "order-items",
-      &order_items_json,
-      &order_items_json_count),
-    0);
+  check_not_null(order_items_json);
+  check_not_null(new_order_request_order_items);
+  check_not_null(new_order_request_order_items_count);
 
   if (order_items_json != NULL)
   {
@@ -88,15 +82,14 @@ int new_order_request_order_items_http_parse(
           0);
 
         new_order_request_order_items_return[i] = new_order_request_order_item;
-        new_order_request_order_items_count_return++;
-
         new_order_request_order_item = NULL;
       }
       else
       {
         new_order_request_order_items_return[i] = NULL;
-        new_order_request_order_items_count_return++;
       }
+
+      new_order_request_order_items_count_return++;
     }
   }
 

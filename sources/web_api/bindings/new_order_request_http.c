@@ -44,9 +44,21 @@ int new_order_request_http_parse(
 
   check_not_null(new_order_request_return);
 
+  json_t *order_items_json = NULL;
+  int order_items_json_count = 0;
+
+  check_result(
+    json_object_get_array(
+      json,
+      "order-items",
+      &order_items_json,
+      &order_items_json_count),
+    0);
+
   check_result(
     new_order_request_order_items_http_parse(
-      json,
+      order_items_json,
+      order_items_json_count,
       &new_order_request_order_items,
       &new_order_request_order_items_count),
     0);

@@ -53,7 +53,8 @@ error:
 
 // parses an array of update order request order items
 int update_order_request_order_items_http_parse(
-  json_t *json,
+  json_t *order_items_json,
+  int order_items_json_count,
   update_order_request_order_item_t ***update_order_request_order_items,
   int *update_order_request_order_items_count)
 {
@@ -62,16 +63,9 @@ int update_order_request_order_items_http_parse(
 
   update_order_request_order_item_t *update_order_request_order_item = NULL;
 
-  json_t *order_items_json = NULL;
-  int order_items_json_count = 0;
-
-  check_result(
-    json_object_get_array(
-      json,
-      "order-items",
-      &order_items_json,
-      &order_items_json_count),
-    0);
+  check_not_null(order_items_json);
+  check_not_null(update_order_request_order_items);
+  check_not_null(update_order_request_order_items_count);
 
   if (order_items_json != NULL)
   {
@@ -93,15 +87,14 @@ int update_order_request_order_items_http_parse(
           0);
 
         update_order_request_order_items_return[i] = update_order_request_order_item;
-        update_order_request_order_items_count_return++;
-
         update_order_request_order_item = NULL;
       }
       else
       {
         update_order_request_order_items_return[i] = NULL;
-        update_order_request_order_items_count_return++;
       }
+
+      update_order_request_order_items_count_return++;
     }
   }
 
