@@ -12,16 +12,37 @@ int sql_connection_open(char *filename, sqlite3 **sql_connection)
 {
   sqlite3 *sql_connection_return = NULL;
 
+  sqlite3_stmt *sql_statement_synchronous = NULL;
+  sqlite3_stmt *sql_statement_foreign_keys = NULL;
+
   check_not_null(filename);
   check_not_null(sql_connection);
 
   check_result(sqlite3_open_v2(filename, &sql_connection_return, SQLITE_OPEN_READWRITE, NULL), SQLITE_OK);
+
+  check_result(
+    sqlite3_prepare_v2(sql_connection_return, "PRAGMA synchronous = OFF;", -1, &sql_statement_synchronous, NULL),
+    SQLITE_OK);
+
+  check_result(sqlite3_step(sql_statement_synchronous), SQLITE_DONE);
+
+  check_result(
+    sqlite3_prepare_v2(sql_connection_return, "PRAGMA foreign_keys = ON;", -1, &sql_statement_foreign_keys, NULL),
+    SQLITE_OK);
+
+  check_result(sqlite3_step(sql_statement_foreign_keys), SQLITE_DONE);
+
+  sql_statement_finalize(sql_statement_synchronous);
+  sql_statement_finalize(sql_statement_foreign_keys);
 
   *sql_connection = sql_connection_return;
 
   return 0;
 
 error:
+
+  if (sql_statement_synchronous != NULL) { sql_statement_finalize(sql_statement_synchronous); }
+  if (sql_statement_foreign_keys != NULL) { sql_statement_finalize(sql_statement_foreign_keys); }
 
   if (sql_connection_return != NULL) { sql_connection_close(sql_connection_return); }
 
