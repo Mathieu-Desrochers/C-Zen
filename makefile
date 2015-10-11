@@ -60,8 +60,10 @@ WEB_API = sources/web_api/bindings/get_order_request_http.o \
 	@rm $<~
 
 web_api_main: $(INFRASTRUCTURE) $(WEB_API) sources/web_api/main/main.c
-	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(WEB_API) \
-	sources/web_api/main/main.c -lsqlite3 -ljansson -lfcgi -lpcre -o web_api_main
+	m4 sources/infrastructure/m4/macros.m4 --synclines sources/web_api/main/main.c > sources/web_api/main/main.c~
+	$(CC) $(CFLAGS) $(INFRASTRUCTURE) $(WEB_API) -xc sources/web_api/main/main.c~ \
+	-lsqlite3 -ljansson -lfcgi -lpcre -o web_api_main
+	@rm sources/web_api/main/main.c~
 
 libraries: fastcgi \
            jansson

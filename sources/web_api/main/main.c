@@ -15,51 +15,43 @@ int main()
   int http_routes_allocated_count = 0;
   int http_routes_used_count = 0;
 
-  int http_route_register_result = 0;
+  check_result(
+    http_route_register(
+      get_order_service_parse_url,
+      get_order_service_http,
+      &http_routes,
+      &http_routes_allocated_count,
+      &http_routes_used_count),
+    0);
 
-  http_route_register_result = http_route_register(
-    get_order_service_parse_url,
-    get_order_service_http,
-    &http_routes,
-    &http_routes_allocated_count,
-    &http_routes_used_count);
+  check_result(
+    http_route_register(
+      get_orders_service_parse_url,
+      get_orders_service_http,
+      &http_routes,
+      &http_routes_allocated_count,
+      &http_routes_used_count),
+    0);
 
-  check(http_route_register_result == 0, "http_route_register_result: %d",
-    http_route_register_result);
+  check_result(
+    http_route_register(
+      new_order_service_parse_url,
+      new_order_service_http,
+      &http_routes,
+      &http_routes_allocated_count,
+      &http_routes_used_count),
+    0);
 
-  http_route_register_result = http_route_register(
-    get_orders_service_parse_url,
-    get_orders_service_http,
-    &http_routes,
-    &http_routes_allocated_count,
-    &http_routes_used_count);
+  check_result(
+    http_route_register(
+      update_order_service_parse_url,
+      update_order_service_http,
+      &http_routes,
+      &http_routes_allocated_count,
+      &http_routes_used_count),
+    0);
 
-  check(http_route_register_result == 0, "http_route_register_result: %d",
-    http_route_register_result);
-
-  http_route_register_result = http_route_register(
-    new_order_service_parse_url,
-    new_order_service_http,
-    &http_routes,
-    &http_routes_allocated_count,
-    &http_routes_used_count);
-
-  check(http_route_register_result == 0, "http_route_register_result: %d",
-    http_route_register_result);
-
-  http_route_register_result = http_route_register(
-    update_order_service_parse_url,
-    update_order_service_http,
-    &http_routes,
-    &http_routes_allocated_count,
-    &http_routes_used_count);
-
-  check(http_route_register_result == 0, "http_route_register_result: %d",
-    http_route_register_result);
-
-  int http_serve_requests_result = http_serve_requests(http_routes, http_routes_used_count);
-  check(http_serve_requests_result == 0, "http_serve_requests_result: %d",
-    http_serve_requests_result);
+  check_result(http_serve_requests(http_routes, http_routes_used_count), 0);
 
   http_routes_free(http_routes, http_routes_used_count);
 

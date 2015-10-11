@@ -16,21 +16,10 @@ order_item_row_t *order_item_row_malloc(
   order_item_row_t *order_item_row = calloc(1, sizeof(order_item_row_t));
   check_mem(order_item_row);
 
-  int malloc_memcpy_order_item_id_result = malloc_memcpy_int(&(order_item_row->order_item_id), order_item_id);
-  check(malloc_memcpy_order_item_id_result == 0, "malloc_memcpy_order_item_id_result: %d",
-    malloc_memcpy_order_item_id_result);
-
-  int malloc_memcpy_order_id_result = malloc_memcpy_int(&(order_item_row->order_id), order_id);
-  check(malloc_memcpy_order_id_result == 0, "malloc_memcpy_order_id_result: %d",
-    malloc_memcpy_order_id_result);
-
-  int malloc_memcpy_name_result = malloc_memcpy_string(&(order_item_row->name), name);
-  check(malloc_memcpy_name_result == 0, "malloc_memcpy_name_result: %d",
-    malloc_memcpy_name_result);
-
-  int malloc_memcpy_quantity_result = malloc_memcpy_double(&(order_item_row->quantity), quantity);
-  check(malloc_memcpy_quantity_result == 0, "malloc_memcpy_quantity_result: %d",
-    malloc_memcpy_quantity_result);
+  check_result(malloc_memcpy_int(&(order_item_row->order_item_id), order_item_id), 0);
+  check_result(malloc_memcpy_int(&(order_item_row->order_id), order_id), 0);
+  check_result(malloc_memcpy_string(&(order_item_row->name), name), 0);
+  check_result(malloc_memcpy_double(&(order_item_row->quantity), quantity), 0);
 
   return order_item_row;
 
@@ -56,7 +45,7 @@ int order_item_rows_compare_order_item_id(const void *x, const void *y)
 // sorts an array of order item rows
 int order_item_rows_sort_by_order_item_id(order_item_row_t **order_item_rows, int count)
 {
-  check(order_item_rows != NULL, "order_item_rows: NULL");
+  check_not_null(order_item_rows);
 
   qsort(order_item_rows, count, sizeof(order_item_row_t *), order_item_rows_compare_order_item_id);
 

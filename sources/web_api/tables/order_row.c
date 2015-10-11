@@ -17,21 +17,10 @@ order_row_t *order_row_malloc(
   order_row_t *order_row = calloc(1, sizeof(order_row_t));
   check_mem(order_row);
 
-  int malloc_memcpy_order_id_result = malloc_memcpy_int(&(order_row->order_id), order_id);
-  check(malloc_memcpy_order_id_result == 0, "malloc_memcpy_order_id_result: %d",
-    malloc_memcpy_order_id_result);
-
-  int malloc_memcpy_customer_name_result = malloc_memcpy_string(&(order_row->customer_name), customer_name);
-  check(malloc_memcpy_customer_name_result == 0, "malloc_memcpy_customer_name_result: %d",
-    malloc_memcpy_customer_name_result);
-
-  int malloc_memcpy_placed_on_date_time_result = malloc_memcpy_time(&(order_row->placed_on_date_time), placed_on_date_time);
-  check(malloc_memcpy_placed_on_date_time_result == 0, "malloc_memcpy_placed_on_date_time_result: %d",
-    malloc_memcpy_placed_on_date_time_result);
-
-  int malloc_memcpy_total_result = malloc_memcpy_int(&(order_row->total), total);
-  check(malloc_memcpy_total_result == 0, "malloc_memcpy_total_result: %d",
-    malloc_memcpy_total_result);
+  check_result(malloc_memcpy_int(&(order_row->order_id), order_id), 0);
+  check_result(malloc_memcpy_string(&(order_row->customer_name), customer_name), 0);
+  check_result(malloc_memcpy_time(&(order_row->placed_on_date_time), placed_on_date_time), 0);
+  check_result(malloc_memcpy_int(&(order_row->total), total), 0);
 
   return order_row;
 
@@ -57,7 +46,7 @@ int order_rows_compare_order_id(const void *x, const void *y)
 // sorts an array of order rows
 int order_rows_sort_by_order_id(order_row_t **order_rows, int count)
 {
-  check(order_rows != NULL, "order_rows: NULL");
+  check_not_null(order_rows);
 
   qsort(order_rows, count, sizeof(order_row_t *), order_rows_compare_order_id);
 
