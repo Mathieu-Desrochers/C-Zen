@@ -27,20 +27,19 @@ int get_orders_service(
 
   get_orders_response_order_t *get_orders_response_order = NULL;
 
-  check(sql_connection != NULL, "sql_connection: NULL");
-  check(get_orders_request != NULL, "get_orders_request: NULL");
-  check(get_orders_response != NULL, "get_orders_response: NULL");
-  check(validation_errors != NULL, "validation_errors: NULL");
-  check(validation_errors_count != NULL, "validation_errors_count: NULL");
+  check_not_null(sql_connection);
+  check_not_null(get_orders_request);
+  check_not_null(get_orders_response);
+  check_not_null(validation_errors);
+  check_not_null(validation_errors_count);
 
-  int get_orders_request_validate_result = get_orders_request_validate(
-    get_orders_request,
-    &validation_errors_return,
-    &validation_errors_allocated_count,
-    &validation_errors_used_count);
-
-  check(get_orders_request_validate_result == 0, "get_orders_request_validate_result: %d",
-    get_orders_request_validate_result);
+  check_result(
+    get_orders_request_validate(
+      get_orders_request,
+      &validation_errors_return,
+      &validation_errors_allocated_count,
+      &validation_errors_used_count),
+    0);
 
   if (validation_errors_return != NULL)
   {
@@ -50,25 +49,23 @@ int get_orders_service(
     return 0;
   }
 
-  int orders_table_select_all_result = orders_table_select_all(
-    sql_connection,
-    &order_rows,
-    &order_rows_count);
-
-  check(orders_table_select_all_result == 0, "orders_table_select_all_result: %d",
-    orders_table_select_all_result);
+  check_result(
+    orders_table_select_all(
+      sql_connection,
+      &order_rows,
+      &order_rows_count),
+    0);
 
   get_orders_response_return = get_orders_response_malloc();
   check(get_orders_response_return != NULL, "get_orders_response_return: NULL");
 
   if (order_rows != NULL)
   {
-    int order_rows_sort_by_order_id_result = order_rows_sort_by_order_id(
-      order_rows,
-      order_rows_count);
-
-    check(order_rows_sort_by_order_id_result == 0, "order_rows_sort_by_order_id_result: %d",
-      order_rows_sort_by_order_id_result);
+    check_result(
+      order_rows_sort_by_order_id(
+        order_rows,
+        order_rows_count),
+      0);
   }
 
   get_orders_response_return->orders = malloc(sizeof(get_orders_response_order_t) * order_rows_count);
@@ -80,7 +77,7 @@ int get_orders_service(
       order_rows[i]->order_id,
       order_rows[i]->customer_name);
 
-    check(get_orders_response_order != NULL, "get_orders_response_order: NULL");
+    check_not_null(get_orders_response_order);
 
     get_orders_response_return->orders[i] = get_orders_response_order;
     get_orders_response_return->orders_count++;

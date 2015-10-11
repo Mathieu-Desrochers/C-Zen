@@ -13,17 +13,9 @@ get_order_response_order_item_t *get_order_response_order_item_malloc(
   get_order_response_order_item_t *get_order_response_order_item = calloc(1, sizeof(get_order_response_order_item_t));
   check_mem(get_order_response_order_item);
 
-  int malloc_memcpy_order_item_id_result = malloc_memcpy_int(&(get_order_response_order_item->order_item_id), order_item_id);
-  check(malloc_memcpy_order_item_id_result == 0, "malloc_memcpy_order_item_id_result: %d",
-    malloc_memcpy_order_item_id_result);
-
-  int malloc_memcpy_name_result = malloc_memcpy_string(&(get_order_response_order_item->name), name);
-  check(malloc_memcpy_name_result == 0, "malloc_memcpy_name_result: %d",
-    malloc_memcpy_name_result);
-
-  int malloc_memcpy_quantity_result = malloc_memcpy_double(&(get_order_response_order_item->quantity), quantity);
-  check(malloc_memcpy_quantity_result == 0, "malloc_memcpy_quantity_result: %d",
-    malloc_memcpy_quantity_result);
+  check_result(malloc_memcpy_int(&(get_order_response_order_item->order_item_id), order_item_id), 0);
+  check_result(malloc_memcpy_string(&(get_order_response_order_item->name), name), 0);
+  check_result(malloc_memcpy_double(&(get_order_response_order_item->quantity), quantity), 0);
 
   return get_order_response_order_item;
 

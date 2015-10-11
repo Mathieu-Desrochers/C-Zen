@@ -30,20 +30,19 @@ int get_order_service(
 
   get_order_response_order_item_t *get_order_response_order_item = NULL;
 
-  check(sql_connection != NULL, "sql_connection: NULL");
-  check(get_order_request != NULL, "get_order_request: NULL");
-  check(get_order_response != NULL, "get_order_response: NULL");
-  check(validation_errors != NULL, "validation_errors: NULL");
-  check(validation_errors_count != NULL, "validation_errors_count: NULL");
+  check_not_null(sql_connection);
+  check_not_null(get_order_request);
+  check_not_null(get_order_response);
+  check_not_null(validation_errors);
+  check_not_null(validation_errors_count);
 
-  int get_order_request_validate_result = get_order_request_validate(
-    get_order_request,
-    &validation_errors_return,
-    &validation_errors_allocated_count,
-    &validation_errors_used_count);
-
-  check(get_order_request_validate_result == 0, "get_order_request_validate_result: %d",
-    get_order_request_validate_result);
+  check_result(
+    get_order_request_validate(
+      get_order_request,
+      &validation_errors_return,
+      &validation_errors_allocated_count,
+      &validation_errors_used_count),
+    0);
 
   if (validation_errors_return != NULL)
   {
@@ -53,23 +52,21 @@ int get_order_service(
     return 0;
   }
 
-  int orders_table_select_by_order_id_result = orders_table_select_by_order_id(
-    sql_connection,
-    *(get_order_request->order_id),
-    &order_row);
-
-  check(orders_table_select_by_order_id_result == 0, "orders_table_select_by_order_id_result: %d",
-    orders_table_select_by_order_id_result);
+  check_result(
+    orders_table_select_by_order_id(
+      sql_connection,
+      *(get_order_request->order_id),
+      &order_row),
+    0);
 
   if (order_row == NULL)
   {
-    int validation_errors_add_result = validation_errors_add_level_1(
-      &validation_errors_return, &validation_errors_allocated_count, &validation_errors_used_count,
-      GET_ORDER_REQUEST_ORDER_ID, -1,
-      VALIDATION_RESULT_UNKNOWN);
-
-    check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
-      validation_errors_add_result);
+    check_result(
+      validation_errors_add_level_1(
+        &validation_errors_return, &validation_errors_allocated_count, &validation_errors_used_count,
+        GET_ORDER_REQUEST_ORDER_ID, -1,
+        VALIDATION_RESULT_UNKNOWN),
+      0);
 
     *validation_errors = validation_errors_return;
     *validation_errors_count = validation_errors_used_count;
@@ -77,14 +74,13 @@ int get_order_service(
     return 0;
   }
 
-  int order_items_table_select_by_order_id_result = order_items_table_select_by_order_id(
-    sql_connection,
-    *(get_order_request->order_id),
-    &order_item_rows,
-    &order_item_rows_count);
-
-  check(order_items_table_select_by_order_id_result == 0, "order_items_table_select_by_order_id_result: %d",
-    order_items_table_select_by_order_id_result);
+  check_result(
+    order_items_table_select_by_order_id(
+      sql_connection,
+      *(get_order_request->order_id),
+      &order_item_rows,
+      &order_item_rows_count),
+    0);
 
   get_order_response_return = get_order_response_malloc(
     order_row->order_id,
@@ -92,14 +88,13 @@ int get_order_service(
     order_row->placed_on_date_time,
     order_row->total);
 
-  check(get_order_response_return != NULL, "get_order_response_return: NULL");
+  check_not_null(get_order_response_return);
 
-  int order_item_rows_sort_by_order_item_id_result = order_item_rows_sort_by_order_item_id(
-    order_item_rows,
-    order_item_rows_count);
-
-  check(order_item_rows_sort_by_order_item_id_result == 0, "order_item_rows_sort_by_order_item_id_result: %d",
-    order_item_rows_sort_by_order_item_id_result);
+  check_result(
+    order_item_rows_sort_by_order_item_id(
+      order_item_rows,
+      order_item_rows_count),
+    0);
 
   get_order_response_return->order_items = malloc(sizeof(get_order_response_order_item_t) * order_item_rows_count);
   check_mem(get_order_response_return->order_items);
@@ -111,7 +106,7 @@ int get_order_service(
       order_item_rows[i]->name,
       order_item_rows[i]->quantity);
 
-    check(get_order_response_order_item != NULL, "get_order_response_order_item: NULL");
+    check_not_null(get_order_response_order_item);
 
     get_order_response_return->order_items[i] = get_order_response_order_item;
     get_order_response_return->order_items_count++;

@@ -15,21 +15,10 @@ get_order_response_t *get_order_response_malloc(
   get_order_response_t *get_order_response = calloc(1, sizeof(get_order_response_t));
   check_mem(get_order_response);
 
-  int malloc_memcpy_order_id_result = malloc_memcpy_int(&(get_order_response->order_id), order_id);
-  check(malloc_memcpy_order_id_result == 0, "malloc_memcpy_order_id_result: %d",
-    malloc_memcpy_order_id_result);
-
-  int malloc_memcpy_customer_name_result = malloc_memcpy_string(&(get_order_response->customer_name), customer_name);
-  check(malloc_memcpy_customer_name_result == 0, "malloc_memcpy_customer_name_result: %d",
-    malloc_memcpy_customer_name_result);
-
-  int malloc_memcpy_placed_on_date_time_result = malloc_memcpy_time(&(get_order_response->placed_on_date_time), placed_on_date_time);
-  check(malloc_memcpy_placed_on_date_time_result == 0, "malloc_memcpy_placed_on_date_time_result: %d",
-    malloc_memcpy_placed_on_date_time_result);
-
-  int malloc_memcpy_total_result = malloc_memcpy_int(&(get_order_response->total), total);
-  check(malloc_memcpy_total_result == 0, "malloc_memcpy_total_result: %d",
-    malloc_memcpy_total_result);
+  check_result(malloc_memcpy_int(&(get_order_response->order_id), order_id), 0);
+  check_result(malloc_memcpy_string(&(get_order_response->customer_name), customer_name), 0);
+  check_result(malloc_memcpy_time(&(get_order_response->placed_on_date_time), placed_on_date_time), 0);
+  check_result(malloc_memcpy_int(&(get_order_response->total), total), 0);
 
   return get_order_response;
 

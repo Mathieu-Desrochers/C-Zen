@@ -27,10 +27,10 @@ int get_orders_request_validate(
   int *validation_errors_allocated_count,
   int *validation_errors_used_count)
 {
-  check(get_orders_request != NULL, "get_orders_request: NULL");
-  check(validation_errors != NULL, "validation_errors: NULL");
-  check(validation_errors_allocated_count != NULL, "validation_errors_allocated_count: NULL");
-  check(validation_errors_used_count != NULL, "validation_errors_used_count: NULL");
+  check_not_null(get_orders_request);
+  check_not_null(validation_errors);
+  check_not_null(validation_errors_allocated_count);
+  check_not_null(validation_errors_used_count);
 
   return 0;
 

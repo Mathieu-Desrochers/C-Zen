@@ -12,9 +12,7 @@ get_order_request_t *get_order_request_malloc(
   get_order_request_t *get_order_request = calloc(1, sizeof(get_order_request_t));
   check_mem(get_order_request);
 
-  int malloc_memcpy_order_id_result = malloc_memcpy_int(&(get_order_request->order_id), order_id);
-  check(malloc_memcpy_order_id_result == 0, "malloc_memcpy_order_id_result: %d",
-    malloc_memcpy_order_id_result);
+  check_result(malloc_memcpy_int(&(get_order_request->order_id), order_id), 0);
 
   return get_order_request;
 
@@ -32,21 +30,20 @@ int get_order_request_validate(
   int *validation_errors_allocated_count,
   int *validation_errors_used_count)
 {
-  check(get_order_request != NULL, "get_order_request: NULL");
-  check(validation_errors != NULL, "validation_errors: NULL");
-  check(validation_errors_allocated_count != NULL, "validation_errors_allocated_count: NULL");
-  check(validation_errors_used_count != NULL, "validation_errors_used_count: NULL");
+  check_not_null(get_order_request);
+  check_not_null(validation_errors);
+  check_not_null(validation_errors_allocated_count);
+  check_not_null(validation_errors_used_count);
 
   int validate_order_id_result = validate_int(get_order_request->order_id, 1, 1, 999999);
   if (validate_order_id_result != 0)
   {
-    int validation_errors_add_result = validation_errors_add_level_1(
-      validation_errors, validation_errors_allocated_count, validation_errors_used_count,
-      GET_ORDER_REQUEST_ORDER_ID, -1,
-      validate_order_id_result);
-
-    check(validation_errors_add_result == 0, "validation_errors_add_result: %d",
-      validation_errors_add_result);
+    check_result(
+      validation_errors_add_level_1(
+        validation_errors, validation_errors_allocated_count, validation_errors_used_count,
+        GET_ORDER_REQUEST_ORDER_ID, -1,
+        validate_order_id_result),
+      0);
   }
 
   return 0;

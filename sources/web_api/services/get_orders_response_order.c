@@ -12,13 +12,8 @@ get_orders_response_order_t *get_orders_response_order_malloc(
   get_orders_response_order_t *get_orders_response_order = calloc(1, sizeof(get_orders_response_order_t));
   check_mem(get_orders_response_order);
 
-  int malloc_memcpy_order_id_result = malloc_memcpy_int(&(get_orders_response_order->order_id), order_id);
-  check(malloc_memcpy_order_id_result == 0, "malloc_memcpy_order_id_result: %d",
-    malloc_memcpy_order_id_result);
-
-  int malloc_memcpy_customer_name_result = malloc_memcpy_string(&(get_orders_response_order->customer_name), customer_name);
-  check(malloc_memcpy_customer_name_result == 0, "malloc_memcpy_customer_name_result: %d",
-    malloc_memcpy_customer_name_result);
+  check_result(malloc_memcpy_int(&(get_orders_response_order->order_id), order_id), 0);
+  check_result(malloc_memcpy_string(&(get_orders_response_order->customer_name), customer_name), 0);
 
   return get_orders_response_order;
 
