@@ -3,7 +3,10 @@ divert(-1)dnl
 define(opening_parenthesis_index, `index(`$1', `(')')
 
 define(check_not_null, `check(`$1' != NULL, "`$1': NULL")')
-define(check_int, `check(`$1' == `$2', "`$1': %d", `$2')')
+
+define(check_int, `check(`$1' == `$2', "`$1': %d", `$1')')
+define(check_int_between, `check(`$1' >= `$2' && `$1' <= `$3', "`$1': %d", `$1')')
+define(check_int_or, `check(`$1' == `$2' || `$1' == `$3', "`$1': %d", `$1')')
 
 define(function_name, `substr(`$1', 0, opening_parenthesis_index(`$1'))')
 

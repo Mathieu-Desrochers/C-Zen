@@ -28,6 +28,8 @@ int update_order_service(
   int validation_errors_allocated_count = 0;
   int validation_errors_used_count = 0;
 
+  int exit_code = 0;
+
   order_row_t *order_row = NULL;
   order_item_row_t **order_item_rows = NULL;
   int order_item_rows_count = 0;
@@ -61,10 +63,12 @@ int update_order_service(
 
   if (validation_errors_return != NULL)
   {
+    *update_order_response = update_order_response_return;
+
     *validation_errors = validation_errors_return;
     *validation_errors_count = validation_errors_used_count;
 
-    return 0;
+    goto cleanup;
   }
 
   check_result(
@@ -83,10 +87,12 @@ int update_order_service(
         VALIDATION_RESULT_UNKNOWN),
       0);
 
+    *update_order_response = update_order_response_return;
+
     *validation_errors = validation_errors_return;
     *validation_errors_count = validation_errors_used_count;
 
-    return 0;
+    goto cleanup;
   }
 
   check_result(
@@ -136,17 +142,12 @@ int update_order_service(
 
   if (validation_errors_return != NULL)
   {
-    order_row_free(order_row);
-    order_item_rows_free(order_item_rows, order_item_rows_count);
-
-    free(update_order_request_order_item_ids);
-    free(order_item_row_order_item_ids);
-    free(unknown_order_item_id_indexes);
+    *update_order_response = update_order_response_return;
 
     *validation_errors = validation_errors_return;
     *validation_errors_count = validation_errors_used_count;
 
-    return 0;
+    goto cleanup;
   }
 
   updated_order_row = order_row_malloc(
@@ -236,25 +237,25 @@ int update_order_service(
   update_order_response_return = update_order_response_malloc();
   check_not_null(update_order_response);
 
-  order_row_free(order_row);
-  order_item_rows_free(order_item_rows, order_item_rows_count);
-  order_row_free(updated_order_row);
-
-  free(update_order_request_order_item_ids);
-  free(order_item_row_order_item_ids);
-  free(unknown_order_item_id_indexes);
-  free(deleted_order_item_id_indexes);
-
-  hash_table_free(order_item_rows_hash_table);
+  check_mem(NULL);
 
   *update_order_response = update_order_response_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (update_order_response_return != NULL) { update_order_response_free(update_order_response_return); }
-  if (validation_errors_return != NULL) { validation_errors_free(validation_errors_return, validation_errors_used_count); }
+
+  if (validation_errors_return != NULL)
+  {
+    validation_errors_free(validation_errors_return, validation_errors_used_count);
+  }
+
+  exit_code = -1;
+
+cleanup:
+
   if (order_row != NULL) { order_row_free(order_row); }
   if (order_item_rows != NULL) { order_item_rows_free(order_item_rows, order_item_rows_count); }
   if (updated_order_row != NULL) { order_row_free(updated_order_row); }
@@ -266,5 +267,5 @@ error:
   if (deleted_order_item_id_indexes != NULL) { free(deleted_order_item_id_indexes); }
   if (order_item_rows_hash_table != NULL) { hash_table_free(order_item_rows_hash_table); }
 
-  return -1;
+  return exit_code;
 }

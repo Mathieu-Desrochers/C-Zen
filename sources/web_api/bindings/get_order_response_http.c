@@ -13,6 +13,8 @@ int get_order_response_http_format(get_order_response_t *get_order_response, jso
 {
   json_t *json_return = NULL;
 
+  int exit_code = 0;
+
   char *placed_on_date_time_string = NULL;
   json_t *order_items_json = NULL;
 
@@ -55,17 +57,20 @@ int get_order_response_http_format(get_order_response_t *get_order_response, jso
 
   order_items_json = NULL;
 
-  free(placed_on_date_time_string);
-
   *json = json_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (json_return != NULL) { json_free(json_return); }
+
+  exit_code = -1;
+
+cleanup:
+
   if (placed_on_date_time_string != NULL) { free(placed_on_date_time_string); }
   if (order_items_json != NULL) { json_free(order_items_json); }
 
-  return -1;
+  return exit_code;
 }
