@@ -8,7 +8,8 @@
 int fastcgi_read_stream(FCGX_Stream *stream, char **string)
 {
   char *string_return = NULL;
-  char *string_return_temp = NULL;
+
+  int exit_code = 0;
 
   check_not_null(stream);
   check_not_null(string);
@@ -35,11 +36,11 @@ int fastcgi_read_stream(FCGX_Stream *stream, char **string)
     buffer_offset = buffer_size;
     buffer_size = buffer_size * 2;
 
+    char *string_return_temp = NULL;
     string_return_temp = realloc(string_return, buffer_size);
     check_mem(string_return_temp);
 
     string_return = string_return_temp;
-    string_return_temp = NULL;
   }
 
   if (strlen(string_return) == 0)
@@ -51,18 +52,24 @@ int fastcgi_read_stream(FCGX_Stream *stream, char **string)
 
   *string = string_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (string_return != NULL) { free(string_return); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // writes a header
 int fastcgi_write_header(FCGX_Stream *stream, char *name, char *value, int is_last)
 {
+  int exit_code = 0;
+
   check_not_null(stream);
   check_not_null(name);
   check_not_null(value);
@@ -77,25 +84,35 @@ int fastcgi_write_header(FCGX_Stream *stream, char *name, char *value, int is_la
     check_result_not(FCGX_PutS("\r\n", stream), -1);
   }
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // writes a body
 int fastcgi_write_body(FCGX_Stream *stream, char *content)
 {
+  int exit_code = 0;
+
   check_not_null(stream);
   check_not_null(content);
 
   check_result_not(FCGX_PutS(content, stream), -1);
   check_result_not(FCGX_PutS("\r\n", stream), -1);
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }

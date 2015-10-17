@@ -12,45 +12,51 @@
 // allocates a hash table
 hash_table_t *hash_table_malloc(int maximum_distinct_keys_count)
 {
-  hash_table_t *hash_table = NULL;
-  hsearch_data *hsearch = NULL;
+  hash_table_t *hash_table_return = NULL;
+  hsearch_data *hsearch_return = NULL;
 
-  hash_table = malloc(sizeof(hash_table_t));
-  check_mem(hash_table);
+  hash_table_return = malloc(sizeof(hash_table_t));
+  check_mem(hash_table_return);
 
-  hsearch = calloc(1, sizeof(hsearch_data));
-  check_mem(hsearch);
+  hsearch_return = calloc(1, sizeof(hsearch_data));
+  check_mem(hsearch_return);
 
-  check_result_not(hcreate_r(maximum_distinct_keys_count * 1.5, hsearch), 0);
+  check_result_not(hcreate_r(maximum_distinct_keys_count * 1.5, hsearch_return), 0);
 
-  hash_table->hsearch = hsearch;
+  hash_table_return->hsearch = hsearch_return;
 
-  hash_table->keys = NULL;
-  hash_table->keys_allocated_count = 0;
-  hash_table->keys_used_count = 0;
+  hash_table_return->keys = NULL;
+  hash_table_return->keys_allocated_count = 0;
+  hash_table_return->keys_used_count = 0;
 
-  hash_table->hash_values = NULL;
-  hash_table->hash_values_allocated_count = 0;
-  hash_table->hash_values_used_count = 0;
+  hash_table_return->hash_values = NULL;
+  hash_table_return->hash_values_allocated_count = 0;
+  hash_table_return->hash_values_used_count = 0;
 
-  return hash_table;
+  goto cleanup;
 
 error:
 
-  if (hsearch != NULL)
+  if (hsearch_return != NULL)
   {
-    hdestroy_r(hsearch);
-    free(hsearch);
+    hdestroy_r(hsearch_return);
+    free(hsearch_return);
   }
 
-  if (hash_table != NULL) { free(hash_table); }
+  if (hash_table_return != NULL) { free(hash_table_return); }
 
-  return NULL;
+  hash_table_return = NULL;
+
+cleanup:
+
+  return hash_table_return;
 }
 
 // gets the hash values for a given key
 int hash_get_hash_values(hash_table_t *hash_table, char *key, hash_values_t **hash_values)
 {
+  int exit_code = 0;
+
   check_not_null(hash_table);
   check_not_null(key);
   check_not_null(hash_values);
@@ -61,29 +67,36 @@ int hash_get_hash_values(hash_table_t *hash_table, char *key, hash_values_t **ha
   ENTRY *existing_entry = NULL;
 
   int hsearch_find_result = hsearch_r(find_entry, FIND, &existing_entry, hash_table->hsearch);
-  check(hsearch_find_result != 0 || (hsearch_find_result == 0 && errno == ESRCH), "hsearch_find_result: %d",
-    hsearch_find_result);
+  int hsearch_find_result_error = hsearch_find_result == 0 && errno != ESRCH;
+  check_int(hsearch_find_result_error, 0);
 
-  if (existing_entry == NULL)
-  {
-    *hash_values = NULL;
-  }
-  else
+  if (existing_entry != NULL)
   {
     *hash_values = (hash_values_t *)(existing_entry->data);
   }
+  else
+  {
+    *hash_values = NULL;
+  }
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // gets or creates the hash values for a given key
 int hash_get_or_create_hash_values(hash_table_t *hash_table, char *key, hash_values_t **hash_values)
 {
   hash_values_t *hash_values_return = NULL;
+
+  int exit_code = 0;
+
   char *key_copied = NULL;
 
   check_not_null(hash_table);
@@ -96,7 +109,7 @@ int hash_get_or_create_hash_values(hash_table_t *hash_table, char *key, hash_val
   {
     *hash_values = hash_values_return;
 
-    return 0;
+    goto cleanup;
   }
 
   check_result(malloc_memcpy_string(&key_copied, key), 0);
@@ -132,21 +145,27 @@ int hash_get_or_create_hash_values(hash_table_t *hash_table, char *key, hash_val
 
   *hash_values = hash_values_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  if (key_copied != NULL) { free(key_copied); }
   if (hash_values_return != NULL) { hash_values_free(hash_values_return); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  if (key_copied != NULL) { free(key_copied); }
+
+  return exit_code;
 }
 
 // adds a value for a given key
 int hash_table_add_int_int(hash_table_t *hash_table, int key, int value)
 {
+  int exit_code = 0;
+
   char *key_string = NULL;
-  hash_values_t *hash_values = NULL;
 
   check_not_null(hash_table);
 
@@ -155,6 +174,7 @@ int hash_table_add_int_int(hash_table_t *hash_table, int key, int value)
 
   check_result_greater(sprintf(key_string, "%d", key), 0);
 
+  hash_values_t *hash_values = NULL;
   check_result(hash_get_or_create_hash_values(hash_table, key_string, &hash_values), 0);
 
   check_result(
@@ -165,22 +185,25 @@ int hash_table_add_int_int(hash_table_t *hash_table, int key, int value)
       value),
     0);
 
-  free(key_string);
-
-  return 0;
+  goto cleanup;
 
 error:
 
+  exit_code = -1;
+
+cleanup:
+
   if (key_string != NULL) { free(key_string); }
 
-  return -1;
+  return exit_code;
 }
 
 // adds a value for a given key
 int hash_table_add_int_pointer(hash_table_t *hash_table, int key, void *value)
 {
+  int exit_code = 0;
+
   char *key_string = NULL;
-  hash_values_t *hash_values = NULL;
 
   check_not_null(hash_table);
 
@@ -189,6 +212,7 @@ int hash_table_add_int_pointer(hash_table_t *hash_table, int key, void *value)
 
   check_result_greater(sprintf(key_string, "%d", key), 0);
 
+  hash_values_t *hash_values = NULL;
   check_result(hash_get_or_create_hash_values(hash_table, key_string, &hash_values), 0);
 
   check_result(
@@ -199,22 +223,28 @@ int hash_table_add_int_pointer(hash_table_t *hash_table, int key, void *value)
       value),
     0);
 
-  free(key_string);
-
-  return 0;
+  goto cleanup;
 
 error:
 
+  exit_code = -1;
+
+cleanup:
+
   if (key_string != NULL) { free(key_string); }
 
-  return -1;
+  return exit_code;
 }
 
 // gets the values for a given key
 int hash_table_get_int_int(hash_table_t *hash_table, int key, int **values, int *values_count)
 {
+  int *values_return = NULL;
+  int values_count_return = 0;
+
+  int exit_code = 0;
+
   char *key_string = NULL;
-  hash_values_t *hash_values = NULL;
 
   check_not_null(hash_table);
   check_not_null(values);
@@ -225,35 +255,45 @@ int hash_table_get_int_int(hash_table_t *hash_table, int key, int **values, int 
 
   check_result_greater(sprintf(key_string, "%d", key), 0);
 
+  hash_values_t *hash_values = NULL;
   check_result(hash_get_hash_values(hash_table, key_string, &hash_values), 0);
 
-  if (hash_values == NULL)
+  if (hash_values != NULL)
   {
-    *values = NULL;
-    *values_count = 0;
+    values_return = (int *)(hash_values->values);
+    values_count_return = hash_values->used_count;
   }
   else
   {
-    *values = (int *)(hash_values->values);
-    *values_count = hash_values->used_count;
+    values_return = NULL;
+    values_count_return = 0;
   }
 
-  free(key_string);
+  *values = values_return;
+  *values_count = values_count_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
+  exit_code = -1;
+
+cleanup:
+
   if (key_string != NULL) { free(key_string); }
 
-  return -1;
+  return exit_code;
 }
 
 // gets the values for a given key
 int hash_table_get_int_pointer(hash_table_t *hash_table, int key, void ***values, int *values_count)
 {
+  void **values_return = NULL;
+  int values_count_return = 0;
+
+  int exit_code = 0;
+
   char *key_string = NULL;
-  hash_values_t *hash_values = NULL;
 
   check_not_null(hash_table);
   check_not_null(values);
@@ -264,28 +304,34 @@ int hash_table_get_int_pointer(hash_table_t *hash_table, int key, void ***values
 
   check_result_greater(sprintf(key_string, "%d", key), 0);
 
+  hash_values_t *hash_values = NULL;
   check_result(hash_get_hash_values(hash_table, key_string, &hash_values), 0);
 
-  if (hash_values == NULL)
+  if (hash_values != NULL)
   {
-    *values = NULL;
-    *values_count = 0;
+    values_return = (void **)(hash_values->values);
+    values_count_return = hash_values->used_count;
   }
   else
   {
-    *values = (void **)(hash_values->values);
-    *values_count = hash_values->used_count;
+    values_return = NULL;
+    values_count_return = 0;
   }
 
-  free(key_string);
+  *values = values_return;
+  *values_count = values_count_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
+  exit_code = -1;
+
+cleanup:
+
   if (key_string != NULL) { free(key_string); }
 
-  return -1;
+  return exit_code;
 }
 
 // frees a hash table

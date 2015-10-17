@@ -7,7 +7,7 @@
 // adds an element to an array
 int array_add_int(int **array, int *allocated_count, int *used_count, int value)
 {
-  int *reallocated_array = NULL;
+  int exit_code = 0;
 
   check_not_null(allocated_count);
   check_not_null(used_count);
@@ -15,7 +15,7 @@ int array_add_int(int **array, int *allocated_count, int *used_count, int value)
   if (*allocated_count == *used_count)
   {
     int reallocated_count = (*allocated_count) == 0 ? 4 : ((*allocated_count) * 2);
-    reallocated_array = realloc(*array, sizeof(int) * reallocated_count);
+    int *reallocated_array = realloc(*array, sizeof(int) * reallocated_count);
     check_mem(reallocated_array);
 
     *array = reallocated_array;
@@ -25,17 +25,21 @@ int array_add_int(int **array, int *allocated_count, int *used_count, int value)
   (*array)[*used_count] = value;
   (*used_count)++;
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // adds an element to an array
 int array_add_pointer(void ***array, int *allocated_count, int *used_count, void *value)
 {
-  void **reallocated_array = NULL;
+  int exit_code = 0;
 
   check_not_null(allocated_count);
   check_not_null(used_count);
@@ -43,7 +47,7 @@ int array_add_pointer(void ***array, int *allocated_count, int *used_count, void
   if (*allocated_count == *used_count)
   {
     int reallocated_count = (*allocated_count) == 0 ? 4 : ((*allocated_count) * 2);
-    reallocated_array = realloc(*array, sizeof(void *) * reallocated_count);
+    void **reallocated_array = realloc(*array, sizeof(void *) * reallocated_count);
     check_mem(reallocated_array);
 
     *array = reallocated_array;
@@ -53,17 +57,21 @@ int array_add_pointer(void ***array, int *allocated_count, int *used_count, void
   (*array)[*used_count] = value;
   (*used_count)++;
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // adds an element to an array
 int array_add_string(char ***array, int *allocated_count, int *used_count, char *value)
 {
-  char **reallocated_array = NULL;
+  int exit_code = 0;
 
   check_not_null(allocated_count);
   check_not_null(used_count);
@@ -71,7 +79,7 @@ int array_add_string(char ***array, int *allocated_count, int *used_count, char 
   if (*allocated_count == *used_count)
   {
     int reallocated_count = (*allocated_count) == 0 ? 4 : ((*allocated_count) * 2);
-    reallocated_array = realloc(*array, sizeof(char *) * reallocated_count);
+    char **reallocated_array = realloc(*array, sizeof(char *) * reallocated_count);
     check_mem(reallocated_array);
 
     *array = reallocated_array;
@@ -81,19 +89,23 @@ int array_add_string(char ***array, int *allocated_count, int *used_count, char 
   (*array)[*used_count] = value;
   (*used_count)++;
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // finds duplicates within an array
 int array_find_duplicates_int(int **array, int array_count, int **duplicate_indexes, int *duplicate_indexes_count)
 {
   int *duplicate_indexes_return = NULL;
-  int duplicate_indexes_allocated_count = 0;
-  int duplicate_indexes_used_count = 0;
+
+  int exit_code = 0;
 
   hash_table_t *hash_table = NULL;
 
@@ -114,8 +126,8 @@ int array_find_duplicates_int(int **array, int array_count, int **duplicate_inde
     check_result(hash_table_add_int_int(hash_table, *(array[i]), i), 0);
   }
 
-  int *values = NULL;
-  int values_count = 0;
+  int duplicate_indexes_allocated_count = 0;
+  int duplicate_indexes_used_count = 0;
 
   for (int i = 0; i < array_count; i++)
   {
@@ -123,6 +135,9 @@ int array_find_duplicates_int(int **array, int array_count, int **duplicate_inde
     {
       continue;
     }
+
+    int *values = NULL;
+    int values_count = 0;
 
     check_result(hash_table_get_int_int(hash_table, *(array[i]), &values, &values_count), 0);
 
@@ -138,27 +153,30 @@ int array_find_duplicates_int(int **array, int array_count, int **duplicate_inde
     }
   }
 
-  hash_table_free(hash_table);
-
   *duplicate_indexes = duplicate_indexes_return;
   *duplicate_indexes_count = duplicate_indexes_used_count;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (duplicate_indexes_return != NULL) { free(duplicate_indexes_return); }
+
+  exit_code = -1;
+
+cleanup:
+
   if (hash_table != NULL) { hash_table_free(hash_table); }
 
-  return -1;
+  return exit_code;
 }
 
 // finds unknown values within an array
-int array_find_unknowns_int(int **array, int array_count, int** known_array, int known_array_count, int **unknown_indexes, int *unknown_indexes_count)
+int array_find_unknowns_int(int **array, int array_count, int **known_array, int known_array_count, int **unknown_indexes, int *unknown_indexes_count)
 {
   int *unknown_indexes_return = NULL;
-  int unknown_indexes_allocated_count = 0;
-  int unknown_indexes_used_count = 0;
+
+  int exit_code = 0;
 
   hash_table_t *hash_table = NULL;
 
@@ -180,8 +198,8 @@ int array_find_unknowns_int(int **array, int array_count, int** known_array, int
     check_result(hash_table_add_int_int(hash_table, *(known_array[i]), i), 0);
   }
 
-  int *values = NULL;
-  int values_count = 0;
+  int unknown_indexes_allocated_count = 0;
+  int unknown_indexes_used_count = 0;
 
   for (int i = 0; i < array_count; i++)
   {
@@ -189,6 +207,9 @@ int array_find_unknowns_int(int **array, int array_count, int** known_array, int
     {
       continue;
     }
+
+    int *values = NULL;
+    int values_count = 0;
 
     check_result(hash_table_get_int_int(hash_table, *(array[i]), &values, &values_count), 0);
 
@@ -204,19 +225,22 @@ int array_find_unknowns_int(int **array, int array_count, int** known_array, int
     }
   }
 
-  hash_table_free(hash_table);
-
   *unknown_indexes = unknown_indexes_return;
   *unknown_indexes_count = unknown_indexes_used_count;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (unknown_indexes_return != NULL) { free(unknown_indexes_return); }
+
+  exit_code = -1;
+
+cleanup:
+
   if (hash_table != NULL) { hash_table_free(hash_table); }
 
-  return -1;
+  return exit_code;
 }
 
 // frees an array
