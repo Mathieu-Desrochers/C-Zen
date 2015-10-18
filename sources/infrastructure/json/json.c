@@ -10,31 +10,33 @@ int json_parse_string(char *string, json_t **json)
 {
   json_t *json_return = NULL;
 
+  int exit_code = 0;
+
   check_not_null(string);
   check_not_null(json);
 
   json_return = json_loads(string, JSON_REJECT_DUPLICATES, NULL);
-  if (json_return == NULL)
-  {
-    *json = NULL;
-
-    return 0;
-  }
 
   *json = json_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (json_return != NULL) { json_free(json_return); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // gets a json value from a key
 int json_object_get_array(json_t *object, char *key, json_t **value, int *size)
 {
+  int exit_code = 0;
+
   check_not_null(object);
   check_not_null(key);
   check_not_null(value);
@@ -44,30 +46,40 @@ int json_object_get_array(json_t *object, char *key, json_t **value, int *size)
   if (json_array_peek == NULL)
   {
     *value = NULL;
-    return 0;
+    *size = 0;
+
+    goto cleanup;
   }
 
   int json_typeof_result = json_typeof(json_array_peek);
   if (json_typeof_result != JSON_ARRAY)
   {
     *value = NULL;
-    return 0;
+    *size = 0;
+
+    goto cleanup;
   }
 
   *value = json_array_peek;
   *size = json_array_size(json_array_peek);
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // gets a json value from a key
 int json_object_get_bool(json_t *object, char *key, int **value)
 {
   int *value_return = NULL;
+
+  int exit_code = 0;
 
   check_not_null(object);
   check_not_null(key);
@@ -77,14 +89,14 @@ int json_object_get_bool(json_t *object, char *key, int **value)
   if (json_boolean_peek == NULL)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   int json_typeof_result = json_typeof(json_boolean_peek);
   if (json_typeof_result != JSON_TRUE && json_typeof_result != JSON_FALSE)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   int value_peek = json_boolean_value(json_boolean_peek);
@@ -92,19 +104,25 @@ int json_object_get_bool(json_t *object, char *key, int **value)
 
   *value = value_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (value_return != NULL) { free(value_return); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // gets a json value from a key
 int json_object_get_double(json_t *object, char *key, double **value)
 {
   double *value_return = NULL;
+
+  int exit_code = 0;
 
   check_not_null(object);
   check_not_null(key);
@@ -114,14 +132,14 @@ int json_object_get_double(json_t *object, char *key, double **value)
   if (json_number_peek == NULL)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   int json_typeof_result = json_typeof(json_number_peek);
   if (json_typeof_result != JSON_INTEGER && json_typeof_result != JSON_REAL)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   double value_peek = json_number_value(json_number_peek);
@@ -129,18 +147,24 @@ int json_object_get_double(json_t *object, char *key, double **value)
 
   *value = value_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (value_return != NULL) { free(value_return); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // gets a json value from a key
 int json_object_get_object(json_t *object, char *key, json_t **value)
 {
+  int exit_code = 0;
+
   check_not_null(object);
   check_not_null(key);
   check_not_null(value);
@@ -149,29 +173,35 @@ int json_object_get_object(json_t *object, char *key, json_t **value)
   if (json_object_peek == NULL)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   int json_typeof_result = json_typeof(json_object_peek);
   if (json_typeof_result != JSON_OBJECT)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   *value = json_object_peek;
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // gets a json value from a key
 int json_object_get_int(json_t *object, char *key, int **value)
 {
   int *value_return = NULL;
+
+  int exit_code = 0;
 
   check_not_null(object);
   check_not_null(key);
@@ -181,14 +211,14 @@ int json_object_get_int(json_t *object, char *key, int **value)
   if (json_integer_peek == NULL)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   int json_typeof_result = json_typeof(json_integer_peek);
   if (json_typeof_result != JSON_INTEGER)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   int value_peek = json_integer_value(json_integer_peek);
@@ -196,19 +226,25 @@ int json_object_get_int(json_t *object, char *key, int **value)
 
   *value = value_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (value_return != NULL) { free(value_return); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // gets a json value from a key
 int json_object_get_string(json_t *object, char *key, char **value)
 {
   char *value_return = NULL;
+
+  int exit_code = 0;
 
   check_not_null(object);
   check_not_null(key);
@@ -218,39 +254,45 @@ int json_object_get_string(json_t *object, char *key, char **value)
   if (json_string_peek == NULL)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   int json_typeof_result = json_typeof(json_string_peek);
   if (json_typeof_result != JSON_STRING)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   char *value_peek = (char *)json_string_value(json_string_peek);
   if (value_peek == NULL)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   check_result(malloc_memcpy_string(&value_return, value_peek), 0);
 
   *value = value_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (value_return != NULL) { free(value_return); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // gets a json value from an index
 int json_array_get_array(json_t *array, int index, json_t **value, int *size)
 {
+  int exit_code = 0;
+
   check_not_null(array);
   check_not_null(value);
   check_not_null(size);
@@ -259,30 +301,40 @@ int json_array_get_array(json_t *array, int index, json_t **value, int *size)
   if (json_array_peek == NULL)
   {
     *value = NULL;
-    return 0;
+    *size = 0;
+
+    goto cleanup;
   }
 
   int json_typeof_result = json_typeof(json_array_peek);
   if (json_typeof_result != JSON_ARRAY)
   {
     *value = NULL;
-    return 0;
+    *size = 0;
+
+    goto cleanup;
   }
 
   *value = json_array_peek;
   *size = json_array_size(json_array_peek);
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // gets a json value from an index
 int json_array_get_bool(json_t *array, int index, int **value)
 {
   int *value_return = NULL;
+
+  int exit_code = 0;
 
   check_not_null(array);
   check_not_null(value);
@@ -291,14 +343,14 @@ int json_array_get_bool(json_t *array, int index, int **value)
   if (json_boolean_peek == NULL)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   int json_typeof_result = json_typeof(json_boolean_peek);
   if (json_typeof_result != JSON_TRUE && json_typeof_result != JSON_FALSE)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   int value_peek = json_boolean_value(json_boolean_peek);
@@ -306,19 +358,25 @@ int json_array_get_bool(json_t *array, int index, int **value)
 
   *value = value_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (value_return != NULL) { free(value_return); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // gets a json value from an index
 int json_array_get_double(json_t *array, int index, double **value)
 {
   double *value_return = NULL;
+
+  int exit_code = 0;
 
   check_not_null(array);
   check_not_null(value);
@@ -327,14 +385,14 @@ int json_array_get_double(json_t *array, int index, double **value)
   if (json_real_peek == NULL)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   int json_typeof_result = json_typeof(json_real_peek);
   if (json_typeof_result != JSON_INTEGER && json_typeof_result != JSON_REAL)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   double value_peek = json_real_value(json_real_peek);
@@ -342,18 +400,24 @@ int json_array_get_double(json_t *array, int index, double **value)
 
   *value = value_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (value_return != NULL) { free(value_return); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // gets a json value from an index
 int json_array_get_object(json_t *array, int index, json_t **value)
 {
+  int exit_code = 0;
+
   check_not_null(array);
   check_not_null(value);
 
@@ -361,29 +425,35 @@ int json_array_get_object(json_t *array, int index, json_t **value)
   if (json_object_peek == NULL)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   int json_typeof_result = json_typeof(json_object_peek);
   if (json_typeof_result != JSON_OBJECT)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   *value = json_object_peek;
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // gets a json value from an index
 int json_array_get_int(json_t *array, int index, int **value)
 {
   int *value_return = NULL;
+
+  int exit_code = 0;
 
   check_not_null(array);
   check_not_null(value);
@@ -392,14 +462,14 @@ int json_array_get_int(json_t *array, int index, int **value)
   if (json_integer_peek == NULL)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   int json_typeof_result = json_typeof(json_integer_peek);
   if (json_typeof_result != JSON_INTEGER)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   int value_peek = json_integer_value(json_integer_peek);
@@ -407,19 +477,25 @@ int json_array_get_int(json_t *array, int index, int **value)
 
   *value = value_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (value_return != NULL) { free(value_return); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // gets a json value from an index
 int json_array_get_string(json_t *array, int index, char **value)
 {
   char *value_return = NULL;
+
+  int exit_code = 0;
 
   check_not_null(array);
   check_not_null(value);
@@ -428,14 +504,14 @@ int json_array_get_string(json_t *array, int index, char **value)
   if (json_string_peek == NULL)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   int json_typeof_result = json_typeof(json_string_peek);
   if (json_typeof_result != JSON_STRING)
   {
     *value = NULL;
-    return 0;
+    goto cleanup;
   }
 
   char *value_peek = (char *)json_string_value(json_string_peek);
@@ -443,67 +519,91 @@ int json_array_get_string(json_t *array, int index, char **value)
 
   *value = value_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (value_return != NULL) { free(value_return); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // allocates a json context
 json_context_t *json_context_malloc()
 {
-  json_context_t *json_context = malloc(sizeof(json_context_t));
-  check_mem(json_context);
+  json_context_t *json_context_return = NULL;
 
-  json_context->strings = NULL;
-  json_context->strings_allocated_count = 0;
-  json_context->strings_used_count = 0;
+  json_context_return = calloc(1, sizeof(json_context_t));
+  check_mem(json_context_return);
 
-  return json_context;
+  json_context_return->strings = NULL;
+  json_context_return->strings_allocated_count = 0;
+  json_context_return->strings_used_count = 0;
+
+  goto cleanup;
 
 error:
 
-  if (json_context != NULL) { free(json_context); }
+  if (json_context_return != NULL) { free(json_context_return); }
 
-  return NULL;
+  json_context_return = NULL;
+
+cleanup:
+
+  return json_context_return;
 }
 
 // allocates a json object
 json_t *json_object_malloc()
 {
-  json_t *json = json_object();
-  check_not_null(json);
+  json_t *json_object_return = NULL;
 
-  return json;
+  json_object_return = json_object();
+  check_not_null(json_object_return);
+
+  goto cleanup;
 
 error:
 
-  if (json != NULL) { json_free(json); }
+  if (json_object_return != NULL) { json_free(json_object_return); }
 
-  return NULL;
+  json_object_return = NULL;
+
+cleanup:
+
+  return json_object_return;
 }
 
 // allocates a json array
 json_t *json_array_malloc()
 {
-  json_t *json = json_array();
-  check_not_null(json);
+  json_t *json_array_return = NULL;
 
-  return json;
+  json_array_return = json_array();
+  check_not_null(json_array_return);
+
+  goto cleanup;
 
 error:
 
-  if (json != NULL) { json_free(json); }
+  if (json_array_return != NULL) { json_free(json_array_return); }
 
-  return NULL;
+  json_array_return = NULL;
+
+cleanup:
+
+  return json_array_return;
 }
 
 // sets a json value for a key
 int json_object_set_array(json_t *object, char *key, json_t *value, json_context_t *json_context)
 {
+  int exit_code = 0;
+
   check_not_null(object);
   check_not_null(key);
   check_not_null(json_context);
@@ -517,17 +617,23 @@ int json_object_set_array(json_t *object, char *key, json_t *value, json_context
     check_result(json_object_set(object, key, json_null()), 0);
   }
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // sets a json value for a key
 int json_object_set_bool(json_t *object, char *key, int *value, json_context_t *json_context)
 {
   json_t *json_boolean_result = NULL;
+
+  int exit_code = 0;
 
   check_not_null(object);
   check_not_null(key);
@@ -547,13 +653,17 @@ int json_object_set_bool(json_t *object, char *key, int *value, json_context_t *
     check_result(json_object_set(object, key, json_null()), 0);
   }
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (json_boolean_result != NULL) { json_free(json_boolean_result); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // sets a json value for a key

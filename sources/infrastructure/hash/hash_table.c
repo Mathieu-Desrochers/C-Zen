@@ -15,7 +15,7 @@ hash_table_t *hash_table_malloc(int maximum_distinct_keys_count)
   hash_table_t *hash_table_return = NULL;
   hsearch_data *hsearch_return = NULL;
 
-  hash_table_return = malloc(sizeof(hash_table_t));
+  hash_table_return = calloc(1, sizeof(hash_table_t));
   check_mem(hash_table_return);
 
   hsearch_return = calloc(1, sizeof(hsearch_data));

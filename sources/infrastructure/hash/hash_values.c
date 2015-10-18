@@ -6,22 +6,26 @@
 // allocates hashed values
 hash_values_t *hash_values_malloc()
 {
-  hash_values_t *hash_values = NULL;
+  hash_values_t *hash_values_return = NULL;
 
-  hash_values = malloc(sizeof(hash_values_t));
-  check_mem(hash_values);
+  hash_values_return = calloc(1, sizeof(hash_values_t));
+  check_mem(hash_values_return);
 
-  hash_values->values = NULL;
-  hash_values->allocated_count = 0;
-  hash_values->used_count = 0;
+  hash_values_return->values = NULL;
+  hash_values_return->allocated_count = 0;
+  hash_values_return->used_count = 0;
 
-  return hash_values;
+  goto cleanup;
 
 error:
 
-  if (hash_values != NULL) { hash_values_free(hash_values); }
+  if (hash_values_return != NULL) { hash_values_free(hash_values_return); }
 
-  return NULL;
+  hash_values_return = NULL;
+
+cleanup:
+
+  return hash_values_return;
 }
 
 // frees hashed values

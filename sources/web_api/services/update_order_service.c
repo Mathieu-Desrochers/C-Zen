@@ -237,8 +237,6 @@ int update_order_service(
   update_order_response_return = update_order_response_malloc();
   check_not_null(update_order_response);
 
-  check_mem(NULL);
-
   *update_order_response = update_order_response_return;
 
   goto cleanup;

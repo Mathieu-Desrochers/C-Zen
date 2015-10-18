@@ -17,6 +17,8 @@ int http_route_register(
   int *http_routes_allocated_count,
   int *http_routes_used_count)
 {
+  int exit_code = 0;
+
   http_route_t *http_route = NULL;
 
   check_not_null(service_parse_url);
@@ -41,13 +43,17 @@ int http_route_register(
 
   http_route = NULL;
 
-  return 0;
+  goto cleanup;
 
 error:
 
+  exit_code = -1;
+
+cleanup:
+
   if (http_route != NULL) { free(http_route); }
 
-  return -1;
+  return exit_code;
 }
 
 // searches for the route matching a request
@@ -62,6 +68,8 @@ int http_match_route(
   http_route_t *http_route_return = NULL;
   char **url_tokens_return = NULL;
   int url_tokens_count_return = 0;
+
+  int exit_code = 0;
 
   check_not_null(request);
   check_not_null(http_routes);
@@ -101,18 +109,24 @@ int http_match_route(
   *url_tokens = url_tokens_return;
   *url_tokens_count = url_tokens_count_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (url_tokens_return != NULL) { array_free_string(url_tokens_return, url_tokens_count_return); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // serves a request
 int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int http_routes_count)
 {
+  int exit_code = 0;
+
   http_route_t *http_route = NULL;
   char **url_tokens = NULL;
   int url_tokens_count = 0;
@@ -142,7 +156,7 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
   if (http_route == NULL)
   {
     check_result(fastcgi_write_header(request->out, "Status", "404 Not Found", 1), 0);
-    return 0;
+    goto cleanup;
   }
 
   check_result(fastcgi_read_stream(request->in, &request_body), 0);
@@ -154,10 +168,7 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
     if (request_json == NULL)
     {
       check_result(fastcgi_write_header(request->out, "Status", "400 Bad Request", 1), 0);
-      array_free_string(url_tokens, url_tokens_count);
-      free(request_body);
-
-      return 0;
+      goto cleanup;
     }
   }
 
@@ -211,18 +222,13 @@ int http_serve_request(FCGX_Request* request, http_route_t **http_routes, int ht
     check_result(fastcgi_write_body(request->out, response_body), 0);
   }
 
-  json_context_free(response_json_context);
-  json_free(response_json);
-  json_free(request_json);
-
-  free(response_body);
-  free(request_body);
-
-  array_free_string(url_tokens, url_tokens_count);
-
-  return 0;
+  goto cleanup;
 
 error:
+
+  exit_code = -1;
+
+cleanup:
 
   if (sql_connection != NULL)
   {
@@ -237,12 +243,14 @@ error:
   if (request_body != NULL) { free(request_body); }
   if (url_tokens != NULL) { array_free_string(url_tokens, url_tokens_count); }
 
-  return -1;
+  return exit_code;
 }
 
 // starts serving requests
 int http_serve_requests(http_route_t **http_routes, int http_routes_count)
 {
+  int exit_code = 0;
+
   FCGX_Request* request = NULL;
 
   check_not_null(http_routes);
@@ -260,12 +268,13 @@ int http_serve_requests(http_route_t **http_routes, int http_routes_count)
     FCGX_Finish_r(request);
   }
 
-  FCGX_Free(request, 1);
-  free(request);
-
-  return 0;
+  goto cleanup;
 
 error:
+
+  exit_code = -1;
+
+cleanup:
 
   if (request != NULL)
   {
@@ -273,7 +282,7 @@ error:
     free(request);
   }
 
-  return -1;
+  return exit_code;
 }
 
 // frees an array of routes
