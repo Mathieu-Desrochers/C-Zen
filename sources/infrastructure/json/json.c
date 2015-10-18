@@ -631,9 +631,9 @@ cleanup:
 // sets a json value for a key
 int json_object_set_bool(json_t *object, char *key, int *value, json_context_t *json_context)
 {
-  json_t *json_boolean_result = NULL;
-
   int exit_code = 0;
+
+  json_t *json_boolean_value = NULL;
 
   check_not_null(object);
   check_not_null(key);
@@ -641,12 +641,12 @@ int json_object_set_bool(json_t *object, char *key, int *value, json_context_t *
 
   if (value != NULL)
   {
-    json_boolean_result = json_boolean(*value);
-    check_not_null(json_boolean_result);
+    json_boolean_value = json_boolean(*value);
+    check_not_null(json_boolean_value);
 
-    check_result(json_object_set_new(object, key, json_boolean_result), 0);
+    check_result(json_object_set_new(object, key, json_boolean_value), 0);
 
-    json_boolean_result = NULL;
+    json_boolean_value = NULL;
   }
   else
   {
@@ -657,11 +657,11 @@ int json_object_set_bool(json_t *object, char *key, int *value, json_context_t *
 
 error:
 
-  if (json_boolean_result != NULL) { json_free(json_boolean_result); }
-
   exit_code = -1;
 
 cleanup:
+
+  if (json_boolean_value != NULL) { json_free(json_boolean_value); }
 
   return exit_code;
 }
@@ -669,7 +669,9 @@ cleanup:
 // sets a json value for a key
 int json_object_set_double(json_t *object, char *key, double *value, json_context_t *json_context)
 {
-  json_t *json_real_result = NULL;
+  int exit_code = 0;
+
+  json_t *json_real_value = NULL;
 
   check_not_null(object);
   check_not_null(key);
@@ -677,31 +679,37 @@ int json_object_set_double(json_t *object, char *key, double *value, json_contex
 
   if (value != NULL)
   {
-    json_real_result = json_real(*value);
-    check_not_null(json_real_result);
+    json_real_value = json_real(*value);
+    check_not_null(json_real_value);
 
-    check_result(json_object_set_new(object, key, json_real_result), 0);
+    check_result(json_object_set_new(object, key, json_real_value), 0);
 
-    json_real_result = NULL;
+    json_real_value = NULL;
   }
   else
   {
     check_result(json_object_set(object, key, json_null()), 0);
   }
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  if (json_real_result != NULL) { json_free(json_real_result); }
+  exit_code = -1;
 
-  return -1;
+cleanup:
+
+  if (json_real_value != NULL) { json_free(json_real_value); }
+
+  return exit_code;
 }
 
 // sets a json value for a key
 int json_object_set_int(json_t *object, char *key, int *value, json_context_t *json_context)
 {
-  json_t *json_integer_result = NULL;
+  int exit_code = 0;
+
+  json_t *json_integer_value = NULL;
 
   check_not_null(object);
   check_not_null(key);
@@ -709,30 +717,36 @@ int json_object_set_int(json_t *object, char *key, int *value, json_context_t *j
 
   if (value != NULL)
   {
-    json_integer_result = json_integer(*value);
-    check_not_null(json_integer_result);
+    json_integer_value = json_integer(*value);
+    check_not_null(json_integer_value);
 
-    check_result(json_object_set_new(object, key, json_integer_result), 0);
+    check_result(json_object_set_new(object, key, json_integer_value), 0);
 
-    json_integer_result = NULL;
+    json_integer_value = NULL;
   }
   else
   {
     check_result(json_object_set(object, key, json_null()), 0);
   }
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  if (json_integer_result != NULL) { json_free(json_integer_result); }
+  exit_code = -1;
 
-  return -1;
+cleanup:
+
+  if (json_integer_value != NULL) { json_free(json_integer_value); }
+
+  return exit_code;
 }
 
 // sets a json value for a key
 int json_object_set_object(json_t *object, char *key, json_t *value, json_context_t *json_context)
 {
+  int exit_code = 0;
+
   check_not_null(object);
   check_not_null(key);
   check_not_null(json_context);
@@ -746,17 +760,23 @@ int json_object_set_object(json_t *object, char *key, json_t *value, json_contex
     check_result(json_object_set(object, key, json_null()), 0);
   }
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // sets a json value for a key
 int json_object_set_string(json_t *object, char *key, char *value, json_context_t *json_context)
 {
-  json_t *json_string_result = NULL;
+  int exit_code = 0;
+
+  json_t *json_string_value = NULL;
   char *value_copied = NULL;
 
   check_not_null(object);
@@ -767,12 +787,12 @@ int json_object_set_string(json_t *object, char *key, char *value, json_context_
   {
     check_result(malloc_memcpy_string(&value_copied, value), 0);
 
-    json_string_result = json_string(value_copied);
-    check_not_null(json_string_result);
+    json_string_value = json_string(value_copied);
+    check_not_null(json_string_value);
 
-    check_result(json_object_set_new(object, key, json_string_result), 0);
+    check_result(json_object_set_new(object, key, json_string_value), 0);
 
-    json_string_result = NULL;
+    json_string_value = NULL;
 
     check_result(
       array_add_string(
@@ -789,19 +809,25 @@ int json_object_set_string(json_t *object, char *key, char *value, json_context_
     check_result(json_object_set(object, key, json_null()), 0);
   }
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  if (value_copied != NULL) { free(value_copied); }
-  if (json_string_result != NULL) { json_free(json_string_result); }
+  exit_code = -1;
 
-  return -1;
+cleanup:
+
+  if (json_string_value != NULL) { json_free(json_string_value); }
+  if (value_copied != NULL) { free(value_copied); }
+
+  return exit_code;
 }
 
 // sets a json value for the next index
 int json_array_add_array(json_t *array, json_t *value, json_context_t *json_context)
 {
+  int exit_code = 0;
+
   check_not_null(array);
   check_not_null(json_context);
 
@@ -814,109 +840,133 @@ int json_array_add_array(json_t *array, json_t *value, json_context_t *json_cont
     check_result(json_array_append(array, json_null()), 0);
   }
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // sets a json value for the next index
 int json_array_add_bool(json_t *array, int *value, json_context_t *json_context)
 {
-  json_t *json_boolean_result = NULL;
+  int exit_code = 0;
 
   check_not_null(array);
   check_not_null(json_context);
 
+  json_t *json_boolean_value = NULL;
+
   if (value != NULL)
   {
-    json_boolean_result = json_boolean(*value);
-    check_not_null(json_boolean_result);
+    json_boolean_value = json_boolean(*value);
+    check_not_null(json_boolean_value);
 
-    check_result(json_array_append_new(array, json_boolean_result), 0);
+    check_result(json_array_append_new(array, json_boolean_value), 0);
 
-    json_boolean_result = NULL;
+    json_boolean_value = NULL;
   }
   else
   {
     check_result(json_array_append(array, json_null()), 0);
   }
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  if (json_boolean_result != NULL) { json_free(json_boolean_result); }
+  exit_code = -1;
 
-  return -1;
+cleanup:
+
+  if (json_boolean_value != NULL) { json_free(json_boolean_value); }
+
+  return exit_code;
 }
 
 // sets a json value for the next index
 int json_array_add_double(json_t *array, double *value, json_context_t *json_context)
 {
-  json_t *json_real_result = NULL;
+  int exit_code = 0;
+
+  json_t *json_real_value = NULL;
 
   check_not_null(array);
   check_not_null(json_context);
 
   if (value != NULL)
   {
-    json_real_result = json_real(*value);
-    check_not_null(json_real_result);
+    json_real_value = json_real(*value);
+    check_not_null(json_real_value);
 
-    check_result(json_array_append_new(array, json_real_result), 0);
+    check_result(json_array_append_new(array, json_real_value), 0);
 
-    json_real_result = NULL;
+    json_real_value = NULL;
   }
   else
   {
     check_result(json_array_append(array, json_null()), 0);
   }
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  if (json_real_result != NULL) { json_free(json_real_result); }
+  exit_code = -1;
 
-  return -1;
+cleanup:
+
+  if (json_real_value != NULL) { json_free(json_real_value); }
+
+  return exit_code;
 }
 
 // sets a json value for the next index
 int json_array_add_int(json_t *array, int *value, json_context_t *json_context)
 {
-  json_t *json_integer_result = NULL;
+  int exit_code = 0;
+
+  json_t *json_integer_value = NULL;
 
   check_not_null(array);
   check_not_null(json_context);
 
   if (value != NULL)
   {
-    json_integer_result = json_integer(*value);
-    check_not_null(json_integer_result);
+    json_integer_value = json_integer(*value);
+    check_not_null(json_integer_value);
 
-    check_result(json_array_append_new(array, json_integer_result), 0);
+    check_result(json_array_append_new(array, json_integer_value), 0);
 
-    json_integer_result = NULL;
+    json_integer_value = NULL;
   }
   else
   {
     check_result(json_array_append(array, json_null()), 0);
   }
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  if (json_integer_result != NULL) { json_free(json_integer_result); }
+  exit_code = -1;
 
-  return -1;
+cleanup:
+
+  if (json_integer_value != NULL) { json_free(json_integer_value); }
+
+  return exit_code;
 }
 
 // sets a json value for the next index
 int json_array_add_object(json_t *array, json_t *value, json_context_t *json_context)
 {
+  int exit_code = 0;
+
   check_not_null(array);
   check_not_null(json_context);
 
@@ -929,17 +979,23 @@ int json_array_add_object(json_t *array, json_t *value, json_context_t *json_con
     check_result(json_array_append(array, json_null()), 0);
   }
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // sets a json value for the next index
 int json_array_add_string(json_t *array, char *value, json_context_t *json_context)
 {
-  json_t *json_string_result = NULL;
+  int exit_code = 0;
+
+  json_t *json_string_value = NULL;
   char *value_copied = NULL;
 
   check_not_null(array);
@@ -949,12 +1005,12 @@ int json_array_add_string(json_t *array, char *value, json_context_t *json_conte
   {
     check_result(malloc_memcpy_string(&value_copied, value), 0);
 
-    json_string_result = json_string(value_copied);
-    check_not_null(json_string_result);
+    json_string_value = json_string(value_copied);
+    check_not_null(json_string_value);
 
-    check_result(json_array_append_new(array, json_string_result), 0);
+    check_result(json_array_append_new(array, json_string_value), 0);
 
-    json_string_result = NULL;
+    json_string_value = NULL;
 
     check_result(
       array_add_string(
@@ -971,36 +1027,46 @@ int json_array_add_string(json_t *array, char *value, json_context_t *json_conte
     check_result(json_array_append(array, json_null()), 0);
   }
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  if (json_string_result != NULL) { json_free(json_string_result); }
+  exit_code = -1;
+
+cleanup:
+
+  if (json_string_value != NULL) { json_free(json_string_value); }
   if (value_copied != NULL) { free(value_copied); }
 
-  return -1;
+  return exit_code;
 }
 
 // formats a json to string
 int json_format_string(json_t *json, char **string)
 {
-  char *json_dumps_result = NULL;
+  char *string_return = NULL;
+
+  int exit_code = 0;
 
   check_not_null(json);
   check_not_null(string);
 
-  json_dumps_result = json_dumps(json, JSON_INDENT(2) | JSON_PRESERVE_ORDER);
-  check_not_null(json_dumps_result);
+  string_return = json_dumps(json, JSON_INDENT(2) | JSON_PRESERVE_ORDER);
+  check_not_null(string_return);
 
-  *string = json_dumps_result;
+  *string = string_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  if (json_dumps_result != NULL) { free(json_dumps_result); }
+  if (string_return != NULL) { free(string_return); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // frees a json object
