@@ -9,41 +9,51 @@
 // allocates a validation path
 validation_path_t *validation_path_malloc(int property, int index)
 {
-  validation_path_t *validation_path = malloc(sizeof(validation_path_t));
-  check_mem(validation_path);
+  validation_path_t *validation_path_return = NULL;
 
-  validation_path->property = property;
-  validation_path->index = index;
-  validation_path->next = NULL;
+  validation_path_return = calloc(1, sizeof(validation_path_t));
+  check_mem(validation_path_return);
 
-  return validation_path;
+  validation_path_return->property = property;
+  validation_path_return->index = index;
+  validation_path_return->next = NULL;
+
+  goto cleanup;
 
 error:
 
-  if (validation_path != NULL) { validation_path_free(validation_path); }
+  if (validation_path_return != NULL) { validation_path_free(validation_path_return); }
 
-  return NULL;
+  validation_path_return = NULL;
+
+cleanup:
+
+  return validation_path_return;
 }
 
 // allocates a validation error
 validation_error_t *validation_error_malloc(
   int error_code)
 {
-  validation_error_t *validation_error = NULL;
+  validation_error_t *validation_error_return = NULL;
 
-  validation_error = malloc(sizeof(validation_error_t));
-  check_mem(validation_error);
+  validation_error_return = calloc(1, sizeof(validation_error_t));
+  check_mem(validation_error_return);
 
-  validation_error->validation_path = NULL;
-  validation_error->error_code = error_code;
+  validation_error_return->validation_path = NULL;
+  validation_error_return->error_code = error_code;
 
-  return validation_error;
+  goto cleanup;
 
 error:
 
-  if (validation_error != NULL) { validation_error_free(validation_error); }
+  if (validation_error_return != NULL) { validation_error_free(validation_error_return); }
 
-  return NULL;
+  validation_error_return = NULL;
+
+cleanup:
+
+  return validation_error_return;
 }
 
 // allocates a validation error
@@ -52,28 +62,31 @@ validation_error_t *validation_error_malloc_level_1(
   int index,
   int error_code)
 {
-  validation_error_t *validation_error = NULL;
-  validation_path_t *validation_path = NULL;
+  validation_error_t *validation_error_return = NULL;
+  validation_path_t *validation_path_return = NULL;
 
-  validation_error = malloc(sizeof(validation_error_t));
-  check_mem(validation_error);
+  validation_error_return = calloc(1, sizeof(validation_error_t));
+  check_mem(validation_error_return);
 
-  validation_error->validation_path = NULL;
-  validation_error->error_code = error_code;
+  validation_path_return = validation_path_malloc(property, index);
+  check_not_null(validation_path_return);
 
-  validation_path = validation_path_malloc(property, index);
-  check_not_null(validation_path);
+  validation_error_return->validation_path = validation_path_return;
+  validation_error_return->error_code = error_code;
 
-  validation_error->validation_path = validation_path;
-
-  return validation_error;
+  goto cleanup;
 
 error:
 
-  if (validation_path != NULL) { validation_path_free(validation_path); }
-  if (validation_error != NULL) { validation_error_free(validation_error); }
+  if (validation_error_return != NULL) { validation_error_free(validation_error_return); }
+  if (validation_path_return != NULL) { validation_path_free(validation_path_return); }
 
-  return NULL;
+  validation_error_return = NULL;
+  validation_path_return = NULL;
+
+cleanup:
+
+  return validation_error_return;
 }
 
 // allocates a validation error
@@ -84,34 +97,38 @@ validation_error_t *validation_error_malloc_level_2(
   int index_level_2,
   int error_code)
 {
-  validation_error_t *validation_error = NULL;
-  validation_path_t *validation_path = NULL;
-  validation_path_t *validation_path_level_2 = NULL;
+  validation_error_t *validation_error_return = NULL;
+  validation_path_t *validation_path_return = NULL;
+  validation_path_t *validation_path_level_2_return = NULL;
 
-  validation_error = malloc(sizeof(validation_error_t));
-  check_mem(validation_error);
+  validation_error_return = calloc(1, sizeof(validation_error_t));
+  check_mem(validation_error_return);
 
-  validation_error->validation_path = NULL;
-  validation_error->error_code = error_code;
+  validation_path_return = validation_path_malloc(property, index);
+  check_not_null(validation_path_return);
 
-  validation_path = validation_path_malloc(property, index);
-  check_not_null(validation_path);
+  validation_path_level_2_return = validation_path_malloc(property_level_2, index_level_2);
+  check_not_null(validation_path_level_2_return);
 
-  validation_path_level_2 = validation_path_malloc(property_level_2, index_level_2);
-  check_not_null(validation_path_level_2);
+  validation_error_return->validation_path = validation_path_return;
+  validation_error_return->validation_path->next = validation_path_level_2_return;
+  validation_error_return->error_code = error_code;
 
-  validation_error->validation_path = validation_path;
-  validation_error->validation_path->next = validation_path_level_2;
-
-  return validation_error;
+  goto cleanup;
 
 error:
 
-  if (validation_path_level_2 != NULL) { validation_path_free(validation_path_level_2); }
-  if (validation_path != NULL) { validation_path_free(validation_path); }
-  if (validation_error != NULL) { validation_error_free(validation_error); }
+  if (validation_error_return != NULL) { validation_error_free(validation_error_return); }
+  if (validation_path_return != NULL) { validation_path_free(validation_path_return); }
+  if (validation_path_level_2_return != NULL) { validation_path_free(validation_path_level_2_return); }
 
-  return NULL;
+  validation_error_return = NULL;
+  validation_path_return = NULL;
+  validation_path_level_2_return = NULL;
+
+cleanup:
+
+  return validation_error_return;
 }
 
 // adds a validation error to an array
@@ -121,6 +138,12 @@ int validation_errors_add(
   int *used_count,
   int error_code)
 {
+  int exit_code = 0;
+
+  check_not_null(validation_errors);
+  check_not_null(allocated_count);
+  check_not_null(used_count);
+
   validation_error_t *validation_error = NULL;
 
   validation_error = validation_error_malloc(error_code);
@@ -136,13 +159,17 @@ int validation_errors_add(
 
   validation_error = NULL;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (validation_error != NULL) { validation_error_free(validation_error); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // adds a validation error to an array
@@ -154,6 +181,8 @@ int validation_errors_add_level_1(
   int index,
   int error_code)
 {
+  int exit_code = 0;
+
   validation_error_t *validation_error = NULL;
 
   check_not_null(validation_errors);
@@ -173,13 +202,17 @@ int validation_errors_add_level_1(
 
   validation_error = NULL;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (validation_error != NULL) { validation_error_free(validation_error); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // adds a validation error to an array
@@ -193,6 +226,8 @@ int validation_errors_add_level_2(
   int index_level_2,
   int error_code)
 {
+  int exit_code = 0;
+
   validation_error_t *validation_error = NULL;
 
   check_not_null(validation_errors);
@@ -212,13 +247,17 @@ int validation_errors_add_level_2(
 
   validation_error = NULL;
 
-  return 0;
+  goto cleanup;
 
 error:
 
   if (validation_error != NULL) { validation_error_free(validation_error); }
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }
 
 // validates a value

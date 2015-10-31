@@ -9,6 +9,8 @@ int string_parse_int(char *string, int *value)
 {
   int value_return = 0;
 
+  int exit_code = 0;
+
   check_not_null(string);
   check_not_null(value);
 
@@ -18,24 +20,28 @@ int string_parse_int(char *string, int *value)
 
   value_return = strtol(string, &endptr, 10);
 
-  if ((value_return == LONG_MIN) || (value_return == LONG_MAX))
+  if ((value_return == (int)LONG_MIN) || (value_return == (int)LONG_MAX))
   {
     if (errno == ERANGE)
     {
-      return -1;
+      goto error;
     }
   }
 
   if (*endptr != '\0')
   {
-    return -1;
+    goto error;
   }
 
   *value = value_return;
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  return -1;
+  exit_code = -1;
+
+cleanup:
+
+  return exit_code;
 }

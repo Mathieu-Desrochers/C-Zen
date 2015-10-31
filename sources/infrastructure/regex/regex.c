@@ -8,13 +8,18 @@
 // matches a string against a regular expression
 int regex_match(char *pattern, char *string, int *matched, char ***tokens, int *tokens_count)
 {
+  char **tokens_return = NULL;
+
+  int exit_code = 0;
+
+  pcre *compiled_pcre = NULL;
   const char *error = NULL;
   int error_offset = 0;
+
   int *match_indexes = NULL;
   const char *match = NULL;
-  char *copied_match = NULL;
+  char *match_copied = NULL;
 
-  char **tokens_return = NULL;
   int tokens_allocated_count = 0;
   int tokens_used_count = 0;
 
@@ -24,9 +29,9 @@ int regex_match(char *pattern, char *string, int *matched, char ***tokens, int *
   check_not_null(tokens);
   check_not_null(tokens_count);
 
-  pcre *compiled_pcre = pcre_compile(pattern, 0, &error, &error_offset, NULL);
-  check(compiled_pcre != NULL, "compiled_pcre: NULL | error: %s | error_offset: %d",
-    error, error_offset);
+  compiled_pcre = pcre_compile(pattern, 0, &error, &error_offset, NULL);
+  check(compiled_pcre != NULL, "compiled_pcre: NULL | pattern: %s | error: %s | error_offset: %d",
+    pattern, error, error_offset);
 
   match_indexes = malloc(sizeof(int) * 30);
   check_mem(match_indexes);
@@ -37,60 +42,48 @@ int regex_match(char *pattern, char *string, int *matched, char ***tokens, int *
 
   if (pcre_exec_result == PCRE_ERROR_NOMATCH)
   {
-    free(match_indexes);
-    pcre_free(compiled_pcre);
-
     *matched = 0;
-
-    return 0;
+    goto cleanup;
   }
 
   for (int i = 1; i < pcre_exec_result; i++)
   {
     check_result_greater(pcre_get_substring(string, match_indexes, pcre_exec_result, i, &match), 0);
 
-    check_result(malloc_memcpy_string(&copied_match, (char *)match), 0);
+    check_result(malloc_memcpy_string(&match_copied, (char *)match), 0);
 
     check_result(
       array_add_string(
         &tokens_return,
         &tokens_allocated_count,
         &tokens_used_count,
-        copied_match),
+        match_copied),
       0);
 
-    copied_match = NULL;
+    match_copied = NULL;
 
     pcre_free_substring(match);
-
     match = NULL;
   }
-
-  free(match_indexes);
-  pcre_free(compiled_pcre);
 
   *matched = 1;
   *tokens = tokens_return;
   *tokens_count = pcre_exec_result - 1;
 
-  return 0;
+  goto cleanup;
 
 error:
 
-  if (tokens_return != NULL)
-  {
-    for (int i = 0; i < tokens_used_count; i++)
-    {
-      free(tokens_return[i]);
-    }
+  if (tokens_return != NULL) { array_free_string(tokens_return, tokens_used_count); }
 
-    free(tokens_return);
-  }
+  exit_code = -1;
 
-  if (copied_match != NULL) { free(copied_match); }
+cleanup:
+
+  if (match_copied != NULL) { free(match_copied); }
   if (match != NULL) { pcre_free_substring(match); }
   if (match_indexes != NULL) { free(match_indexes); }
   if (compiled_pcre != NULL) { pcre_free(compiled_pcre); }
 
-  return -1;
+  return exit_code;
 }
